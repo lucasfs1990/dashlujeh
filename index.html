@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v6 -------- -->
+<!-- -------- index.html v7 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -22,25 +22,47 @@ try { var _t = localStorage.getItem('jl_tema'); if (_t === 'claro' || _t === 'es
    Dentro do Apps Script, google.script.run já existe e nada muda.
    Fora dele (GitHub Pages / app instalado) este bloco cria um
    google.script.run equivalente que chama a API (Api.gs) por fetch,
-   com o endereço e a chave guardados neste aparelho. Assim o resto
-   do arquivo é o mesmo nos dois lugares. Erro de rede chega com
-   .offline = true, e o app guarda o lançamento para mandar depois. */
+   com o endereço guardado neste aparelho e o login Google de quem
+   está usando (a API só responde para o Lucas e a Jéssica). Sem
+   login ligado na API, vale a chave antiga. Erro de rede ou de login
+   chega com .offline = true, e o app guarda o lançamento para mandar
+   depois. */
 (function () {
   if (window.google && google.script && google.script.run) return;
   if (/\.googleusercontent\.com$/.test(location.hostname)) return;   // tela servida pelo Apps Script
-  const CFG = 'jl_backend';
+  const CFG = 'jl_backend', TOK = 'jl_login';
   const ler = () => { try { return JSON.parse(localStorage.getItem(CFG) || 'null'); } catch (e) { return null; } };
+  let login = null;
+  try { login = JSON.parse(localStorage.getItem(TOK) || 'null'); } catch (e) { /* sem login guardado */ }
+  const valido = () => !!(login && login.exp * 1000 > Date.now() + 60000);
+  let esperando = [];
+  /** Chama fn com o login válido; sem login, pede para entrar e espera até 2 min */
+  function comLogin(fn, falha) {
+    const c = ler();
+    if (!c || !c.clientId) return fn('');
+    if (valido()) return fn(login.jwt);
+    const item = { fn: fn };
+    item.t = setTimeout(() => { esperando = esperando.filter(x => x !== item); falha('Entre com a sua conta Google para continuar.'); }, 120000);
+    esperando.push(item);
+    if (window.JL && JL.pedirLogin) JL.pedirLogin();
+  }
   function chamar(fn, args, ok, falha) {
     const c = ler();
     const erro = (msg, off) => { if (falha) { const e = new Error(msg); e.offline = !!off; falha(e); } };
-    if (!c || !c.url || !c.token) return erro('Conecte o app ao backend primeiro.');
+    if (!c || !c.url || !(c.token || c.clientId)) return erro('Conecte o app ao backend primeiro.');
     if (navigator.onLine === false) return erro('Sem internet.', true);
-    // text/plain evita o "preflight" de CORS, que o Apps Script não responde
-    fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                   body: JSON.stringify({ fn: fn, args: args, token: c.token }) })
-      .then(r => r.json())
-      .then(r => { if (r.ok) { if (ok) ok(r.data); } else erro(r.erro || 'Erro no backend'); })
-      .catch(e => erro('Sem conexão com o backend (' + e.message + ')', true));
+    comLogin(jwt => {
+      // text/plain evita o "preflight" de CORS, que o Apps Script não responde
+      fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                     body: JSON.stringify({ fn: fn, args: args, token: c.token || '', idToken: jwt }) })
+        .then(r => r.json())
+        .then(r => {
+          if (r.ok) { if (ok) ok(r.data); return; }
+          if (r.login) { login = null; localStorage.removeItem(TOK); erro(r.erro || 'Entre de novo com a conta Google.', true); if (JL.pedirLogin) JL.pedirLogin(); return; }
+          erro(r.erro || 'Erro no backend');
+        })
+        .catch(e => erro('Sem conexão com o backend (' + e.message + ')', true));
+    }, msg => erro(msg, true));
   }
   function novoRun() {
     let ok = null, falha = null;
@@ -56,9 +78,23 @@ try { var _t = localStorage.getItem('jl_tema'); if (_t === 'claro' || _t === 'es
   window.JL = {
     standalone: true,
     config: ler,
-    configurado: () => { const c = ler(); return !!(c && c.url && c.token); },
-    gravar: (url, token) => localStorage.setItem(CFG, JSON.stringify({ url: url, token: token })),
-    esquecer: () => localStorage.removeItem(CFG)
+    configurado: () => { const c = ler(); return !!(c && c.url && (c.token || c.clientId)); },
+    gravar: (url, token, clientId) => localStorage.setItem(CFG, JSON.stringify({ url: url, token: token || '', clientId: clientId || '' })),
+    esquecer: () => { localStorage.removeItem(CFG); localStorage.removeItem(TOK); login = null; },
+    /** Pergunta à API se o login Google está ligado (e com qual cliente) */
+    loginInfo: url => fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'loginInfo' }) })
+      .then(r => r.json()).then(r => (r && r.data) || {}),
+    /** Chegou o login do botão do Google: guarda e solta os pedidos que estavam esperando */
+    receberLogin(jwt) {
+      const p = JSON.parse(atob(jwt.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      login = { jwt: jwt, exp: p.exp, email: String(p.email || '').toLowerCase() };
+      try { localStorage.setItem(TOK, JSON.stringify(login)); } catch (e) { /* sem espaço: vale só nesta sessão */ }
+      const lista = esperando; esperando = [];
+      lista.forEach(x => { clearTimeout(x.t); x.fn(jwt); });
+    },
+    email: () => (login && login.email) || '',
+    temLogin: valido,
+    pedirLogin: null   // o app põe aqui a função que mostra o botão do Google
   };
 })();
 </script>
@@ -1035,11 +1071,11 @@ button.grp-ic.vazio { background:transparent; outline:1.5px dashed var(--mut2); 
     <div class="sec">Conexão</div>
     <p class="aj-p" id="ajFila"></p>
     <button type="button" class="btn2" onclick="enviarFila(true)">Enviar agora o que está esperando</button>
-    <button type="button" class="btn2" id="ajTrocar" hidden onclick="mostrarSetup()">Trocar endereço ou chave</button>
+    <button type="button" class="btn2" id="ajTrocar" hidden onclick="mostrarSetup()">Trocar endereço ou entrar de novo</button>
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v6</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v7</p>
   </div>
 </section>
 
@@ -1047,12 +1083,25 @@ button.grp-ic.vazio { background:transparent; outline:1.5px dashed var(--mut2); 
 <div id="setup" hidden>
   <header class="topo"><div><div class="marca">Jeh &amp; Luh</div><div class="hoje">primeira vez neste aparelho</div></div></header>
   <div class="card">
-    <div class="sec">Conectar ao backend</div>
-    <p class="setup-p">Cole o endereço da API (o link que termina em <strong>/exec</strong>) e a chave do app. Os dois ficam guardados só aqui.</p>
+    <div class="sec">Conectar à planilha</div>
+    <p class="setup-p">Cole o endereço da API (o link que termina em <strong>/exec</strong>). Ele fica guardado só neste aparelho. Depois, entre com a sua conta Google: o app só abre para o Lucas e a Jéssica.</p>
     <div class="field"><label for="cfgUrl">Endereço da API</label><input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"/></div>
-    <div class="field"><label for="cfgToken">Chave do app</label><input id="cfgToken" type="password" autocomplete="off"/></div>
-    <button class="btn" id="btnCfg" onclick="cfgSalvar(event)">Conectar</button>
+    <div class="field" id="cfgChave" hidden><label for="cfgToken">Chave do app</label><input id="cfgToken" type="password" autocomplete="off"/>
+      <div class="setup-p" style="margin:6px 0 0">A API ainda está sem o login Google: por enquanto vale a chave.</div></div>
+    <button class="btn" id="btnCfg" onclick="cfgSalvar(event)">Continuar</button>
+    <div id="cfgGoogle" style="display:flex;justify-content:center;margin-top:14px"></div>
     <div class="setup-err" id="cfgErr"></div>
+  </div>
+</div>
+
+<!-- ══ ENTRAR (login Google venceu ou ainda não foi feito) ═════ -->
+<div class="pop" id="login" hidden>
+  <div class="pop-c" role="dialog" aria-modal="true" aria-labelledby="loginTit" style="max-width:420px;padding:24px">
+    <div class="lp-tit" id="loginTit">Entrar</div>
+    <p class="setup-p" style="margin:8px 0 16px">Este app só abre para o Lucas e a Jéssica. Entre com a sua conta Google para ver e lançar.</p>
+    <div id="loginBt" style="display:flex;justify-content:center;min-height:44px"></div>
+    <div class="setup-err" id="loginErr"></div>
+    <button type="button" class="btn-txt" style="width:100%;margin-top:6px" onclick="document.getElementById('login').hidden=true">Agora não (o app continua com o que está guardado)</button>
   </div>
 </div>
 
@@ -1079,7 +1128,7 @@ button.grp-ic.vazio { background:transparent; outline:1.5px dashed var(--mut2); 
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v6';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v7';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1307,6 +1356,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ajTrocar').hidden = false;
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
     if (!JL.configurado()) { mostrarSetup(); return; }
+    JL.pedirLogin = pedirLogin;
   }
   window.addEventListener('online', () => enviarFila());
   dadosLer();
@@ -3075,7 +3125,7 @@ function cfSecAparelho() {
     <div class="cfg-acoes">
       <button type="button" class="bt" onclick="sincronizar(true)">${ic('refresh', 16)}Atualizar com a planilha</button>
       ${n ? `<button type="button" class="bt" onclick="enviarFila(true)">Enviar agora</button>` : ''}
-      ${window.JL && JL.standalone ? `<button type="button" class="bt" onclick="mostrarSetup()">Trocar endereço ou chave</button>` : ''}
+      ${window.JL && JL.standalone ? `<button type="button" class="bt" onclick="mostrarSetup()">Trocar endereço ou entrar de novo</button>` : ''}
     </div>
     <p class="cx-s" style="margin-top:14px">${esc(document.getElementById('verInfo').textContent)}</p>
   </section>`;
@@ -3104,12 +3154,14 @@ function cfSalvar(secao, btn) {
     .salvarConfig(secao, dados);
 }
 
-/* ══ primeira conexão — só existe fora do Apps Script ═══════════ */
+/* ══ primeira conexão e login — só existem fora do Apps Script ══ */
 function mostrarSetup() {
   const c = (window.JL && JL.config()) || {};
   document.getElementById('cfgUrl').value = c.url || '';
   document.getElementById('cfgToken').value = c.token || '';
+  document.getElementById('cfgChave').hidden = !c.token;
   document.getElementById('cfgErr').textContent = '';
+  document.getElementById('cfgGoogle').innerHTML = '';
   document.body.classList.add('sem-cfg');
   document.getElementById('setup').hidden = false;
   window.scrollTo(0, 0);
@@ -3117,19 +3169,71 @@ function mostrarSetup() {
 function cfgSalvar(e) {
   const url = document.getElementById('cfgUrl').value.trim();
   const token = document.getElementById('cfgToken').value.trim();
-  const err = document.getElementById('cfgErr');
+  const err = document.getElementById('cfgErr'), btn = document.getElementById('btnCfg');
+  err.textContent = '';
   if (!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(url)) { err.textContent = 'O endereço tem que ser o link da implantação, terminando em /exec.'; return; }
-  if (!token) { err.textContent = 'Falta a chave do app.'; return; }
-  const btn = document.getElementById('btnCfg');
   addRipple(btn, e);
   btn.classList.add('loading'); btn.innerHTML = '<span class="spin"></span> Testando…';
-  JL.gravar(url, token);
-  google.script.run
-    .withSuccessHandler(() => { location.reload(); })
-    .withFailureHandler(x => { btn.classList.remove('loading'); btn.textContent = 'Conectar'; err.textContent = x.message || 'Não consegui falar com o backend.'; })
-    .getLists();
+  const volta = msg => { btn.classList.remove('loading'); btn.textContent = 'Continuar'; err.textContent = msg; };
+  JL.loginInfo(url).then(info => {
+    if (info.clientId) {
+      JL.gravar(url, '', info.clientId);
+      btn.classList.remove('loading'); btn.hidden = true;
+      document.getElementById('cfgChave').hidden = true;
+      botaoGoogle('cfgGoogle', () => location.reload());
+      return;
+    }
+    // API ainda sem login Google: vale a chave
+    if (!token) { document.getElementById('cfgChave').hidden = false; volta('Falta a chave do app.'); return; }
+    JL.gravar(url, token, '');
+    google.script.run.withSuccessHandler(() => location.reload()).withFailureHandler(x => volta(x.message || 'Não consegui falar com o backend.')).getLists();
+  }).catch(() => volta('Não consegui falar com a API. Confira o endereço.'));
+}
+
+/* login Google (Google Identity Services), carregado só quando a API pede */
+let _gisCarregando = null, _depoisLogin = null;
+function carregarGoogle() {
+  if (window.google && google.accounts && google.accounts.id) return Promise.resolve();
+  if (_gisCarregando) return _gisCarregando;
+  _gisCarregando = new Promise((ok, falha) => {
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+    s.onload = ok; s.onerror = () => { _gisCarregando = null; falha(new Error('Não consegui carregar o login do Google.')); };
+    document.head.appendChild(s);
+  });
+  return _gisCarregando;
+}
+function iniciarGoogle() {
+  const c = JL.config() || {};
+  google.accounts.id.initialize({
+    client_id: c.clientId, auto_select: true, use_fedcm_for_prompt: true, cancel_on_tap_outside: false,
+    callback: r => {
+      JL.receberLogin(r.credential);
+      document.getElementById('login').hidden = true;
+      if (_depoisLogin) { const f = _depoisLogin; _depoisLogin = null; f(); }
+    }
+  });
+}
+/** Desenha o botão "Fazer login com o Google" dentro do elemento id */
+function botaoGoogle(id, depois) {
+  _depoisLogin = depois || null;
+  carregarGoogle().then(() => {
+    iniciarGoogle();
+    google.accounts.id.renderButton(document.getElementById(id), { theme: 'filled_black', size: 'large', shape: 'pill', text: 'signin_with', locale: 'pt-BR' });
+  }).catch(e => { const el = document.getElementById(id === 'loginBt' ? 'loginErr' : 'cfgErr'); if (el) el.textContent = e.message; });
+}
+/** A API pediu login: mostra o botão e, por trás, tenta entrar sozinho (conta já usada aqui) */
+let _pedindo = false;
+function pedirLogin() {
+  if (_pedindo || JL.temLogin()) return;
+  _pedindo = true;
+  document.getElementById('login').hidden = false;
+  document.getElementById('loginErr').textContent = '';
+  botaoGoogle('loginBt');
+  carregarGoogle().then(() => google.accounts.id.prompt()).catch(() => { /* o erro já aparece embaixo do botão */ })
+    .then(() => { setTimeout(() => { _pedindo = false; }, 4000); });
 }
 </script>
 </body>
 </html>
-<!-- -------- index.html v6 -------- -->
+<!-- -------- index.html v7 -------- -->
