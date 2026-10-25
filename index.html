@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v17 -------- -->
+<!-- -------- index.html v18 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -865,6 +865,11 @@ body.pc .mnc-fixa, body.em-lancar .mnc-fixa, body.sem-cfg .mnc-fixa { display:no
 .barra.dupla i:last-child { border-radius:999px }
 .vr-tx { color:var(--vr); font-weight:700; font-size:11px }
 .seg.chave button.vr.on { background:var(--vr); color:#08213A }
+
+/* ── Contas fixas: cartão roxo no carrossel da Casa, só para ver ── */
+.fatura.fx-cel { background:#2B2346; color:#F0EBFF }
+.fatura.fx-cel .anel { border-color:rgba(240,235,255,.16) }
+.tag-um { font-size:10.5px; font-weight:800; color:var(--mut); background:var(--s3); border-radius:6px; padding:1px 6px; margin-left:6px }
 .chave-l { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap }
 
 /* ── Consultas ── */
@@ -1319,7 +1324,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v17</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v18</p>
   </div>
 </section>
 
@@ -1378,7 +1383,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v17';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v18';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1568,7 +1573,7 @@ function dadosGravar() {
   _gravarT = setTimeout(() => {
     // se não couber, guarda sem as partes grandes (elas voltam na próxima busca)
     if (!LS.set(CACHE_K, JSON.stringify(_dados)))
-      LS.set(CACHE_K, JSON.stringify(Object.assign({}, _dados, { lancs: null, painel: {}, recentes: null, fluxo: {}, base: null })));
+      LS.set(CACHE_K, JSON.stringify(Object.assign({}, _dados, { lancs: null, painel: {}, recentes: null, fluxo: {} })));
   }, 300);
 }
 function aplicarListas(l) {
@@ -1806,7 +1811,8 @@ function pintarCasa(d) {
   // compatível com o code.gs v7 (sem a lista de cartões)
   const cartoes = d.cartoes && d.cartoes.length ? d.cartoes : [{ nome: 'C6', prevista: d.prevista, real: d.faturaC6,
     venc: d.venc, fechaDias: d.fecha.dias, fechaData: d.fecha.data }];
-  const cels = cartoes.map(c => faturaCel(c, d)).concat(d.vr ? [cartaoVR(d, true)] : []);
+  const fx = fixosDoMes(d.yyyymm);
+  const cels = cartoes.map(c => faturaCel(c, d)).concat(d.vr ? [cartaoVR(d, true)] : [], fx ? [cartaoFixos(d, fx)] : []);
   const topo = cels.length > 1
     ? `<div class="carrossel" id="cCarr" onscroll="carrPontos(this)">${cels.join('')}</div>
        <div class="pontos-car" id="cPontos">${cels.map((c, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>`
@@ -1930,6 +1936,7 @@ function cmPintar() {
   if (!_cm) return;
   const host = document.getElementById('cmCaixa'), f = _cm, d = _dados.inicio[_mes] || {};
   const fechar = `<button type="button" class="btn-ic" aria-label="Fechar" onclick="cmFechar()">${ic('x', 18)}</button>`;
+  if (f.fixos) return cmFixos(host, fechar, d);
   const todas = cmLinhas();
   if (!todas) {
     host.innerHTML = `<div class="cm-top"><div class="cm-h"><div style="flex:1"><div class="cm-tit" id="cmTit">Compras do mês</div>
@@ -3352,6 +3359,45 @@ function cartaoVR(d, cel) {
     <div class="cpc-l"><span>${v.dia ? 'cai dia ' + dois(v.dia) : ''}</span><span></span></div></div>`;
 }
 
+/** As contas fixas do mês ym (saídas da aba BASE), por dia. null sem a BASE no aparelho ou sem nenhuma. */
+function fixosDoMes(ym) {
+  const B = _dados.base;
+  if (!B || !B.regras) return null;
+  const dia = r => r.data ? +r.data.slice(8) : r.dia;
+  const cartao = r => (B.cartoes || []).find(c => c.toUpperCase() === String(r.como).trim().toUpperCase()) || '';
+  const l = B.regras.filter(r => r.tipo === 'Saída' && r.valor && fxAtiva(r, ym))
+    .map(r => Object.assign({}, r, { d: dia(r), cartao: cartao(r) }))
+    .sort((a, b) => a.d - b.d || b.valor - a.valor);
+  return l.length ? l : null;
+}
+/** O cartão roxo das contas fixas (Casa, celular): só para ver; toca e abre a lista */
+function cartaoFixos(d, l) {
+  const tot = l.reduce((s, r) => s + r.valor, 0), noCart = l.filter(r => r.cartao).reduce((s, r) => s + r.valor, 0);
+  const hoje = new Date(), prox = ymDe(hoje) === Number(d.yyyymm) && l.find(r => r.d >= hoje.getDate());
+  const sub = noCart ? `da conta ${brl(tot - noCart)} · no cartão ${brl(noCart)}` : 'saem da conta: débito, boleto e Pix';
+  return `<section class="fatura fx-cel toca" role="button" tabindex="0" aria-label="Ver as contas fixas" onclick="cmAbrir({fixos:true})"><span class="anel a1"></span><span class="anel a2"></span>
+      <div class="fat-l1"><span>Contas fixas · ${esc(d.mesNome)}</span><span class="fat-mu">${l.length} ${l.length === 1 ? 'conta' : 'contas'}</span></div>
+      <div><div class="fat-v">${brl(tot)}</div><div class="fat-sub">${esc(sub)}</div></div>
+      <div class="fat-l3"><span>${prox ? esc('próxima: ' + prox.item + ' · dia ' + dois(prox.d)) : ''}</span><span>toque para ver</span></div></section>`;
+}
+/** A lista das contas fixas na folha das compras: só leitura (editar é no Fluxo do mês, no computador) */
+function cmFixos(host, fechar, d) {
+  const l = fixosDoMes(d.yyyymm || _mes) || [], soma = a => a.reduce((s, r) => s + r.valor, 0);
+  const linha = r => `<div class="ult-i"><span class="ult-ic">${ic(icCat(r.grupo), 18)}</span>
+      <div style="flex:1;min-width:0"><div class="ult-d">${esc(r.item)}${r.data ? '<span class="tag-um">uma vez</span>' : ''}</div>
+        <div class="ult-m">${esc(['dia ' + dois(r.d), r.grupo, r.cartao ? '' : r.como, r.conta].filter(Boolean).join(' · '))}</div></div>
+      <div><div class="ult-v">${nbr(r.valor)}</div></div></div>`;
+  const secao = (t, s, a) => a.length ? `<div class="cm-sec"><div>${esc(t)}<small>${esc(s)}</small></div><span>${brl(soma(a))}</span></div>${a.map(linha).join('')}` : '';
+  const cartoes = [...new Set(l.filter(r => r.cartao).map(r => r.cartao))];
+  host.innerHTML = `<div class="cm-top"><div class="cm-h"><div style="flex:1;min-width:0"><div class="cm-tit" id="cmTit">Contas fixas</div>
+        <div class="cm-tot">${brl(soma(l))}</div>
+        <div class="cm-sub">${esc(d.mesNome || rotMes(_mes))} · ${l.length} ${l.length === 1 ? 'conta' : 'contas'} da aba BASE</div></div>${fechar}</div></div>
+    ${l.length ? secao('Saem da conta', 'débito automático, boleto, Pix', l.filter(r => !r.cartao))
+        + cartoes.map(c => secao('No cartão ' + c, 'já estão dentro da fatura prevista', l.filter(r => r.cartao === c))).join('')
+      : '<div class="empty">Nenhuma conta fixa neste mês.</div>'}
+    <div class="cm-nota">Só para ver. Para mudar um valor ou criar uma conta, use o Fluxo do mês no computador.</div>`;
+}
+
 /* ── Configurações: VR e cheque especial ── */
 function cfSecVr() {
   const p = _cf.prefs || {};
@@ -4331,4 +4377,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v17 -------- -->
+<!-- -------- index.html v18 -------- -->
