@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v8 -------- -->
+<!-- -------- index.html v9 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1211,7 +1211,7 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v8</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v9</p>
   </div>
 </section>
 
@@ -1265,7 +1265,7 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v8';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v9';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1452,7 +1452,7 @@ function dadosGravar() {
   _gravarT = setTimeout(() => {
     // se não couber, guarda sem as partes grandes (elas voltam na próxima busca)
     if (!LS.set(CACHE_K, JSON.stringify(_dados)))
-      LS.set(CACHE_K, JSON.stringify(Object.assign({}, _dados, { lancs: null, painel: {}, recentes: null })));
+      LS.set(CACHE_K, JSON.stringify(Object.assign({}, _dados, { lancs: null, painel: {}, recentes: null, fluxo: {}, base: null })));
   }, 300);
 }
 function aplicarListas(l) {
@@ -1521,7 +1521,9 @@ function sincronizar(manual) {
       _sincronizando = false; gira(false);
       _dados.lists = r.lists; _dados.meses = r.meses || []; _dados.pend = r.pendencias || [];
       if (r.consultas) { _dados.consultas = r.consultas; _dados.consultasEm = Date.now(); }
-      _dados.fluxo = {}; if (manual) _dados.base = null;
+      // code.gs v13+ manda tudo junto (Lançamentos, Fluxo, BASE, Configurações): nenhuma tela busca depois
+      _dados.fluxo = r.fluxo || {};
+      if (r.base) _dados.base = r.base; else if (manual) _dados.base = null;
       // o que chegou antes desta busca começar fica velho (busca de novo quando abrir)
       const novos = o => { const n = {}; Object.keys(o || {}).forEach(k => { if (o[k] && o[k]._em > t0) n[k] = o[k]; }); return n; };
       _dados.inicio = novos(_dados.inicio); _dados.painel = novos(_dados.painel);
@@ -1533,12 +1535,15 @@ function sincronizar(manual) {
         _dados.inicio[k] = x;
         if (r.painel) _dados.painel[k] = Object.assign({}, x, r.painel);
       });
-      _dados.recentes = null; _dados.em = Date.now();
-      if (manual) { _dados.lancs = null; _dados.config = null; }
+      _dados.recentes = r.recentes || null; _dados.em = Date.now();
+      if (r.lancs) _dados.lancs = r.lancs; else if (manual) _dados.lancs = null;
+      if (r.config) _dados.config = r.config; else if (manual) _dados.config = null;
+      if (r.config && (_tela !== 'config' || manual)) _cf = JSON.parse(JSON.stringify(r.config));   // a cópia de editar segue a planilha (menos no meio de uma edição)
       aplicarListas(r.lists); _meses = _dados.meses; _pend = _dados.pend;
       if (!_mes) _mes = r.inicio.yyyymm;
       dadosGravar();
-      repintar(manual);
+      repintar(manual && !r.lancs);   // com tudo já aqui, só pinta de novo (sem buscar outra vez)
+      if (manual && _tela === 'plano') { _plLoaded = false; entrarPlano(); }
       if (manual) showToast('✓ Atualizado com a planilha', 'ok');
     })
     .withFailureHandler(err => {
@@ -2057,6 +2062,7 @@ function pintarAjustes() {
 function loadRecent() {
   const host = document.getElementById('recList');
   if (_dados.recentes) pintarRecentes(_dados.recentes); else host.innerHTML = '<div class="empty">Carregando…</div>';
+  if (_dados.recentes && Date.now() - _dados.em < 60000) return;   // acabou de vir com a sincronização
   google.script.run
     .withSuccessHandler(items => { _dados.recentes = items; dadosGravar(); if (_tela === 'recentes') pintarRecentes(items); })
     .withFailureHandler(() => { if (!_dados.recentes) host.innerHTML = '<div class="empty">Erro ao carregar</div>'; })
@@ -3990,4 +3996,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v8 -------- -->
+<!-- -------- index.html v9 -------- -->
