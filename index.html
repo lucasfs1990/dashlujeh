@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v20 -------- -->
+<!-- -------- index.html v21 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1339,7 +1339,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v20</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v21</p>
   </div>
 </section>
 
@@ -1398,7 +1398,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v20';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v21';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -2696,7 +2696,9 @@ function c6Render() {
 function c6Linha(x) {
   const meta = [x.cat6, x.portador ? 'cartão ' + x.portador : '', x.usd ? 'US$ ' + x.usd : ''].filter(Boolean).join(' · ');
   const aviso = x.status === 'parecido'
-    ? `<div class="c6-aviso">Parecido com a linha ${x.linha}: <b>${esc(x.linhaDesc)}</b> · ${brl(x.linhaValor)}. Se for a mesma compra, deixe desmarcado.</div>` : '';
+    ? `<div class="c6-aviso">Parecido com a linha ${x.linha}: <b>${esc(x.linhaDesc)}</b> · ${brl(x.linhaValor)}. É a mesma compra?
+        <div class="c6-ajuste"><button type="button" onclick="c6Substituir(${x.id},this)">Sim: corrigir a linha ${x.linha} para ${brl(x.valor)} em ${esc(x.dataBR)}</button>
+          <span>não é: marque a caixinha para lançar como nova</span></div></div>` : '';
   const ajuste = x.ajuste && !x.ajusteFeito
     ? `<div class="c6-ajuste"><span>Planilha: ${brl(x.ajuste.previsto)} · C6: <b style="color:var(--txt)">${brl(x.ajuste.real)}</b></span>
        <button type="button" onclick="c6Ajustar(${x.id},this)">Usar ${brl(x.ajuste.real)} daqui pra frente</button></div>`
@@ -2738,6 +2740,21 @@ function c6Ajustar(id, btn) {
     .withSuccessHandler(r => { x.ajusteFeito = true; showToast(`✓ ${r.desc}: ${brl(r.valor)} em ${r.meses} meses`, 'ok'); c6Render(); _dados.inicio = {}; _dados.painel = {}; _dados.lancs = null; })
     .withFailureHandler(err => { btn.disabled = false; btn.textContent = 'Tentar de novo'; showToast(err.message || 'Erro', 'err'); })
     .ajustarFixo(x.ajuste.linha, x.ajuste.yyyymm, x.ajuste.real);
+}
+/** "Parecido" que é a mesma compra, lançada com valor ou data errados: a linha da planilha
+    fica com o valor e a data do C6 (descrição, grupo e quem continuam os de vocês) */
+function c6Substituir(id, btn) {
+  const x = _c6.itens[id]; if (!x || !x.linha) return;
+  btn.disabled = true; btn.textContent = 'Corrigindo…';
+  google.script.run
+    .withSuccessHandler(() => {
+      x.status = 'lancado'; x.sel = false; x.linhaValor = x.valor;
+      _dados.inicio = {}; _dados.painel = {}; _dados.lancs = null;
+      showToast(`✓ Linha ${x.linha} corrigida: ${brl(x.valor)} em ${x.dataBR}`, 'ok');
+      c6Render(); sincronizar(false);
+    })
+    .withFailureHandler(err => { btn.disabled = false; btn.textContent = 'Tentar de novo'; showToast((err && err.message) || 'Erro ao corrigir', 'err'); })
+    .editarLancamento(x.linha, { desc: x.linhaDesc, valor: x.linhaValor }, { valor: x.valor, data: x.data }, '');
 }
 function c6Lancar(e) {
   const btn = document.getElementById('btnC6Lancar');
@@ -4476,4 +4493,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v20 -------- -->
+<!-- -------- index.html v21 -------- -->
