@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v9 -------- -->
+<!-- -------- index.html v10 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -854,6 +854,32 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
 .fx-ag summary::-webkit-details-marker, .fx-gr summary::-webkit-details-marker { display:none }
 .fx-ag[open] summary, .fx-gr[open] summary { margin-bottom:8px }
 
+/* ── Compras do mês (celular): toca num grupo, numa pessoa ou no cartão ── */
+button.cat-linha { display:block; width:100%; border:0; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer }
+.cat-linha-t .num svg { display:inline-block; vertical-align:-1px; color:var(--mut2); margin-left:2px }
+button.pessoa { font-family:var(--f-tx); color:var(--txt) }
+.fatura.toca { cursor:pointer }
+.fatura.toca:active, button.cat-linha:active, button.pessoa:active { opacity:.8 }
+.ver-compras { margin:10px 20px 0; width:calc(100% - 40px); min-height:44px; border-radius:14px; border:1px solid var(--bd); background:var(--s1); color:var(--acc-tx); font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; gap:6px }
+.cm-c { max-height:88vh; padding-top:0 }
+.cm-top { position:sticky; top:0; background:var(--s1); padding:16px 0 10px; z-index:2 }
+.cm-h { display:flex; align-items:flex-start; gap:10px }
+.cm-tit { font-weight:800; font-size:17px }
+.cm-tot { font-family:var(--f-num); font-weight:600; font-size:28px; letter-spacing:-.8px; line-height:1.15; margin-top:2px }
+.cm-sub { font-size:12px; color:var(--mut) }
+.cm-chips { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin:12px -20px 0; padding:0 20px }
+.cm-chips::-webkit-scrollbar { display:none }
+.cm-chip { flex:0 0 auto; display:flex; align-items:center; gap:6px; min-height:36px; padding:0 12px; border-radius:999px; border:1px solid var(--bd); background:var(--s2); font-size:12.5px; font-weight:700; color:var(--mut); white-space:nowrap }
+.cm-chip b { font-family:var(--f-num); font-weight:600; color:var(--txt) }
+.cm-chip.on { background:var(--acc); border-color:var(--acc); color:var(--acc-on) } .cm-chip.on b { color:var(--acc-on) }
+.cm-chip.fil { background:var(--acc-soft); border-color:transparent; color:var(--acc-tx) }
+.cm-ord { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; font-size:12px; color:var(--mut) }
+.cm-ord .seg { padding:2px } .cm-ord .seg button { height:30px; font-size:12px; padding:0 10px }
+.cm-sec { display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-weight:800; font-size:13px; padding:14px 0 4px; border-bottom:1px solid var(--bd) }
+.cm-sec span { font-family:var(--f-num); font-weight:600; color:var(--mut) }
+.cm-sec small { display:block; font-size:11.5px; font-weight:600; color:var(--mut2) }
+.cm-nota { font-size:12px; color:var(--mut); background:var(--s2); border-radius:12px; padding:10px 12px; margin-top:14px; line-height:1.5 }
+
 
 @media (min-width: 560px) {
   /* celular "largo" (tablet) sem ser computador: coluna centralizada */
@@ -1211,7 +1237,7 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v9</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v10</p>
   </div>
 </section>
 
@@ -1252,6 +1278,11 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
   </div>
 </div>
 
+<!-- ══ compras do mês (celular): toca num grupo, numa pessoa ou no cartão ══ -->
+<div class="folha" id="folhaCompras" hidden onclick="if(event.target===this)cmFechar()">
+  <div class="folha-c cm-c" role="dialog" aria-modal="true" aria-labelledby="cmTit" id="cmCaixa"></div>
+</div>
+
 <!-- ══ janela de editar um lançamento (computador) ══════════ -->
 <div class="pop" id="lsPop" hidden onclick="if(event.target===this)lsFechar()">
   <div class="pop-c" role="dialog" aria-modal="true" aria-labelledby="lpTit" id="lpCaixa"></div>
@@ -1265,7 +1296,7 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v9';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v10';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1485,7 +1516,8 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('mousemove', dicaSegue);
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    if (_lsPop) lsFechar();
+    if (_cm) cmFechar();
+    else if (_lsPop) lsFechar();
     else if (_fxRegra) fxFechar();
     else if (document.body.classList.contains('em-lancar')) fecharLancar();
   });
@@ -1551,12 +1583,14 @@ function sincronizar(manual) {
       if (manual || !_dados.inicio[_mes]) showToast('Não consegui atualizar: ' + ((err && err.message) || 'sem conexão'), 'err');
       if (!_dados.inicio[_mes] && _tela === 'casa') document.getElementById('cConteudo').innerHTML =
         `<div class="alert alert-crit c6-err"><span class="alert-icon">⚠️</span><span>${esc((err && err.message) || 'Não consegui carregar o mês')}</span></div>`;
+      if (_cm) cmPintar();
     })
     .getApp(_mes);
 }
 /** Pinta de novo a tela aberta com os dados novos */
 function repintar(forcar) {
   pintarBadge();
+  if (_cm) cmPintar();
   if (_tela === 'casa') carregarCasa();
   else if (_tela === 'painel') carregarPainel();   // a sincronização já trouxe o mês; fora da faixa, ele busca
   else if (_tela === 'pend') pintarPend();
@@ -1672,7 +1706,7 @@ function faturaCel(c, d) {
     sub = c.nome === 'C6' ? 'cole a fatura do C6 no computador para comparar com a real' : 'à vista + parcelas + fixos deste cartão';
   }
   const cor = c.cor && c.cor.toUpperCase() !== '#F2B33D' ? `style="background:${c.cor};color:${tintaSobre(c.cor)}"` : '';
-  return `<section class="fatura" ${cor}>
+  return `<section class="fatura toca" role="button" tabindex="0" aria-label="Ver as compras da fatura ${escA(c.nome)}" onclick="cmAbrir({cartao:${escA(JSON.stringify(c.nome))}})" ${cor}>
       <span class="anel a1"></span><span class="anel a2"></span>
       <div class="fat-l1"><span>${esc(rot)}</span><span class="fat-mu">cartão ${esc(c.nome)}</span></div>
       <div><div class="fat-v">${brl(valor)}</div><div class="fat-sub">${esc(sub)}</div></div>
@@ -1704,7 +1738,7 @@ function pintarCasa(d) {
 
   const com = (d.pessoas || []).filter(p => p.nome !== 'sem nome');
   const pessoas = com.length ? `<div class="pessoas">${(d.pessoas || []).map(p =>
-      `<span class="pessoa"><b>${esc(p.nome === 'sem nome' ? '?' : p.nome[0])}</b>${esc(p.nome)} <span class="num">${brl(Math.round(p.valor)).replace(',00', '')}</span></span>`).join('')}</div>` : '';
+      `<button type="button" class="pessoa" onclick="cmAbrir({quem:${escA(JSON.stringify(p.nome))}})"><b>${esc(p.nome === 'sem nome' ? '?' : p.nome[0])}</b>${esc(p.nome)} <span class="num">${brl(Math.round(p.valor)).replace(',00', '')}</span></button>`).join('')}</div>` : '';
 
   const t = d.terminam || { qtd: 0 };
   const terminam = t.qtd ? `
@@ -1739,6 +1773,7 @@ function pintarCasa(d) {
     <div class="sec-h"><h2>Para onde foi</h2><span>${esc(totChave(d))}</span></div>
     <div style="padding:0 20px">${chaveHtml()}</div>
     <div class="cats-todas">${paraOndeHtml(d)}</div>
+    <button type="button" class="ver-compras" onclick="cmAbrir({})">Ver as compras que somam este mês ${ic('chevR', 14)}</button>
     ${pessoas}
     ${npend ? `<button type="button" class="btn-pend" onclick="ir('pend')">${ic('camera', 18)}${npend} ${npend > 1 ? 'fotos esperando' : 'foto esperando'} descrição</button>` : ''}
     <div class="sec-h"><h2>Últimos lançamentos</h2><button type="button" class="link" onclick="ir('recentes')">ver todos</button></div>
@@ -1748,6 +1783,125 @@ function pintarCasa(d) {
 function carrPontos(el) {
   const i = Math.round(el.scrollLeft / Math.max(1, el.firstElementChild.offsetWidth + 12));
   document.querySelectorAll('#cPontos i').forEach((p, k) => p.classList.toggle('on', k === i));
+}
+
+/* ══ Compras do mês (celular) ════════════════════════════════
+   Toca num grupo do "Para onde foi", numa pessoa ou no cartão: abre a
+   lista do que soma aquele valor nesta fatura, separando a compra nova
+   deste ciclo da parcela de compra antiga. Usa a lista de Lançamentos
+   que já vem com a sincronização, então abre na hora. */
+let _cm = null, _cmPedindo = false;
+function cmAbrir(f) {
+  _cm = Object.assign({ grupo: '', quem: '', cartao: '', ordem: LS.get('jl_cm_ordem', 'valor') }, f);
+  document.getElementById('folhaCompras').hidden = false;
+  document.body.classList.add('com-pop');
+  // no app instalado, o "voltar" do celular fecha a lista em vez de sair do app
+  if (window.JL && JL.standalone) try { history.pushState({ cm: 1 }, ''); } catch (e) { /* sem histórico */ }
+  cmPintar();
+  document.getElementById('cmCaixa').scrollTop = 0;
+}
+function cmFechar(peloVoltar) {
+  if (!_cm) return;
+  _cm = null;
+  document.getElementById('folhaCompras').hidden = true;
+  document.body.classList.remove('com-pop');
+  if (!peloVoltar && window.JL && JL.standalone && history.state && history.state.cm) try { history.back(); } catch (e) { /* sem histórico */ }
+}
+window.addEventListener('popstate', () => { if (_cm) cmFechar(true); });
+function cmSet(k, v) {
+  _cm[k] = v;
+  if (k === 'ordem') LS.set('jl_cm_ordem', v);
+  cmPintar();
+}
+/** As compras que caem na fatura do mês aberto: [{x, noMes, k}] (k = qual parcela; 0 = à vista) */
+function cmLinhas() {
+  const L = lancsComFila();
+  if (!L) return null;
+  const idx = idxDe(_mes), out = [];
+  L.forEach(x => {
+    if (!x.vr && !x.cartao) return;   // Pix e débito não caem em fatura (a mesma conta do "Para onde foi")
+    let noMes = x.valor, k = 0;
+    if (x.n > 1) { if (!(x.ci <= idx && idx <= x.ci + x.n - 1)) return; noMes = x.valor / x.n; k = idx - x.ci + 1; }
+    else if (x.ci !== idx) return;
+    out.push({ x, noMes, k });
+  });
+  return out;
+}
+/** A lista não ficou guardada no aparelho: busca (a sincronização, se estiver rodando, já traz) */
+function cmBuscar() {
+  if (_cmPedindo || _sincronizando) return;
+  _cmPedindo = true;
+  google.script.run
+    .withSuccessHandler(l => { _cmPedindo = false; _dados.lancs = l; dadosGravar(); cmPintar(); })
+    .withFailureHandler(err => {
+      _cmPedindo = false;
+      const s = _cm && document.querySelector('#cmCaixa .cm-sub');
+      if (s) s.textContent = 'Não consegui buscar: ' + ((err && err.message) || 'sem conexão');
+    })
+    .listarLancamentos();
+}
+function cmPintar() {
+  if (!_cm) return;
+  const host = document.getElementById('cmCaixa'), f = _cm, d = _dados.inicio[_mes] || {};
+  const fechar = `<button type="button" class="btn-ic" aria-label="Fechar" onclick="cmFechar()">${ic('x', 18)}</button>`;
+  const todas = cmLinhas();
+  if (!todas) {
+    host.innerHTML = `<div class="cm-top"><div class="cm-h"><div style="flex:1"><div class="cm-tit" id="cmTit">Compras do mês</div>
+      <div class="cm-sub">buscando a lista na planilha…</div></div>${fechar}</div></div>
+      <div class="esq" style="height:56px;margin-top:8px"></div><div class="esq" style="height:56px;margin-top:8px"></div><div class="esq" style="height:56px;margin-top:8px"></div>`;
+    cmBuscar();
+    return;
+  }
+  // com um cartão escolhido, vale só ele; sem cartão, vale a chave Tudo · Crédito · VR da Casa
+  const base = todas.filter(l => f.cartao
+      ? (f.cartao === 'VR' ? l.x.vr : !l.x.vr && String(l.x.cartao).toUpperCase() === f.cartao.toUpperCase())
+      : _chave === 'cred' ? !l.x.vr : _chave === 'vr' ? l.x.vr : true)
+    .filter(l => !f.quem || (f.quem === 'sem nome' ? !l.x.quem : l.x.quem === f.quem));
+  const linhas = base.filter(l => !f.grupo || l.x.grupo === f.grupo);
+  const soma = a => a.reduce((s, l) => s + l.noMes, 0);
+  const pg = {};
+  base.forEach(l => { pg[l.x.grupo] = (pg[l.x.grupo] || 0) + l.noMes; });
+  const grupos = Object.keys(pg).sort((a, b) => pg[b] - pg[a]);
+  if (f.grupo && grupos.indexOf(f.grupo) < 0) grupos.unshift(f.grupo);
+
+  const ord = f.ordem === 'data' ? (a, b) => b.x.data.localeCompare(a.x.data) || b.noMes - a.noMes : (a, b) => b.noMes - a.noMes;
+  const novas = linhas.filter(l => l.k <= 1).sort(ord), antigas = linhas.filter(l => l.k > 1).sort(ord);
+  const princ = (_cfg.cartoes[0] || {}).nome;
+  const linha = l => {
+    const x = l.x, meta = [x.dataBR.slice(0, 5), f.grupo ? '' : x.grupo, x.quem, !x.vr && x.cartao !== princ ? x.cartao : ''].filter(Boolean).join(' · ');
+    return `<div class="ult-i${x.enviando ? ' enviando' : ''}"><span class="ult-ic"${x.vr ? ' style="color:var(--vr)"' : ''}>${ic(icCat(x.grupo), 18)}</span>
+      <div style="flex:1;min-width:0"><div class="ult-d">${esc(x.desc)}${lsTags(x)}</div><div class="ult-m">${esc(meta)}</div></div>
+      <div><div class="ult-v">${nbr(l.noMes)}</div><div class="ult-p">${x.n > 1 ? `${l.k}/${x.n} · de ${nbr(x.valor)}` : 'à vista'}</div></div></div>`;
+  };
+  const secao = (t, s, a) => a.length ? `<div class="cm-sec"><div>${t}<small>${s}</small></div><span>${brl(soma(a))}</span></div>${a.map(linha).join('')}` : '';
+
+  const tit = f.grupo || (f.cartao ? (f.cartao === 'VR' ? 'Vale-refeição' : 'Fatura ' + f.cartao) : f.quem ? (f.quem === 'sem nome' ? 'Sem "quem"' : 'Compras de ' + f.quem) : 'Compras do mês');
+  // cartão e pessoa escolhidos viram etiquetas que se tiram com um toque
+  const filtros = [f.cartao ? [f.cartao === 'VR' ? 'só VR' : 'só ' + f.cartao, 'cartao'] : null,
+                   f.quem ? [f.quem === 'sem nome' ? 'sem "quem"' : f.quem, 'quem'] : null].filter(Boolean);
+  const chips = filtros.map(([t, k]) => `<button type="button" class="cm-chip fil" aria-label="Tirar o filtro ${escA(t)}" onclick="cmSet('${k}','')">${esc(t)} ✕</button>`).join('')
+    + `<button type="button" class="cm-chip${f.grupo ? '' : ' on'}" onclick="cmSet('grupo','')">Todos <b>${nbr(soma(base))}</b></button>`
+    + grupos.map(g => `<button type="button" class="cm-chip${g === f.grupo ? ' on' : ''}" onclick="cmSet('grupo',${escA(JSON.stringify(g))})">${esc(g)} <b>${nbr(pg[g] || 0)}</b></button>`).join('');
+
+  // os fixos do cartão (assinaturas, contas) vêm da PROJEÇÃO, não da LANÇAMENTOS
+  const fixos = !f.grupo && !f.quem && f.cartao !== 'VR' && (f.cartao || _chave !== 'vr')
+    ? (d.cartoes || []).filter(c => !f.cartao || c.nome === f.cartao).reduce((s, c) => s + (c.fixos || 0), 0) : 0;
+
+  host.innerHTML = `<div class="cm-top">
+      <div class="cm-h"><div style="flex:1;min-width:0"><div class="cm-tit" id="cmTit">${esc(tit)}</div>
+        <div class="cm-tot">${brl(soma(linhas))}</div>
+        <div class="cm-sub">fatura de ${esc(d.mesNome || rotMes(_mes))} · ${novas.length} ${novas.length === 1 ? 'compra nova' : 'compras novas'} + ${antigas.length} ${antigas.length === 1 ? 'parcela antiga' : 'parcelas antigas'}</div></div>${fechar}</div>
+      <div class="cm-chips" role="group" aria-label="Filtrar por grupo">${chips}</div>
+      <div class="cm-ord"><span>${f.grupo ? 'toque em "Todos" para ver tudo de novo' : 'toque num grupo para filtrar'}</span>
+        <div class="seg">${[['valor', 'Maior valor'], ['data', 'Data']].map(([v, t]) => `<button type="button" class="${v === f.ordem ? 'on' : ''}" onclick="cmSet('ordem','${v}')">${t}</button>`).join('')}</div></div>
+    </div>
+    ${linhas.length ? secao('Compras novas desta fatura', 'à vista ou 1ª parcela: o que entrou de gasto agora', novas)
+                    + secao('Parcelas de compras anteriores', 'já estavam comprometidas antes deste ciclo', antigas)
+                    : '<div class="empty">Nada neste filtro.</div>'}
+    ${fixos ? `<div class="cm-nota">Fora desta lista: <strong>${brl(fixos)}</strong> de fixos no cartão (assinaturas e contas da PROJEÇÃO). Eles completam a fatura prevista.</div>` : ''}`;
+  // o grupo escolhido fica à vista na fileira, mesmo lá no fim
+  const fila = host.querySelector('.cm-chips'), on = host.querySelector('.cm-chip.on');
+  if (fila && on) fila.scrollLeft = Math.max(0, on.offsetLeft - fila.offsetLeft - 40);
 }
 
 function abrirMeses() {
@@ -3040,11 +3194,12 @@ const valChave = x => _chave === 'cred' ? x.cred : _chave === 'vr' ? x.vr : x.cr
 function paraOndeHtml(d, limite) {
   const lista = porGrupoMes(d).filter(x => valChave(x) > 0).sort((a, b) => valChave(b) - valChave(a));
   if (!lista.length) return `<div class="cx-s" style="padding:8px 0">${_chave === 'vr' ? 'Nada no VR neste mês.' : 'Nada lançado ainda.'}</div>`;
-  const max = valChave(lista[0]) || 1;
+  const max = valChave(lista[0]) || 1, toca = !ehPC();   // no celular, tocar no grupo abre as compras dele
   return lista.slice(0, limite || 99).map(x => {
     const c = _chave === 'vr' ? 0 : x.cred, v = _chave === 'cred' ? 0 : x.vr;
-    return `<div class="cat-linha"><div class="cat-linha-t"><span>${esc(x.nome)}</span><span class="num">${brl(c + v)}${_chave === 'tudo' && x.vr ? ` <small class="vr-tx">${nbr(x.vr)} VR</small>` : ''}</span></div>
-      <div class="barra dupla"><i style="width:${(c / max * 100).toFixed(1)}%"></i><b style="width:${(v / max * 100).toFixed(1)}%"></b></div></div>`;
+    const dentro = `<div class="cat-linha-t"><span>${esc(x.nome)}</span><span class="num">${brl(c + v)}${_chave === 'tudo' && x.vr ? ` <small class="vr-tx">${nbr(x.vr)} VR</small>` : ''}${toca ? ic('chevR', 12) : ''}</span></div>
+      <div class="barra dupla"><i style="width:${(c / max * 100).toFixed(1)}%"></i><b style="width:${(v / max * 100).toFixed(1)}%"></b></div>`;
+    return toca ? `<button type="button" class="cat-linha" onclick="cmAbrir({grupo:${escA(JSON.stringify(x.nome))}})">${dentro}</button>` : `<div class="cat-linha">${dentro}</div>`;
   }).join('');
 }
 function totChave(d) {
@@ -3055,7 +3210,7 @@ function totChave(d) {
 function cartaoVR(d, cel) {
   const v = d.vr || {};
   const sub = v.valor ? `usado de ${brl(v.valor)} · sobram ${brl(v.saldo)}` : 'defina o valor que cai por mês em Configurações';
-  if (cel) return `<section class="fatura vr-cel"><span class="anel a1"></span><span class="anel a2"></span>
+  if (cel) return `<section class="fatura vr-cel toca" role="button" tabindex="0" aria-label="Ver as compras no VR" onclick="cmAbrir({cartao:'VR'})"><span class="anel a1"></span><span class="anel a2"></span>
       <div class="fat-l1"><span>Vale-refeição · ${esc(d.mesNome)}</span><span class="fat-mu">fora da conta</span></div>
       <div><div class="fat-v">${brl(v.total)}</div><div class="fat-sub">${esc(sub)}</div></div>
       <div class="fat-l3"><span>${v.dia ? 'cai dia ' + dois(v.dia) : ''}</span><span>${(v.categorias || []).length} grupos</span></div></section>`;
@@ -3996,4 +4151,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v9 -------- -->
+<!-- -------- index.html v10 -------- -->
