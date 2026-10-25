@@ -1,20 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- -------- icon.svg v2 -------- -->
-  <!-- carteira âmbar com a seta subindo, no preto do app -->
+  <!-- ======== icon.svg v3 ======== -->
+  <!-- dois anéis entrelaçados (Jeh & Luh) em âmbar -->
   <defs>
     <linearGradient id="ouro" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#FFC95C"/>
-      <stop offset="1" stop-color="#E39A1E"/>
+      <stop offset="1" stop-color="#EDA82A"/>
     </linearGradient>
+    <clipPath id="baixo"><rect x="0" y="256" width="512" height="256"/></clipPath>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#111113"/>
-  <g transform="translate(256 272) scale(.86) translate(-256 -228)">
-    <rect x="104" y="170" width="304" height="216" rx="40" fill="url(#ouro)"/>
-    <path d="M104 214h304" stroke="#111113" stroke-opacity=".25" stroke-width="10"/>
-    <rect x="300" y="250" width="108" height="72" rx="20" fill="#111113"/>
-    <circle cx="342" cy="286" r="14" fill="#F2B33D"/>
-    <path d="M150 140 L224 96 L280 124 L362 74" fill="none" stroke="#F2B33D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M332 70h34v34" fill="none" stroke="#F2B33D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="512" height="512" rx="112" fill="url(#ouro)"/>
+  <g fill="none" stroke-linecap="round">
+    <circle cx="198" cy="256" r="86" stroke="#1B1405" stroke-width="38"/>
+    <circle cx="314" cy="256" r="86" stroke="#EDA82A" stroke-width="62"/>
+    <circle cx="314" cy="256" r="86" stroke="#1B1405" stroke-width="38"/>
+    <g clip-path="url(#baixo)">
+      <circle cx="198" cy="256" r="86" stroke="#EDA82A" stroke-width="62"/>
+      <circle cx="198" cy="256" r="86" stroke="#1B1405" stroke-width="38"/>
+    </g>
   </g>
-  <!-- -------- icon.svg v2 -------- -->
+  <!-- ======== icon.svg v3 ======== -->
 </svg>

@@ -1,11 +1,11 @@
-// -------- sw.js v18 --------
+// -------- sw.js v19 --------
 // Service worker do app instalado: guarda a "casca" (tela, ícones) para
 // abrir mesmo sem internet. Os dados nunca ficam aqui — a API (outra
 // origem, script.google.com) passa direto pela rede.
 // Ao mudar o index.html, suba a versão do CACHE para os celulares
 // pegarem a tela nova.
-const CACHE = 'jl-casca-v19';
-const CASCA = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
+const CACHE = 'jl-casca-v20';
+const CASCA = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CASCA)));
@@ -27,4 +27,4 @@ self.addEventListener('fetch', e => {
       .catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
   );
 });
-// -------- sw.js v18 --------
+// -------- sw.js v19 --------

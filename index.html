@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v18 -------- -->
+<!-- -------- index.html v19 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest"/>
 <meta name="theme-color" content="#0F0F10"/>
 <link rel="icon" href="icon.svg" type="image/svg+xml"/>
-<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="apple-touch-icon" href="icon-maskable-512.png"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Jeh &amp; Luh"/>
@@ -561,7 +561,7 @@ body.pc .tela { padding:0 0 64px }
 .ps-pe small { display:block; font-size:11px; color:var(--mut) }
 .ps-ver { font-size:11px; color:var(--mut2); padding:10px 8px 0 }
 
-.pcw { max-width:1180px; margin:0 auto; padding:28px 32px 0; display:flex; flex-direction:column; gap:18px }
+.pcw { max-width:none; margin:0; padding:28px 40px 0; display:flex; flex-direction:column; gap:18px }
 .pch { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px }
 .pch h1 { font-size:26px; font-weight:800; letter-spacing:-.5px }
 .pch-s { font-size:13px; color:var(--mut) }
@@ -583,7 +583,7 @@ body.pc .tela { padding:0 0 64px }
 
 .cards-pc { display:flex; gap:16px; overflow-x:auto; padding:2px 2px 6px; cursor:grab; scrollbar-width:thin }
 .cards-pc.arrastando { cursor:grabbing; user-select:none }
-.cpc { flex:0 0 340px; min-height:190px; border-radius:22px; padding:20px; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; gap:10px; border:0; text-align:left }
+.cpc { flex:1 0 340px; min-height:190px; border-radius:22px; padding:20px; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; gap:10px; border:0; text-align:left }
 .cpc .anel { position:absolute; right:-40px; top:-40px; width:160px; height:160px; border-radius:50%; border:2px solid currentColor; opacity:.16; pointer-events:none }
 .cpc-l { display:flex; justify-content:space-between; font-weight:700; font-size:13px; position:relative; gap:8px }
 .cpc-v { font-family:var(--f-num); font-weight:600; font-size:32px; letter-spacing:-1px; position:relative; line-height:1.1 }
@@ -675,7 +675,7 @@ body.pc .tela { padding:0 0 64px }
 .x-bt { width:36px; height:36px; border-radius:10px; border:1px solid var(--bd); background:transparent; color:var(--mut); font-size:16px; line-height:1 }
 
 /* telas do celular reaproveitadas no computador, mais largas */
-body.pc #t-pend.on, body.pc #t-plano.on, body.pc #t-recentes.on, body.pc #t-ajustes.on { max-width:1040px; margin:0 auto; padding:8px 12px 64px }
+body.pc #t-pend.on, body.pc #t-plano.on, body.pc #t-recentes.on, body.pc #t-ajustes.on { max-width:none; margin:0; padding:8px 28px 64px }
 body.pc #pLista { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:0 4px }
 body.pc #pl-orc.on { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start }
 body.pc .toast { bottom:28px; margin-left:124px }
@@ -688,6 +688,9 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 
 .so-leitor { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0 }
 .pcw.larga { max-width:none }
+/* Painel: a lista do "Para onde foi" tem a altura do gráfico ao lado e rola por dentro */
+.po-rolagem { margin-top:8px; max-height:224px; overflow-y:auto; padding-right:8px; scrollbar-width:thin; scrollbar-color:var(--s3) transparent }
+.po-rolagem::-webkit-scrollbar { width:6px } .po-rolagem::-webkit-scrollbar-thumb { background:var(--s3); border-radius:999px }
 .nm { font-family:var(--f-num); font-weight:600; white-space:nowrap }
 .bt.grande { height:50px; padding:0 26px; font-size:15px }
 
@@ -705,7 +708,7 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .csel.pes { background:var(--s3); color:var(--txt) }
 .csel.vazio { background:transparent; border:1px dashed var(--mut2); color:var(--mut) }
 .tag-vr { font-size:10.5px; font-weight:800; color:var(--vr); background:var(--vr-soft); border-radius:6px; padding:1px 6px; margin-left:6px }
-.dias { display:flex; flex-direction:column; gap:14px; max-width:900px }
+.dias { display:flex; flex-direction:column; gap:14px }
 .dia-cx { padding:6px 8px }
 .dia-h { display:flex; justify-content:space-between; align-items:baseline; padding:10px 12px 6px; font-weight:800; font-size:14px; text-transform:capitalize }
 .dia-h .nm { font-size:13px; color:var(--mut); text-transform:none }
@@ -874,7 +877,7 @@ body.pc .mnc-fixa, body.em-lancar .mnc-fixa, body.sem-cfg .mnc-fixa { display:no
 
 /* ── Consultas ── */
 .cs-w { padding:12px 20px 0; display:flex; flex-direction:column; gap:14px }
-body.pc .cs-w { max-width:1180px; margin:0 auto; padding:28px 32px 0; gap:18px }
+body.pc .cs-w { max-width:none; margin:0; padding:28px 40px 0; gap:18px }
 .pc-tit { display:none } body.pc .pc-tit { display:flex }
 .cs-grid { display:flex; flex-direction:column; gap:14px }
 body.pc .cs-grid { flex-direction:row; align-items:flex-start }
@@ -999,7 +1002,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 
 <!-- ══ COMPUTADOR: barra lateral ══════════════════════════════ -->
 <aside class="pc-side" aria-label="Menu">
-  <div class="ps-marca"><span class="ps-logo"><i data-ic="logo" data-s="22" data-w="2.2"></i></span>Jeh &amp; Luh</div>
+  <div class="ps-marca"><span class="ps-logo"><svg viewBox="40 40 432 432" width="36" height="36" fill="none" stroke-linecap="round" aria-hidden="true"><defs><clipPath id="psBaixo"><rect x="0" y="256" width="512" height="256"/></clipPath></defs><circle cx="198" cy="256" r="86" stroke="currentColor" stroke-width="38"/><circle cx="314" cy="256" r="86" stroke="var(--acc)" stroke-width="62"/><circle cx="314" cy="256" r="86" stroke="currentColor" stroke-width="38"/><g clip-path="url(#psBaixo)"><circle cx="198" cy="256" r="86" stroke="var(--acc)" stroke-width="62"/><circle cx="198" cy="256" r="86" stroke="currentColor" stroke-width="38"/></g></svg></span>Jeh &amp; Luh</div>
   <button type="button" class="ps-b" data-t="painel" onclick="ir('painel')"><i data-ic="casa" data-s="19"></i><span>Painel</span></button>
   <button type="button" class="ps-b" data-t="lancs" onclick="ir('lancs')"><i data-ic="recibo" data-s="19"></i><span>Lançamentos</span></button>
   <button type="button" class="ps-b" data-t="fluxo" onclick="ir('fluxo')"><i data-ic="dinheiro" data-s="19"></i><span>Fluxo do mês</span></button>
@@ -1044,7 +1047,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 </section>
 
 <!-- ══ Configurações (feita para o computador) ═══════════════ -->
-<section class="tela pc-only" id="t-config"><div class="pcw" id="cfConteudo" style="max-width:1060px"><div class="esq" style="height:190px"></div></div></section>
+<section class="tela pc-only" id="t-config"><div class="pcw" id="cfConteudo"><div class="esq" style="height:190px"></div></div></section>
 
 <!-- ══ CARTÃO (importar o C6) — só no computador ═════════════ -->
 <section class="tela" id="t-cartao">
@@ -1324,7 +1327,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v18</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v19</p>
   </div>
 </section>
 
@@ -1383,7 +1386,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v18';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v19';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -3558,7 +3561,7 @@ function pintarPainel(d) {
       <div class="cx" style="flex:2 1 320px">
         <div class="cx-h"><h2>Para onde foi</h2><span class="cx-s">${totChave(d)}</span></div>
         <div style="margin-top:10px">${chaveHtml()}</div>
-        <div style="margin-top:8px">${paraOndeHtml(d, 10)}</div>
+        <div class="po-rolagem" tabindex="0" aria-label="Grupos de gastos (role para ver todos)">${paraOndeHtml(d)}</div>
         <button type="button" class="link" onclick="ir('lancs')">ver em Lançamentos</button>
       </div>
     </section>
@@ -4377,4 +4380,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v18 -------- -->
+<!-- -------- index.html v19 -------- -->
