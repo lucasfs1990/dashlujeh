@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v22 -------- -->
+<!-- -------- index.html v23 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -113,7 +113,7 @@ html { font-size:16px; -webkit-text-size-adjust:100%; text-size-adjust:100% }
   --bg:#0F0F10; --s1:#1A1A1C; --s2:#232326; --s3:#2C2C30; --bd:#2E2E33;
   --txt:#F5F3EE; --mut:#ABA79E; --mut2:#8F8B82;
   --acc:#F2B33D; --acc-on:#1B1405; --acc-tx:#F2B33D; --acc-soft:#3A2D12; --acc-line:rgba(27,20,5,.16);
-  --acc2:#6EE7A8; --ok:#6EE7A8; --ok-soft:#163626; --warn:#FB923C; --danger:#FF8A7A; --danger-soft:#3A1D1A; --vr:#6CB6FF; --vr-soft:#12304A;
+  --acc2:#6EE7A8; --ok:#6EE7A8; --ok-soft:#163626; --warn:#FB923C; --danger:#FF8A7A; --danger-soft:#3A1D1A; --vr:#6CB6FF; --vr-soft:#12304A; --aro:#E47A92; --aro-soft:#3D1A23;
   --nav:#18181A; --sombra:0 10px 30px rgba(0,0,0,.45); --ant:#6E675B; --out:#4A463F;
   --r:18px; --ih:50px;
   --f-tx:'Manrope',sans-serif; --f-num:'IBM Plex Mono',monospace;
@@ -124,7 +124,7 @@ html { font-size:16px; -webkit-text-size-adjust:100%; text-size-adjust:100% }
   --bg:#F6F4EF; --s1:#FFFFFF; --s2:#F1EDE4; --s3:#E9E4D8; --bd:#E2DDD1;
   --txt:#19170F; --mut:#5F5A4D; --mut2:#736D60;
   --acc:#EDA82A; --acc-on:#1B1405; --acc-tx:#865700; --acc-soft:#FBEBC8; --acc-line:rgba(27,20,5,.14);
-  --acc2:#157A47; --ok:#157A47; --ok-soft:#DDF3E6; --warn:#B45309; --danger:#B42318; --danger-soft:#FBE4E1; --vr:#1F6FBF; --vr-soft:#DCEBFA;
+  --acc2:#157A47; --ok:#157A47; --ok-soft:#DDF3E6; --warn:#B45309; --danger:#B42318; --danger-soft:#FBE4E1; --vr:#1F6FBF; --vr-soft:#DCEBFA; --aro:#8E3346; --aro-soft:#F6DCE2;
   --nav:#FFFFFF; --sombra:0 10px 30px rgba(60,45,10,.12); --ant:#C4BBA8; --out:#8F8878;
   color-scheme:light;
 }
@@ -133,7 +133,7 @@ html { font-size:16px; -webkit-text-size-adjust:100%; text-size-adjust:100% }
     --bg:#F6F4EF; --s1:#FFFFFF; --s2:#F1EDE4; --s3:#E9E4D8; --bd:#E2DDD1;
     --txt:#19170F; --mut:#5F5A4D; --mut2:#736D60;
     --acc:#EDA82A; --acc-on:#1B1405; --acc-tx:#865700; --acc-soft:#FBEBC8; --acc-line:rgba(27,20,5,.14);
-    --acc2:#157A47; --ok:#157A47; --ok-soft:#DDF3E6; --warn:#B45309; --danger:#B42318; --danger-soft:#FBE4E1; --vr:#1F6FBF; --vr-soft:#DCEBFA;
+    --acc2:#157A47; --ok:#157A47; --ok-soft:#DDF3E6; --warn:#B45309; --danger:#B42318; --danger-soft:#FBE4E1; --vr:#1F6FBF; --vr-soft:#DCEBFA; --aro:#8E3346; --aro-soft:#F6DCE2;
     --nav:#FFFFFF; --sombra:0 10px 30px rgba(60,45,10,.12); --ant:#C4BBA8; --out:#8F8878;
     color-scheme:light;
   }
@@ -707,6 +707,7 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .csel:hover, .csel:focus { border-color:var(--acc) }
 .csel.pes { background:var(--s3); color:var(--txt) }
 .csel.vazio { background:transparent; border:1px dashed var(--mut2); color:var(--mut) }
+.tag-aro { font-size:10.5px; font-weight:800; color:var(--aro); background:var(--aro-soft); border-radius:6px; padding:1px 6px; margin-left:6px }
 .tag-vr { font-size:10.5px; font-weight:800; color:var(--vr); background:var(--vr-soft); border-radius:6px; padding:1px 6px; margin-left:6px }
 .dias { display:flex; flex-direction:column; gap:14px }
 .dia-cx { padding:6px 8px }
@@ -736,18 +737,35 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .cal-d.fora { color:var(--mut2); background:repeating-linear-gradient(135deg,var(--s1) 0 6px,var(--s2) 6px 12px); cursor:default }
 .cal-d.on { border:2px solid var(--acc) }
 .cal-d b { font-size:12px } .cal-d span { font-family:var(--f-num); font-size:12px; font-weight:600 }
-.cal-r { width:100%; display:flex; flex-direction:column; gap:5px }
-.cal-b { display:flex; gap:1px; height:5px; border-radius:3px; overflow:hidden; width:100% }
-.cal-b s { display:block; height:100%; min-width:3px; text-decoration:none }
-.cal-fora { display:block; font-style:normal; font-family:var(--f-tx); font-size:10.5px; font-weight:600; color:var(--mut2) }
-.cal-ctl { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px }
-.cal-ctl .cm-chip.tirada { text-decoration:line-through; opacity:.5 }
+.cal-topo { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:12px 20px; margin-bottom:14px }
+.cal-topo h2 { font-size:16px; font-weight:800 }
+.cal-meds { display:flex; flex-wrap:wrap; gap:18px }
+.cal-med { display:flex; flex-direction:column }
+.cal-med b { font-family:var(--f-num); font-size:20px; font-weight:600; font-variant-numeric:tabular-nums }
+.cal-med small { font-size:11.5px; color:var(--mut) }
+.cal-med.princ b { color:var(--acc-tx) }
+.cal-chips { display:flex; flex-wrap:wrap; gap:6px }
+.cm-chip.cal-ch svg { opacity:.8 }
+.cm-chip.cal-ch.on { background:var(--acc-soft); border-color:var(--acc); color:var(--acc-tx) }
+.cm-chip.cal-ch.on:first-child { background:var(--acc); color:var(--acc-on) }
+.cal-dica { font-size:12px; color:var(--mut2); margin:6px 0 12px }
+.cal-n { display:flex; justify-content:space-between; width:100%; gap:4px }
+.cal-v { font-family:var(--f-num); font-size:12.5px; font-weight:600; font-variant-numeric:tabular-nums }
+.cal-df { display:block; font-style:normal; font-family:var(--f-num); font-size:11px; font-weight:600 }
+.cal-d.fut { opacity:.45 }
+.cal-d.cima { background:color-mix(in srgb, var(--warn) 16%, var(--bg)); border-color:color-mix(in srgb, var(--warn) 45%, transparent) }
+.cal-d.cima .cal-df, .cal-d.cima .cal-seta { color:var(--warn) }
+.cal-d.baixo { background:var(--ok-soft); border-color:color-mix(in srgb, var(--ok) 40%, transparent) }
+.cal-d.baixo .cal-df, .cal-d.baixo .cal-seta { color:var(--ok) }
+.cal-ics { display:flex; gap:3px; align-items:center; color:var(--acc-tx) }
+.cal-ics i { width:20px; height:20px; border-radius:6px; background:var(--s2); display:flex; align-items:center; justify-content:center; font-style:normal }
+.cal-d.cima .cal-ics i, .cal-d.baixo .cal-ics i { background:var(--s1) }
+.cal-ics em { font-style:normal; font-size:10.5px; font-weight:800; color:var(--mut) }
 .cal-leg { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:12px; font-size:12px; color:var(--mut) }
-.cal-leg i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px }
-.cal-sec { border-left:3px solid var(--cc); padding-left:10px; margin-top:14px }
-.cal-sec.fora { opacity:.6 }
-.cal-sec-h { display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-weight:800; font-size:13px; padding:2px 0 }
-.cal-sec-h i { display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--cc); margin-right:7px }
+.cal-leg i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px }
+.cal-sep { font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--mut2); padding:12px 12px 2px; border-top:1px solid var(--bd); margin-top:6px }
+.lin-b.cal-aro { opacity:.5 }
+.tag-ct { font-size:10.5px; font-weight:800; color:var(--mut); background:var(--s2); border-radius:6px; padding:1px 6px; margin-left:6px }
 .chip-acc.vr { color:var(--vr); background:var(--vr-soft) }
 
 .pop { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:120; display:flex; align-items:flex-start; justify-content:center; padding:4vh 16px; overflow-y:auto }
@@ -1339,7 +1357,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v22</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v23</p>
   </div>
 </section>
 
@@ -1398,7 +1416,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v22';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v23';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1862,7 +1880,7 @@ function pintarCasa(d) {
   const ult = (d.ultimos || []).slice(0, 5).map(u => {
     const p = String(u.parc).toLowerCase() === 'sim' && u.nparc > 1;
     return `<div class="ult-i${u.enviando ? ' enviando' : ''}"><span class="ult-ic">${ic(icCat(u.cat), 18)}</span>
-      <div style="flex:1;min-width:0"><div class="ult-d">${esc(u.desc)}${u.enviando ? '<span class="tag-env">enviando</span>' : ''}</div><div class="ult-m">${esc(String(u.data).slice(0, 5))} · ${esc(u.cat)}${u.quem ? ' · ' + esc(u.quem) : ''}</div></div>
+      <div style="flex:1;min-width:0"><div class="ult-d">${esc(u.desc)}${tagAro(u.cat)}${u.enviando ? '<span class="tag-env">enviando</span>' : ''}</div><div class="ult-m">${esc(String(u.data).slice(0, 5))} · ${esc(u.cat)}${u.quem ? ' · ' + esc(u.quem) : ''}</div></div>
       <div><div class="ult-v">${nbr(u.valor)}</div><div class="ult-p">${p ? `${u.nparc}x de ${nbr(u.valor / u.nparc)}` : 'à vista'}</div></div></div>`;
   }).join('');
 
@@ -3555,7 +3573,7 @@ function pintarPainel(d) {
 
   const ult = (d.ultimos || []).slice(0, 8).map(u => {
     const p = String(u.parc).toLowerCase() === 'sim' && u.nparc > 1;
-    return `<tr${u.enviando ? ' style="opacity:.6"' : ''}><td class="mu nm">${esc(String(u.data).slice(0, 5))}</td><td style="font-weight:700">${esc(u.desc)}${u.enviando ? '<span class="tag-env">enviando</span>' : ''}</td>
+    return `<tr${u.enviando ? ' style="opacity:.6"' : ''}><td class="mu nm">${esc(String(u.data).slice(0, 5))}</td><td style="font-weight:700">${esc(u.desc)}${tagAro(u.cat)}${u.enviando ? '<span class="tag-env">enviando</span>' : ''}</td>
       <td><span class="gchip">${esc(u.cat)}</span></td><td class="mu">${esc(u.quem || '—')}</td><td class="mu">${p ? `${u.nparc}x de ${nbr(u.valor / u.nparc)}` : 'à vista'}</td><td class="r nm">${nbr(u.valor)}</td></tr>`;
   }).join('');
 
@@ -3739,7 +3757,9 @@ function cicloTxt(ym) {
   return `compras de ${br(ini)} a ${br(f)}`;
 }
 const lsParcTxt = (x, k) => x.n > 1 ? (k ? `${k}/${x.n} · de ${nbr(x.valor)}` : `${x.n}x de ${nbr(x.valor / x.n)}`) : 'à vista';
-const lsTags = x => (x.vr ? '<span class="tag-vr">VR</span>' : '') + (x.enviando ? '<span class="tag-env">enviando</span>' : '');
+const ehAroeira = g => /aroeira/i.test(String(g || ''));
+const tagAro = g => ehAroeira(g) ? '<span class="tag-aro">Aroeira</span>' : '';
+const lsTags = x => (x.vr ? '<span class="tag-vr">VR</span>' : '') + tagAro(x.grupo) + (x.enviando ? '<span class="tag-env">enviando</span>' : '');
 function lsSelGrupo(x) {
   const lista = _cfg.categorias.indexOf(x.grupo) < 0 ? _cfg.categorias.concat([x.grupo]) : _cfg.categorias;
   return `<select class="csel" aria-label="Grupo de ${escA(x.desc)}" onclick="event.stopPropagation()" onchange="lsRapido('${escA(x.id)}','cat',this.value)">${lista.map(g => `<option${g === x.grupo ? ' selected' : ''}>${esc(g)}</option>`).join('')}</select>`;
@@ -3810,125 +3830,110 @@ function lsVistaGrupo(linhas) {
         <span style="text-align:right"><span class="nm" style="font-size:17px;display:block">${brl(c.tot)}</span>${c.vr ? `<small class="vr-tx">+ ${nbr(c.vr)} no VR</small>` : ''}</span></button>
       <div class="barra dupla"><i style="width:${(c.tot / max * 100).toFixed(1)}%"></i><b style="width:${(c.vr / max * 100).toFixed(1)}%"></b></div>
       <div>${c.its.slice(0, 5).map(l => `<button type="button" class="gcard-i" onclick="lsAbrir('${escA(l.x.id)}')">
-          <span><span class="nm mu" style="font-size:12px">${esc(l.x.dataBR.slice(0, 5))}</span> ${esc(l.x.desc)}${l.x.vr ? '<span class="tag-vr">VR</span>' : ''}</span><span class="nm">${nbr(l.noMes)}</span></button>`).join('')}
+          <span><span class="nm mu" style="font-size:12px">${esc(l.x.dataBR.slice(0, 5))}</span> ${esc(l.x.desc)}${lsTags(l.x)}</span><span class="nm">${nbr(l.noMes)}</span></button>`).join('')}
         ${c.its.length > 5 ? `<button type="button" class="link" style="padding:4px 6px" onclick="${filtro}">ver os ${c.its.length}</button>` : ''}</div></div>`;
   }).join('')}
     <div class="cx gcard"><div class="cx-h"><h2>Fixos no cartão</h2><span class="cx-s" id="lsFixosMes"></span></div><div id="lsFixos" style="margin-top:8px"></div></div></section>`;
 }
 /* ── Calendário: o ciclo da fatura dia a dia ──
-   Cada dia mostra o total e uma faixa com a cor de cada cartão usado; ao tocar, o painel da
-   direita separa por cartão. Os fixos (aba BASE) entram no dia combinado, se você ligar.
-   Os grupos tirados nos chips (ex.: Loja Aroeira) saem da conta e do escuro do dia, mas
-   continuam à vista, em cinza, para você saber que estão lá. */
-let _lsFixos = LS.get('jl_ls_fixos', 'nao');
-let _lsFora = (() => { try { return JSON.parse(LS.get('jl_ls_fora', '[]')) || []; } catch (e) { return []; } })();
-const calCartao = x => x.vr ? 'VR' : (x.cartao || x.forma || 'Outras');
-const calCor = k => k === 'VR' ? 'var(--vr)' : k === 'Conta' ? 'var(--mut2)' : ((_cfg.cartoes.find(c => c.nome === k) || {}).cor || 'var(--out)');
-function lsFixosSet(v) {
-  _lsFixos = v; LS.set('jl_ls_fixos', v);
-  if (v !== 'nao' && !_dados.base) carregarBase();
-  pintarLancs();
-}
-function lsForaToggle(g) {
-  const i = _lsFora.indexOf(g);
-  if (i >= 0) _lsFora.splice(i, 1); else _lsFora.push(g);
-  LS.set('jl_ls_fora', JSON.stringify(_lsFora));
-  pintarLancs();
-}
-/** As contas fixas da BASE que caem nos dias do ciclo: [{d, item, valor, grupo, como, card, uma}] */
-function calFixos(dias) {
-  const B = _dados.base, forma = val('lsForma'), grupo = val('lsGrupo'), ym = +val('lsMes') || _mes;
-  if (_lsFixos === 'nao' || !B || !B.regras || val('lsQuem') || ehVR(forma)) return [];
-  const cartoes = B.cartoes || [], out = [];
-  B.regras.forEach(r => {
-    if (r.tipo !== 'Saída' || !r.valor || (grupo && r.grupo !== grupo)) return;
-    const cart = cartoes.find(c => c.toUpperCase() === String(r.como).trim().toUpperCase()) || '';
-    if (_lsFixos === 'cartao' && !cart) return;
-    if (forma && cart.toUpperCase() !== forma.toUpperCase()) return;
-    const alvo = r.data ? +r.data.slice(8) : r.dia;
-    const cai = d => d.getDate() === Math.min(alvo, diasNoMes(d.getFullYear(), d.getMonth()));
-    const base = { item: r.item, valor: r.valor, grupo: r.grupo, como: r.como, card: cart || 'Conta', uma: !!r.data };
-    if (cart) {   // fixo de cartão: vale pela fatura do mês escolhido, no dia combinado dentro do ciclo
-      if (!fxAtiva(r, ym)) return;
-      out.push(Object.assign({ d: dias.find(cai) || dias[dias.length - 1] }, base));
-    } else dias.forEach(d => { if (fxAtiva(r, ymDe(d)) && cai(d)) out.push(Object.assign({ d: d }, base)); });
-  });
-  return out;
-}
+   Chips de grupo (começam apagados = mostra tudo; "Todos" acende ou apaga tudo). No topo, o total
+   e a média por dia; cada dia é comparado com a média dos grupos acesos (▲ laranja acima de 20%,
+   ▼ verde abaixo de 20%, perto da média fica sem cor) e mostra os ícones dos grupos em que gastou.
+   No painel do dia, a Loja Aroeira vai para o fim, apagada, e o total grande é sem ela. */
+let _calGrupos = (() => { try { return JSON.parse(LS.get('jl_cal_grupos', '[]')) || []; } catch (e) { return []; } })();
+let _calLista = [];
+function calGravar() { LS.set('jl_cal_grupos', JSON.stringify(_calGrupos)); pintarLancs(); }
+function calGrupo(g) { const i = _calGrupos.indexOf(g); if (i >= 0) _calGrupos.splice(i, 1); else _calGrupos.push(g); calGravar(); }
+function calTodos() { _calGrupos = _calLista.every(g => _calGrupos.indexOf(g) >= 0) ? [] : _calLista.slice(); calGravar(); }
 function lsVistaCal(linhas) {
   const ym = +val('lsMes') || _mes, c = _cfg.cartoes[0];
   const fim = fechamentoDe(ym, c), a = fechamentoDe(ymDe(new Date(Math.floor(ym / 100), ym % 100 - 2, 1)), c);
   const ini = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1);
-  const dias = []; for (let d = new Date(ini); d <= fim; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) dias.push(d);
-  const fixos = calFixos(dias);
+  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
 
-  // tudo por dia: total (sem VR e sem o que foi tirado), VR, o que foi tirado, total por cartão
-  const dd = {}, gr = {};
-  const dia = k => dd[k] || (dd[k] = { tot: 0, vr: 0, fora: 0, cart: {}, itens: [] });
-  const soma = (k, card, valor, grupo, item) => {
-    const g = dia(k), fora = _lsFora.indexOf(grupo) >= 0;
-    g.itens.push(Object.assign({ card: card, fora: fora, valor: valor }, item));
-    if (fora) g.fora += valor; else if (card === 'VR') g.vr += valor; else { g.tot += valor; g.cart[card] = (g.cart[card] || 0) + valor; }
-    gr[grupo] = (gr[grupo] || 0) + valor;
-  };
-  linhas.forEach(l => soma(l.x.data, calCartao(l.x), l.noMes, l.x.grupo, { l: l }));
-  fixos.forEach(f => soma(isoDe(f.d), f.card, f.valor, f.grupo, { f: f }));
+  // os grupos do ciclo, na ordem de Configurações → Grupos
+  const ordem = g => { const i = _cfg.categorias.indexOf(g); return i < 0 ? 999 : i; };
+  _calLista = [...new Set(linhas.map(l => l.x.grupo))].sort((x, y) => ordem(x) - ordem(y) || x.localeCompare(y));
+  const acesos = _calGrupos.filter(g => _calLista.indexOf(g) >= 0), tudo = !acesos.length;
+  const sel = linhas.filter(l => tudo || acesos.indexOf(l.x.grupo) >= 0);
 
-  const max = Math.max(1, ...Object.keys(dd).map(k => dd[k].tot));
+  const porDia = {}, vrDia = {}, gDia = {};
+  sel.forEach(l => {
+    const k = l.x.data;
+    if (l.x.vr) { vrDia[k] = (vrDia[k] || 0) + l.noMes; return; }
+    porDia[k] = (porDia[k] || 0) + l.noMes;
+    (gDia[k] = gDia[k] || {})[l.x.grupo] = (gDia[k][l.x.grupo] || 0) + l.noMes;
+  });
+  const total = Object.keys(porDia).reduce((s, k) => s + porDia[k], 0);
+  const ate = hoje < fim ? hoje : fim;
+  const passados = ate < ini ? 0 : Math.round((ate - ini) / 86400000) + 1;
+  const comGasto = Object.keys(porDia).filter(k => dataDe(k) <= ate).length;
+  const media = passados ? total / passados : 0, mediaGasto = comGasto ? total / comGasto : 0;
+
   if (!_lsDia || dataDe(_lsDia) < ini || dataDe(_lsDia) > fim) {
-    const comCompra = Object.keys(dd).filter(k => dataDe(k) >= ini && dataDe(k) <= fim).sort();
-    _lsDia = comCompra.length ? comCompra[comCompra.length - 1] : isoDe(fim);
+    const comCompra = Object.keys(porDia).concat(Object.keys(vrDia)).sort();
+    _lsDia = comCompra.length ? comCompra[comCompra.length - 1] : isoDe(ate < ini ? ini : ate);
   }
+
   const g0 = new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() - (ini.getDay() + 6) % 7);
-  const cel = [], usados = {};
+  const cel = [];
   for (let d = new Date(g0); d <= fim || d.getDay() !== 1; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
-    const k = isoDe(d), fora = d < ini || d > fim, g = dd[k] || { tot: 0, vr: 0, fora: 0, cart: {} };
-    Object.keys(g.cart).forEach(n => { usados[n] = 1; });
-    // a cor do dia segue a raiz do valor: um dia de R$ 4 mil não apaga todos os outros
-    const fundo = !fora && g.tot ? `background:rgba(242,179,61,${(0.1 + 0.55 * Math.sqrt(g.tot / max)).toFixed(2)})` : '';
-    const faixa = Object.keys(g.cart).length ? `<i class="cal-b">${Object.keys(g.cart).map(n => `<s style="flex:${g.cart[n].toFixed(2)};background:${escA(calCor(n))}"></s>`).join('')}</i>` : '';
-    const dica = Object.keys(g.cart).map(n => n + ' ' + nbr(g.cart[n])).concat(g.vr ? ['VR ' + nbr(g.vr)] : [], g.fora ? ['fora do calendário ' + nbr(g.fora)] : []).join(' · ');
-    cel.push(`<button type="button" class="cal-d${fora ? ' fora' : ''}${k === _lsDia ? ' on' : ''}" style="${fundo}" ${dica ? `title="${escA(dica)}"` : ''} ${fora ? 'disabled' : `onclick="_lsDia='${k}';pintarLancs()"`}>
-      <b>${d.getDate() === 1 || !cel.length ? d.getDate() + ' ' + MES_MIN[d.getMonth()] : d.getDate()}</b>
-      <div class="cal-r"><span>${g.tot ? nbr(g.tot) : ''}${g.vr ? `<em style="display:block;font-style:normal;color:var(--vr)">${nbr(g.vr)} VR</em>` : ''}${g.fora ? `<em class="cal-fora">+ ${nbr(g.fora)} fora</em>` : ''}</span>${faixa}</div></button>`);
+    const k = isoDe(d), fora = d < ini || d > fim, fut = !fora && d > hoje, v = porDia[k] || 0, w = vrDia[k] || 0;
+    let cls = '', seta = '', dif = '';
+    if (!fora && !fut && v && media) {
+      if (v > media * 1.2) { cls = ' cima'; seta = '▲'; dif = '+' + nbr(v - media); }
+      else if (v < media * 0.8) { cls = ' baixo'; seta = '▼'; dif = '−' + nbr(media - v); }
+    }
+    const gs = !fora && gDia[k] ? Object.keys(gDia[k]).sort((x, y) => gDia[k][y] - gDia[k][x]) : [];
+    const icones = gs.length ? `<span class="cal-ics">${gs.slice(0, 4).map(g => `<i title="${escA(g + ' · ' + brl(gDia[k][g]))}">${ic(icCat(g), 13)}</i>`).join('')}${gs.length > 4 ? `<em>+${gs.length - 4}</em>` : ''}</span>` : '';
+    const rot = d.getDate() === 1 || !cel.length ? d.getDate() + ' ' + MES_MIN[d.getMonth()] : d.getDate();
+    cel.push(`<button type="button" class="cal-d${fora ? ' fora' : ''}${fut ? ' fut' : ''}${cls}${k === _lsDia ? ' on' : ''}" ${fora ? 'disabled' : `onclick="_lsDia='${k}';pintarLancs()"`}>
+      <span class="cal-n"><b>${rot}</b><span class="cal-seta">${seta}</span></span>
+      <span><span class="cal-v">${v ? nbr(v) : ''}</span>${w ? `<em class="cal-df" style="color:var(--vr)">${nbr(w)} VR</em>` : ''}${dif ? `<em class="cal-df">${dif}</em>` : ''}</span>
+      ${icones}</button>`);
     if (cel.length > 49) break;
   }
 
-  // o dia escolhido, separado por cartão (principal primeiro; fixos da conta e VR por último; o que foi tirado, no fim)
-  const sel = dd[_lsDia] || { tot: 0, vr: 0, fora: 0, cart: {}, itens: [] }, dSel = dataDe(_lsDia);
-  const ordem = n => { const i = _cfg.cartoes.findIndex(x => x.nome === n); return i >= 0 ? i : n === 'Conta' ? 50 : n === 'VR' ? 60 : 70; };
-  const linhaFixo = f => `<div class="lin-b" style="cursor:default"><span class="lin-ic">${ic(icCat(f.grupo), 19)}</span>
-    <span style="flex:1;min-width:0"><span class="lin-t">${esc(f.item)}<span class="tag-um">fixo${f.uma ? ' · uma vez' : ''}</span></span><span class="lin-m">${esc([f.grupo, f.card === 'Conta' ? f.como : ''].filter(Boolean).join(' · '))}</span></span>
-    <span class="nm" style="min-width:88px;text-align:right">${nbr(f.valor)}</span></div>`;
-  const bloco = (nome, itens, tirado) => `<div class="cal-sec${tirado ? ' fora' : ''}" style="--cc:${escA(tirado ? 'var(--mut2)' : calCor(nome))}">
-      <div class="cal-sec-h"><span><i></i>${esc(nome)}</span><span class="nm">${brl(itens.reduce((s, i) => s + i.valor, 0))}</span></div>
-      ${itens.sort((x, y) => y.valor - x.valor).map(i => i.f ? linhaFixo(i.f) : lsItemLinha(i.l.x, i.l.noMes, i.l.k)).join('')}</div>`;
-  const cartoesDia = [...new Set(sel.itens.filter(i => !i.fora).map(i => i.card))].sort((x, y) => ordem(x) - ordem(y));
-  const tirados = sel.itens.filter(i => i.fora);
-  const painel = cartoesDia.map(n => bloco(n, sel.itens.filter(i => !i.fora && i.card === n), false)).join('')
-    + (tirados.length ? bloco('Fora do calendário (você tirou)', tirados, true) : '')
-    || '<div class="cx-s">Nada neste dia.</div>';
+  // o dia escolhido: uma lista só, da maior para a menor; a Loja Aroeira no fim, apagada
+  const dSel = dataDe(_lsDia), doDia = sel.filter(l => l.x.data === _lsDia);
+  const maior = (x, y) => y.noMes - x.noMes;
+  const normais = doDia.filter(l => !ehAroeira(l.x.grupo)).sort(maior), daLoja = doDia.filter(l => ehAroeira(l.x.grupo)).sort(maior);
+  const soma = a => a.filter(l => !l.x.vr).reduce((s, l) => s + l.noMes, 0);
+  const vrSel = doDia.filter(l => l.x.vr).reduce((s, l) => s + l.noMes, 0);
+  const linha = l => {
+    const x = l.x;
+    return `<button type="button" class="lin-b${ehAroeira(x.grupo) ? ' cal-aro' : ''}" onclick="lsAbrir('${escA(x.id)}')"${x.enviando ? ' style="opacity:.6"' : ''}>
+      <span class="lin-ic${x.vr ? ' vr' : ''}">${ic(icCat(x.grupo), 19)}</span>
+      <span style="flex:1;min-width:0"><span class="lin-t">${esc(x.desc)}${lsTags(x)}</span>
+        <span class="lin-m">${esc(x.grupo)}${x.vr ? '' : `<span class="tag-ct">${esc(x.cartao || x.forma)}</span>`}</span></span>
+      <span class="av-q${x.quem ? '' : ' vazio'}" title="${escA(x.quem || 'sem quem')}">${esc(x.quem ? x.quem[0] : '?')}</span>
+      <span class="nm" style="min-width:80px;text-align:right">${nbr(l.noMes)}</span></button>`;
+  };
+  const subDia = [daLoja.length ? 'sem a Aroeira · com ela ' + brl(soma(normais) + soma(daLoja)) : '', vrSel ? '+ ' + nbr(vrSel) + ' no VR' : ''].filter(Boolean).join(' · ');
 
-  // controles: fixos e os grupos que dá para tirar da conta do calendário
-  const grupos = Object.keys(gr).sort((x, y) => gr[y] - gr[x]);
-  const controles = `<div class="cal-ctl"><span class="cx-s">Fixos</span>
-      <div class="seg" style="flex:0 0 auto">${[['nao', 'Não'], ['cartao', 'Do cartão'], ['todos', 'Todos']].map(([v, t]) =>
-        `<button type="button" class="${v === _lsFixos ? 'on' : ''}" aria-pressed="${v === _lsFixos}" onclick="lsFixosSet('${v}')">${t}</button>`).join('')}</div>
-      ${_lsFixos !== 'nao' && !_dados.base ? '<span class="cx-s">buscando as contas fixas…</span>' : ''}</div>
-    <div class="cal-ctl"><span class="cx-s">Tirar do calendário</span>
-      ${grupos.map(n => `<button type="button" class="cm-chip${_lsFora.indexOf(n) >= 0 ? ' tirada' : ''}" aria-pressed="${_lsFora.indexOf(n) >= 0}" onclick="lsForaToggle(${escA(JSON.stringify(n))})">${esc(n)} <b>${nbr(gr[n])}</b></button>`).join('') || '<span class="cx-s">nenhum grupo neste mês</span>'}</div>`;
-  const legenda = Object.keys(usados).sort((x, y) => ordem(x) - ordem(y)).map(n => `<span><i style="background:${escA(calCor(n))}"></i>${esc(n)}</span>`).join('');
+  const todosOn = _calLista.length && _calLista.every(g => acesos.indexOf(g) >= 0);
+  const chips = `<button type="button" class="cm-chip cal-ch${todosOn ? ' on' : ''}" aria-pressed="${!!todosOn}" onclick="calTodos()">Todos</button>`
+    + _calLista.map(g => `<button type="button" class="cm-chip cal-ch${acesos.indexOf(g) >= 0 ? ' on' : ''}" aria-pressed="${acesos.indexOf(g) >= 0}" onclick="calGrupo(${escA(JSON.stringify(g))})">${ic(icCat(g), 15)}${esc(g)}</button>`).join('');
   return `<section class="linha2" style="align-items:flex-start">
-    <div class="cx" style="flex:3 1 560px">
-      <div class="cx-h" style="margin-bottom:12px"><h2>Ciclo da fatura ${esc(rotMes(ym))}</h2><span class="cx-s">mais escuro = dia que gastou mais · faixa = cartão usado</span></div>
-      ${controles}
+    <div class="cx" style="flex:3 1 600px">
+      <div class="cal-topo">
+        <div><h2>Ciclo da fatura ${esc(rotMes(ym))}</h2><div class="cx-s">compras de ${dois(ini.getDate())}/${dois(ini.getMonth() + 1)} a ${dois(fim.getDate())}/${dois(fim.getMonth() + 1)}${passados ? ` · ${passados} ${passados === 1 ? 'dia' : 'dias'} até hoje` : ' · ainda não começou'}</div></div>
+        <div class="cal-meds">
+          <div class="cal-med"><b>${brl(total)}</b><small>${tudo ? 'todos os grupos' : acesos.length + (acesos.length > 1 ? ' grupos escolhidos' : ' grupo escolhido')}</small></div>
+          <div class="cal-med princ"><b>${brl(media)}</b><small>por dia do ciclo${passados ? ' (÷ ' + passados + ')' : ''}</small></div>
+          <div class="cal-med"><b>${brl(mediaGasto)}</b><small>por dia com gasto · gastou em ${comGasto} de ${passados}</small></div>
+        </div></div>
+      <div class="cal-chips" role="group" aria-label="Grupos do calendário">${chips}</div>
+      <p class="cal-dica">${tudo ? 'Nenhum grupo escolhido: mostrando tudo. Toque nos grupos para ver só eles.' : '&nbsp;'}</p>
       <div class="cal">${['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'].map(s => `<div class="cal-h">${s}</div>`).join('')}${cel.join('')}</div>
-      ${legenda ? `<div class="cal-leg">${legenda}</div>` : ''}</div>
+      ${media ? `<div class="cal-leg"><span><i style="background:var(--warn)"></i>▲ acima de ${brl(media * 1.2)}</span><span><i style="background:var(--s3)"></i>perto da média</span><span><i style="background:var(--ok)"></i>▼ abaixo de ${brl(media * 0.8)}</span><span>ícones = grupos do dia (passe o mouse)</span></div>` : ''}
+    </div>
     <div class="cx" style="flex:1 1 320px">
       <div style="font-weight:800;text-transform:capitalize">${SEM_LONGO[dSel.getDay()]}, ${dSel.getDate()} ${MES_MIN[dSel.getMonth()]}</div>
-      <div class="kpi-v">${brl(sel.tot)}</div>
-      ${sel.vr || sel.fora ? `<div class="cx-s">${[sel.vr ? '+ ' + nbr(sel.vr) + ' no VR' : '', sel.fora ? '+ ' + nbr(sel.fora) + ' fora do calendário' : ''].filter(Boolean).join(' · ')}</div>` : ''}
-      ${painel}</div></section>`;
+      <div class="kpi-v">${brl(soma(normais))}</div>
+      ${subDia ? `<div class="cx-s" style="margin-bottom:6px">${esc(subDia)}</div>` : ''}
+      ${doDia.length ? normais.map(linha).join('') + (daLoja.length ? '<div class="cal-sep">Loja Aroeira</div>' + daLoja.map(linha).join('') : '')
+        : '<div class="cx-s" style="padding-top:8px">Nada nos grupos escolhidos neste dia.</div>'}</div></section>`;
 }
 function pintarFixosLs() {
   const ym = +val('lsMes') || _mes, d = _dados.inicio[ym];
@@ -4493,4 +4498,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v22 -------- -->
+<!-- -------- index.html v23 -------- -->
