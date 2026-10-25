@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v16 -------- -->
+<!-- -------- index.html v17 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -454,6 +454,9 @@ textarea { height:150px; padding:12px 14px; resize:none; line-height:1.4 }
 .folha-g { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px }
 .folha-g button { height:46px; border-radius:12px; border:1px solid var(--bd); background:var(--s2); font-weight:700; font-size:14px }
 .folha-g button.on { background:var(--acc); color:var(--acc-on); border-color:var(--acc) }
+.folha-g button.velho:not(.on) { opacity:.45 }
+.folha-g button.princ:not(.on) { border:1.5px solid var(--acc); color:var(--acc-tx) }
+.folha-g button.princ { margin:4px 0 }
 
 /* ── primeira conexão (app fora do Apps Script) ── */
 body.sem-cfg .tela, body.sem-cfg .nav { display:none !important }
@@ -1316,7 +1319,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v16</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v17</p>
   </div>
 </section>
 
@@ -1375,7 +1378,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v16';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v17';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -2003,8 +2006,16 @@ function cmPintar() {
 
 function abrirMeses() {
   const lista = _meses.length ? _meses : [{ yyyymm: _mes, label: rotMes(_mes) }];
-  document.getElementById('folhaLista').innerHTML = lista.map(m =>
-    `<button type="button" class="${m.yyyymm === _mes ? 'on' : ''}" onclick="escolherMes(${m.yyyymm})">${esc(m.label)}</button>`).join('');
+  // o mês principal (a fatura aberta) fica sozinho no meio; em cima, apagados, os 3 de antes; embaixo, os seguintes
+  const hoje = new Date(), princ = _cfg.abreMes === 'calendario' ? ymDe(hoje) : ymDe(compDe(hoje, _cfg.cartoes[0]));
+  const bt = (m, cls, extra) => `<button type="button" class="${[cls, m.yyyymm === _mes ? 'on' : ''].filter(Boolean).join(' ')}"${extra || ''} onclick="escolherMes(${m.yyyymm})">${esc(m.label)}</button>`;
+  const antes = lista.filter(m => m.yyyymm < princ).slice(-3), depois = lista.filter(m => m.yyyymm > princ);
+  const p = lista.find(m => m.yyyymm === princ);
+  document.getElementById('folhaLista').innerHTML = p
+    ? antes.map((m, i) => bt(m, 'velho', i ? '' : ` style="grid-column-start:${4 - antes.length}"`)).join('')
+      + bt(p, 'princ', ' style="grid-column:2"')
+      + depois.map((m, i) => bt(m, '', i ? '' : ' style="grid-column-start:1"')).join('')
+    : lista.map(m => bt(m, '')).join('');
   document.getElementById('folhaMes').hidden = false;
 }
 function fecharMeses() { document.getElementById('folhaMes').hidden = true; }
@@ -4320,4 +4331,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v16 -------- -->
+<!-- -------- index.html v17 -------- -->
