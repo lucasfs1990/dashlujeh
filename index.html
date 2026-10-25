@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v19 -------- -->
+<!-- -------- index.html v20 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -731,11 +731,23 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .gcard-i > span:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 .cal { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px }
 .cal-h { font-size:11px; font-weight:800; color:var(--mut2); text-transform:uppercase; letter-spacing:.06em; padding:0 4px 4px }
-.cal-d { min-height:74px; border-radius:12px; padding:8px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; text-align:left; border:1px solid var(--bd); background:var(--bg); color:var(--txt); font-family:var(--f-tx) }
+.cal-d { min-height:92px; border-radius:12px; padding:8px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; text-align:left; border:1px solid var(--bd); background:var(--bg); color:var(--txt); font-family:var(--f-tx) }
 .cal-d:hover:not(:disabled) { border-color:var(--mut2) }
 .cal-d.fora { color:var(--mut2); background:repeating-linear-gradient(135deg,var(--s1) 0 6px,var(--s2) 6px 12px); cursor:default }
 .cal-d.on { border:2px solid var(--acc) }
 .cal-d b { font-size:12px } .cal-d span { font-family:var(--f-num); font-size:12px; font-weight:600 }
+.cal-r { width:100%; display:flex; flex-direction:column; gap:5px }
+.cal-b { display:flex; gap:1px; height:5px; border-radius:3px; overflow:hidden; width:100% }
+.cal-b s { display:block; height:100%; min-width:3px; text-decoration:none }
+.cal-fora { display:block; font-style:normal; font-family:var(--f-tx); font-size:10.5px; font-weight:600; color:var(--mut2) }
+.cal-ctl { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px }
+.cal-ctl .cm-chip.tirada { text-decoration:line-through; opacity:.5 }
+.cal-leg { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:12px; font-size:12px; color:var(--mut) }
+.cal-leg i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px }
+.cal-sec { border-left:3px solid var(--cc); padding-left:10px; margin-top:14px }
+.cal-sec.fora { opacity:.6 }
+.cal-sec-h { display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-weight:800; font-size:13px; padding:2px 0 }
+.cal-sec-h i { display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--cc); margin-right:7px }
 .chip-acc.vr { color:var(--vr); background:var(--vr-soft) }
 
 .pop { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:120; display:flex; align-items:flex-start; justify-content:center; padding:4vh 16px; overflow-y:auto }
@@ -1327,7 +1339,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v19</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v20</p>
   </div>
 </section>
 
@@ -1386,7 +1398,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v19';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v20';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -3072,7 +3084,7 @@ function carregarFluxo(forcar) {
     .getFluxo(ym);
 }
 function carregarBase() {
-  google.script.run.withSuccessHandler(b => { _dados.base = b; dadosGravar(); if (_tela === 'fluxo' && _fxAba === 'contas') pintarFluxo((_dados.fluxo || {})[_mes]); if (_tela === 'config') pintarConfig(); })
+  google.script.run.withSuccessHandler(b => { _dados.base = b; dadosGravar(); if (_tela === 'fluxo' && _fxAba === 'contas') pintarFluxo((_dados.fluxo || {})[_mes]); if (_tela === 'config') pintarConfig(); if (_tela === 'lancs') pintarLancs(); })
     .withFailureHandler(err => showToast((err && err.message) || 'Erro ao ler a BASE', 'err')).listarBase();
 }
 function fxMes(k) { _mes = ymMais(_mes, k); carregarFluxo(); }
@@ -3786,36 +3798,120 @@ function lsVistaGrupo(linhas) {
   }).join('')}
     <div class="cx gcard"><div class="cx-h"><h2>Fixos no cartão</h2><span class="cx-s" id="lsFixosMes"></span></div><div id="lsFixos" style="margin-top:8px"></div></div></section>`;
 }
+/* ── Calendário: o ciclo da fatura dia a dia ──
+   Cada dia mostra o total e uma faixa com a cor de cada cartão usado; ao tocar, o painel da
+   direita separa por cartão. Os fixos (aba BASE) entram no dia combinado, se você ligar.
+   Os grupos tirados nos chips (ex.: Loja Aroeira) saem da conta e do escuro do dia, mas
+   continuam à vista, em cinza, para você saber que estão lá. */
+let _lsFixos = LS.get('jl_ls_fixos', 'nao');
+let _lsFora = (() => { try { return JSON.parse(LS.get('jl_ls_fora', '[]')) || []; } catch (e) { return []; } })();
+const calCartao = x => x.vr ? 'VR' : (x.cartao || x.forma || 'Outras');
+const calCor = k => k === 'VR' ? 'var(--vr)' : k === 'Conta' ? 'var(--mut2)' : ((_cfg.cartoes.find(c => c.nome === k) || {}).cor || 'var(--out)');
+function lsFixosSet(v) {
+  _lsFixos = v; LS.set('jl_ls_fixos', v);
+  if (v !== 'nao' && !_dados.base) carregarBase();
+  pintarLancs();
+}
+function lsForaToggle(g) {
+  const i = _lsFora.indexOf(g);
+  if (i >= 0) _lsFora.splice(i, 1); else _lsFora.push(g);
+  LS.set('jl_ls_fora', JSON.stringify(_lsFora));
+  pintarLancs();
+}
+/** As contas fixas da BASE que caem nos dias do ciclo: [{d, item, valor, grupo, como, card, uma}] */
+function calFixos(dias) {
+  const B = _dados.base, forma = val('lsForma'), grupo = val('lsGrupo'), ym = +val('lsMes') || _mes;
+  if (_lsFixos === 'nao' || !B || !B.regras || val('lsQuem') || ehVR(forma)) return [];
+  const cartoes = B.cartoes || [], out = [];
+  B.regras.forEach(r => {
+    if (r.tipo !== 'Saída' || !r.valor || (grupo && r.grupo !== grupo)) return;
+    const cart = cartoes.find(c => c.toUpperCase() === String(r.como).trim().toUpperCase()) || '';
+    if (_lsFixos === 'cartao' && !cart) return;
+    if (forma && cart.toUpperCase() !== forma.toUpperCase()) return;
+    const alvo = r.data ? +r.data.slice(8) : r.dia;
+    const cai = d => d.getDate() === Math.min(alvo, diasNoMes(d.getFullYear(), d.getMonth()));
+    const base = { item: r.item, valor: r.valor, grupo: r.grupo, como: r.como, card: cart || 'Conta', uma: !!r.data };
+    if (cart) {   // fixo de cartão: vale pela fatura do mês escolhido, no dia combinado dentro do ciclo
+      if (!fxAtiva(r, ym)) return;
+      out.push(Object.assign({ d: dias.find(cai) || dias[dias.length - 1] }, base));
+    } else dias.forEach(d => { if (fxAtiva(r, ymDe(d)) && cai(d)) out.push(Object.assign({ d: d }, base)); });
+  });
+  return out;
+}
 function lsVistaCal(linhas) {
   const ym = +val('lsMes') || _mes, c = _cfg.cartoes[0];
   const fim = fechamentoDe(ym, c), a = fechamentoDe(ymDe(new Date(Math.floor(ym / 100), ym % 100 - 2, 1)), c);
   const ini = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1);
-  const porDia = {}, vrDia = {};
-  linhas.forEach(l => { const o = l.x.vr ? vrDia : porDia; o[l.x.data] = (o[l.x.data] || 0) + l.noMes; });
-  const max = Math.max(1, ...Object.keys(porDia).map(k => porDia[k]));
+  const dias = []; for (let d = new Date(ini); d <= fim; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) dias.push(d);
+  const fixos = calFixos(dias);
+
+  // tudo por dia: total (sem VR e sem o que foi tirado), VR, o que foi tirado, total por cartão
+  const dd = {}, gr = {};
+  const dia = k => dd[k] || (dd[k] = { tot: 0, vr: 0, fora: 0, cart: {}, itens: [] });
+  const soma = (k, card, valor, grupo, item) => {
+    const g = dia(k), fora = _lsFora.indexOf(grupo) >= 0;
+    g.itens.push(Object.assign({ card: card, fora: fora, valor: valor }, item));
+    if (fora) g.fora += valor; else if (card === 'VR') g.vr += valor; else { g.tot += valor; g.cart[card] = (g.cart[card] || 0) + valor; }
+    gr[grupo] = (gr[grupo] || 0) + valor;
+  };
+  linhas.forEach(l => soma(l.x.data, calCartao(l.x), l.noMes, l.x.grupo, { l: l }));
+  fixos.forEach(f => soma(isoDe(f.d), f.card, f.valor, f.grupo, { f: f }));
+
+  const max = Math.max(1, ...Object.keys(dd).map(k => dd[k].tot));
   if (!_lsDia || dataDe(_lsDia) < ini || dataDe(_lsDia) > fim) {
-    const comCompra = Object.keys(porDia).concat(Object.keys(vrDia)).filter(k => dataDe(k) >= ini && dataDe(k) <= fim).sort();
+    const comCompra = Object.keys(dd).filter(k => dataDe(k) >= ini && dataDe(k) <= fim).sort();
     _lsDia = comCompra.length ? comCompra[comCompra.length - 1] : isoDe(fim);
   }
   const g0 = new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() - (ini.getDay() + 6) % 7);
-  const cel = [];
+  const cel = [], usados = {};
   for (let d = new Date(g0); d <= fim || d.getDay() !== 1; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
-    const k = isoDe(d), fora = d < ini || d > fim, v = porDia[k] || 0, w = vrDia[k] || 0;
-    const fundo = !fora && v ? `background:rgba(242,179,61,${(0.12 + 0.6 * v / max).toFixed(2)})` : '';
-    cel.push(`<button type="button" class="cal-d${fora ? ' fora' : ''}${k === _lsDia ? ' on' : ''}" style="${fundo}" ${fora ? 'disabled' : `onclick="_lsDia='${k}';pintarLancs()"`}>
+    const k = isoDe(d), fora = d < ini || d > fim, g = dd[k] || { tot: 0, vr: 0, fora: 0, cart: {} };
+    Object.keys(g.cart).forEach(n => { usados[n] = 1; });
+    // a cor do dia segue a raiz do valor: um dia de R$ 4 mil não apaga todos os outros
+    const fundo = !fora && g.tot ? `background:rgba(242,179,61,${(0.1 + 0.55 * Math.sqrt(g.tot / max)).toFixed(2)})` : '';
+    const faixa = Object.keys(g.cart).length ? `<i class="cal-b">${Object.keys(g.cart).map(n => `<s style="flex:${g.cart[n].toFixed(2)};background:${escA(calCor(n))}"></s>`).join('')}</i>` : '';
+    const dica = Object.keys(g.cart).map(n => n + ' ' + nbr(g.cart[n])).concat(g.vr ? ['VR ' + nbr(g.vr)] : [], g.fora ? ['fora do calendário ' + nbr(g.fora)] : []).join(' · ');
+    cel.push(`<button type="button" class="cal-d${fora ? ' fora' : ''}${k === _lsDia ? ' on' : ''}" style="${fundo}" ${dica ? `title="${escA(dica)}"` : ''} ${fora ? 'disabled' : `onclick="_lsDia='${k}';pintarLancs()"`}>
       <b>${d.getDate() === 1 || !cel.length ? d.getDate() + ' ' + MES_MIN[d.getMonth()] : d.getDate()}</b>
-      <span>${v ? nbr(v) : ''}${w ? `<em style="display:block;font-style:normal;color:var(--vr)">${nbr(w)} VR</em>` : ''}</span></button>`);
+      <div class="cal-r"><span>${g.tot ? nbr(g.tot) : ''}${g.vr ? `<em style="display:block;font-style:normal;color:var(--vr)">${nbr(g.vr)} VR</em>` : ''}${g.fora ? `<em class="cal-fora">+ ${nbr(g.fora)} fora</em>` : ''}</span>${faixa}</div></button>`);
     if (cel.length > 49) break;
   }
-  const dSel = dataDe(_lsDia), doDia = linhas.filter(l => l.x.data === _lsDia);
+
+  // o dia escolhido, separado por cartão (principal primeiro; fixos da conta e VR por último; o que foi tirado, no fim)
+  const sel = dd[_lsDia] || { tot: 0, vr: 0, fora: 0, cart: {}, itens: [] }, dSel = dataDe(_lsDia);
+  const ordem = n => { const i = _cfg.cartoes.findIndex(x => x.nome === n); return i >= 0 ? i : n === 'Conta' ? 50 : n === 'VR' ? 60 : 70; };
+  const linhaFixo = f => `<div class="lin-b" style="cursor:default"><span class="lin-ic">${ic(icCat(f.grupo), 19)}</span>
+    <span style="flex:1;min-width:0"><span class="lin-t">${esc(f.item)}<span class="tag-um">fixo${f.uma ? ' · uma vez' : ''}</span></span><span class="lin-m">${esc([f.grupo, f.card === 'Conta' ? f.como : ''].filter(Boolean).join(' · '))}</span></span>
+    <span class="nm" style="min-width:88px;text-align:right">${nbr(f.valor)}</span></div>`;
+  const bloco = (nome, itens, tirado) => `<div class="cal-sec${tirado ? ' fora' : ''}" style="--cc:${escA(tirado ? 'var(--mut2)' : calCor(nome))}">
+      <div class="cal-sec-h"><span><i></i>${esc(nome)}</span><span class="nm">${brl(itens.reduce((s, i) => s + i.valor, 0))}</span></div>
+      ${itens.sort((x, y) => y.valor - x.valor).map(i => i.f ? linhaFixo(i.f) : lsItemLinha(i.l.x, i.l.noMes, i.l.k)).join('')}</div>`;
+  const cartoesDia = [...new Set(sel.itens.filter(i => !i.fora).map(i => i.card))].sort((x, y) => ordem(x) - ordem(y));
+  const tirados = sel.itens.filter(i => i.fora);
+  const painel = cartoesDia.map(n => bloco(n, sel.itens.filter(i => !i.fora && i.card === n), false)).join('')
+    + (tirados.length ? bloco('Fora do calendário (você tirou)', tirados, true) : '')
+    || '<div class="cx-s">Nada neste dia.</div>';
+
+  // controles: fixos e os grupos que dá para tirar da conta do calendário
+  const grupos = Object.keys(gr).sort((x, y) => gr[y] - gr[x]);
+  const controles = `<div class="cal-ctl"><span class="cx-s">Fixos</span>
+      <div class="seg" style="flex:0 0 auto">${[['nao', 'Não'], ['cartao', 'Do cartão'], ['todos', 'Todos']].map(([v, t]) =>
+        `<button type="button" class="${v === _lsFixos ? 'on' : ''}" aria-pressed="${v === _lsFixos}" onclick="lsFixosSet('${v}')">${t}</button>`).join('')}</div>
+      ${_lsFixos !== 'nao' && !_dados.base ? '<span class="cx-s">buscando as contas fixas…</span>' : ''}</div>
+    <div class="cal-ctl"><span class="cx-s">Tirar do calendário</span>
+      ${grupos.map(n => `<button type="button" class="cm-chip${_lsFora.indexOf(n) >= 0 ? ' tirada' : ''}" aria-pressed="${_lsFora.indexOf(n) >= 0}" onclick="lsForaToggle(${escA(JSON.stringify(n))})">${esc(n)} <b>${nbr(gr[n])}</b></button>`).join('') || '<span class="cx-s">nenhum grupo neste mês</span>'}</div>`;
+  const legenda = Object.keys(usados).sort((x, y) => ordem(x) - ordem(y)).map(n => `<span><i style="background:${escA(calCor(n))}"></i>${esc(n)}</span>`).join('');
   return `<section class="linha2" style="align-items:flex-start">
     <div class="cx" style="flex:3 1 560px">
-      <div class="cx-h" style="margin-bottom:12px"><h2>Ciclo da fatura ${esc(rotMes(ym))}</h2><span class="cx-s">mais escuro = dia que gastou mais · listrado = fora do ciclo</span></div>
-      <div class="cal">${['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'].map(s => `<div class="cal-h">${s}</div>`).join('')}${cel.join('')}</div></div>
-    <div class="cx" style="flex:1 1 300px">
+      <div class="cx-h" style="margin-bottom:12px"><h2>Ciclo da fatura ${esc(rotMes(ym))}</h2><span class="cx-s">mais escuro = dia que gastou mais · faixa = cartão usado</span></div>
+      ${controles}
+      <div class="cal">${['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'].map(s => `<div class="cal-h">${s}</div>`).join('')}${cel.join('')}</div>
+      ${legenda ? `<div class="cal-leg">${legenda}</div>` : ''}</div>
+    <div class="cx" style="flex:1 1 320px">
       <div style="font-weight:800;text-transform:capitalize">${SEM_LONGO[dSel.getDay()]}, ${dSel.getDate()} ${MES_MIN[dSel.getMonth()]}</div>
-      <div class="kpi-v">${brl(doDia.filter(l => !l.x.vr).reduce((s, l) => s + l.noMes, 0))}</div>
-      ${doDia.length ? doDia.map(l => lsItemLinha(l.x, l.noMes, l.k)).join('') : '<div class="cx-s">Nenhuma compra neste dia.</div>'}</div></section>`;
+      <div class="kpi-v">${brl(sel.tot)}</div>
+      ${sel.vr || sel.fora ? `<div class="cx-s">${[sel.vr ? '+ ' + nbr(sel.vr) + ' no VR' : '', sel.fora ? '+ ' + nbr(sel.fora) + ' fora do calendário' : ''].filter(Boolean).join(' · ')}</div>` : ''}
+      ${painel}</div></section>`;
 }
 function pintarFixosLs() {
   const ym = +val('lsMes') || _mes, d = _dados.inicio[ym];
@@ -4380,4 +4476,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v19 -------- -->
+<!-- -------- index.html v20 -------- -->
