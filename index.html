@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v21 -------- -->
+<!-- -------- index.html v22 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -549,7 +549,7 @@ body:not(.pc) #t-config .grp-x { margin-left:0 }
 .aj-cfg em { display:inline-block; margin-top:8px; font-style:normal; font-size:11px; font-weight:700; color:var(--acc-tx); background:var(--acc-soft); border-radius:999px; padding:3px 9px }
 body.pc .tela { padding:0 0 64px }
 .ps-marca { display:flex; align-items:center; gap:10px; padding:0 8px 22px; font-weight:800; font-size:18px }
-.ps-logo { width:36px; height:36px; border-radius:10px; background:var(--acc); color:var(--acc-on); display:flex; align-items:center; justify-content:center }
+.ps-logo { width:36px; height:36px; display:flex; flex-shrink:0; border-radius:9px; box-shadow:0 0 0 1px var(--bd) }
 .ps-b { display:flex; align-items:center; gap:12px; width:100%; min-height:44px; padding:0 12px; border-radius:12px; border:0; background:transparent; color:var(--mut); font-size:14px; font-weight:700; text-align:left }
 .ps-b:hover { background:var(--s2); color:var(--txt) }
 .ps-b.on { background:var(--acc-soft); color:var(--acc-tx) }
@@ -1014,7 +1014,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 
 <!-- ══ COMPUTADOR: barra lateral ══════════════════════════════ -->
 <aside class="pc-side" aria-label="Menu">
-  <div class="ps-marca"><span class="ps-logo"><svg viewBox="40 40 432 432" width="36" height="36" fill="none" stroke-linecap="round" aria-hidden="true"><defs><clipPath id="psBaixo"><rect x="0" y="256" width="512" height="256"/></clipPath></defs><circle cx="198" cy="256" r="86" stroke="currentColor" stroke-width="38"/><circle cx="314" cy="256" r="86" stroke="var(--acc)" stroke-width="62"/><circle cx="314" cy="256" r="86" stroke="currentColor" stroke-width="38"/><g clip-path="url(#psBaixo)"><circle cx="198" cy="256" r="86" stroke="var(--acc)" stroke-width="62"/><circle cx="198" cy="256" r="86" stroke="currentColor" stroke-width="38"/></g></svg></span>Jeh &amp; Luh</div>
+  <div class="ps-marca"><span class="ps-logo"><svg viewBox="0 0 512 512" width="36" height="36" aria-hidden="true"><defs><linearGradient id="psOuro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFC95C"/><stop offset="1" stop-color="#E39A1E"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="#111113"/><g transform="translate(256 272) scale(.86) translate(-256 -228)"><rect x="104" y="170" width="304" height="216" rx="40" fill="url(#psOuro)"/><path d="M104 214h304" stroke="#111113" stroke-opacity=".25" stroke-width="10"/><rect x="300" y="250" width="108" height="72" rx="20" fill="#111113"/><circle cx="342" cy="286" r="14" fill="#F2B33D"/><path d="M150 140 L224 96 L280 124 L362 74" fill="none" stroke="#F2B33D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><path d="M332 70h34v34" fill="none" stroke="#F2B33D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/></g></svg></span>Jeh &amp; Luh</div>
   <button type="button" class="ps-b" data-t="painel" onclick="ir('painel')"><i data-ic="casa" data-s="19"></i><span>Painel</span></button>
   <button type="button" class="ps-b" data-t="lancs" onclick="ir('lancs')"><i data-ic="recibo" data-s="19"></i><span>Lançamentos</span></button>
   <button type="button" class="ps-b" data-t="fluxo" onclick="ir('fluxo')"><i data-ic="dinheiro" data-s="19"></i><span>Fluxo do mês</span></button>
@@ -1339,7 +1339,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v21</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v22</p>
   </div>
 </section>
 
@@ -1398,7 +1398,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v21';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v22';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -4493,4 +4493,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v21 -------- -->
+<!-- -------- index.html v22 -------- -->
