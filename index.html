@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v14 -------- -->
+<!-- -------- index.html v15 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -114,7 +114,7 @@ html { font-size:16px; -webkit-text-size-adjust:100%; text-size-adjust:100% }
   --txt:#F5F3EE; --mut:#ABA79E; --mut2:#8F8B82;
   --acc:#F2B33D; --acc-on:#1B1405; --acc-tx:#F2B33D; --acc-soft:#3A2D12; --acc-line:rgba(27,20,5,.16);
   --acc2:#6EE7A8; --ok:#6EE7A8; --ok-soft:#163626; --warn:#FB923C; --danger:#FF8A7A; --danger-soft:#3A1D1A; --vr:#6CB6FF; --vr-soft:#12304A;
-  --nav:#18181A; --sombra:0 10px 30px rgba(0,0,0,.45); --ant:#6E675B;
+  --nav:#18181A; --sombra:0 10px 30px rgba(0,0,0,.45); --ant:#6E675B; --out:#4A463F;
   --r:18px; --ih:50px;
   --f-tx:'Manrope',sans-serif; --f-num:'IBM Plex Mono',monospace;
   color-scheme:dark;
@@ -125,7 +125,7 @@ html { font-size:16px; -webkit-text-size-adjust:100%; text-size-adjust:100% }
   --txt:#19170F; --mut:#5F5A4D; --mut2:#736D60;
   --acc:#EDA82A; --acc-on:#1B1405; --acc-tx:#865700; --acc-soft:#FBEBC8; --acc-line:rgba(27,20,5,.14);
   --acc2:#157A47; --ok:#157A47; --ok-soft:#DDF3E6; --warn:#B45309; --danger:#B42318; --danger-soft:#FBE4E1; --vr:#1F6FBF; --vr-soft:#DCEBFA;
-  --nav:#FFFFFF; --sombra:0 10px 30px rgba(60,45,10,.12); --ant:#C4BBA8;
+  --nav:#FFFFFF; --sombra:0 10px 30px rgba(60,45,10,.12); --ant:#C4BBA8; --out:#8F8878;
   color-scheme:light;
 }
 @media (prefers-color-scheme: light) {
@@ -134,7 +134,7 @@ html { font-size:16px; -webkit-text-size-adjust:100%; text-size-adjust:100% }
     --txt:#19170F; --mut:#5F5A4D; --mut2:#736D60;
     --acc:#EDA82A; --acc-on:#1B1405; --acc-tx:#865700; --acc-soft:#FBEBC8; --acc-line:rgba(27,20,5,.14);
     --acc2:#157A47; --ok:#157A47; --ok-soft:#DDF3E6; --warn:#B45309; --danger:#B42318; --danger-soft:#FBE4E1; --vr:#1F6FBF; --vr-soft:#DCEBFA;
-    --nav:#FFFFFF; --sombra:0 10px 30px rgba(60,45,10,.12); --ant:#C4BBA8;
+    --nav:#FFFFFF; --sombra:0 10px 30px rgba(60,45,10,.12); --ant:#C4BBA8; --out:#8F8878;
     color-scheme:light;
   }
 }
@@ -934,10 +934,10 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 .cm-sec small { display:block; font-size:11.5px; font-weight:600; color:var(--mut2) }
 /* agora (âmbar) · VR (azul) · parcelas de antes (apagado) */
 .barra.tri { display:flex }
-.barra.tri i, .barra.tri b, .barra.tri s { display:block; height:100%; border-radius:0; flex-shrink:0 }
-.barra.tri i { background:var(--acc) } .barra.tri b { background:var(--vr) } .barra.tri s { background:var(--ant) }
-.sw-ag, .sw-vr, .sw-ant { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:6px; vertical-align:0 }
-.sw-ag { background:var(--acc) } .sw-vr { background:var(--vr) } .sw-ant { background:var(--ant) }
+.barra.tri i, .barra.tri b, .barra.tri s, .barra.tri u { display:block; height:100%; border-radius:0; flex-shrink:0 }
+.barra.tri i { background:var(--acc) } .barra.tri b { background:var(--vr) } .barra.tri s { background:var(--ant) } .barra.tri u { background:var(--out) }
+.sw-ag, .sw-vr, .sw-ant, .sw-out { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:6px; vertical-align:0 }
+.sw-ag { background:var(--acc) } .sw-vr { background:var(--vr) } .sw-ant { background:var(--ant) } .sw-out { background:var(--out) }
 .leg-po { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:11.5px; color:var(--mut); padding:6px 0 2px }
 .apag { color:var(--mut2); font-weight:600; opacity:.85 }
 .cat-linha-t small.apag { font-family:var(--f-num); font-size:11px }
@@ -1308,7 +1308,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v14</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v15</p>
   </div>
 </section>
 
@@ -1367,7 +1367,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v14';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v15';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1934,16 +1934,19 @@ function cmPintar() {
     .filter(l => !f.quem || (f.quem === 'sem nome' ? !l.x.quem : l.x.quem === f.quem));
   const linhas = base.filter(l => !f.grupo || l.x.grupo === f.grupo);
   const soma = a => a.reduce((s, l) => s + l.noMes, 0);
-  // o valor de cada grupo é o de agora; as parcelas de antes só entram de desempate
-  const pg = {}, pa = {};
-  base.forEach(l => { const o = l.k > 1 ? pa : pg; o[l.x.grupo] = (o[l.x.grupo] || 0) + l.noMes; });
-  const grupos = Object.keys(Object.assign({}, pa, pg)).sort((a, b) => (pg[b] || 0) - (pg[a] || 0) || (pa[b] || 0) - (pa[a] || 0));
+  // a conta que manda é a do cartão principal (ou a do cartão escolhido); os outros cartões vão para o fim
+  const princ = (_cfg.cartoes[0] || {}).nome, dono = f.cartao && f.cartao !== 'VR' ? f.cartao : princ;
+  const fora = l => !l.x.vr && l.x.cartao !== dono;
+  const corCartao = nome => (_cfg.cartoes.find(c => c.nome === nome) || {}).cor || 'var(--mut)';
+  // o valor de cada grupo é o de agora; as parcelas de antes e os outros cartões só entram de desempate
+  const pg = {}, pa = {}, po = {};
+  base.forEach(l => { const o = fora(l) ? po : l.k > 1 ? pa : pg; o[l.x.grupo] = (o[l.x.grupo] || 0) + l.noMes; });
+  const grupos = Object.keys(Object.assign({}, po, pa, pg)).sort((a, b) => (pg[b] || 0) - (pg[a] || 0) || (pa[b] || 0) - (pa[a] || 0) || (po[b] || 0) - (po[a] || 0));
   if (f.grupo && grupos.indexOf(f.grupo) < 0) grupos.unshift(f.grupo);
 
   const ord = f.ordem === 'data' ? (a, b) => b.x.data.localeCompare(a.x.data) || b.noMes - a.noMes : (a, b) => b.noMes - a.noMes;
-  const novas = linhas.filter(l => l.k <= 1).sort(ord), antigas = linhas.filter(l => l.k > 1).sort(ord);
-  const sCred = soma(novas.filter(l => !l.x.vr)), sVr = soma(novas.filter(l => l.x.vr)), sAnt = soma(antigas), sTot = sCred + sVr + sAnt || 1;
-  const princ = (_cfg.cartoes[0] || {}).nome;
+  const novas = linhas.filter(l => !fora(l) && l.k <= 1).sort(ord), antigas = linhas.filter(l => !fora(l) && l.k > 1).sort(ord), outras = linhas.filter(fora).sort(ord);
+  const sCred = soma(novas.filter(l => !l.x.vr)), sVr = soma(novas.filter(l => l.x.vr)), sAnt = soma(antigas), sOut = soma(outras), sTot = sCred + sVr + sAnt + sOut || 1;
   const riscas = l => {
     const n = l.x.n, k = Math.min(l.k, n), falta = n - k;
     if (!(n > 1)) return '';
@@ -1951,8 +1954,9 @@ function cmPintar() {
     return `<div class="parc-r" title="${t}" aria-label="${t}">${'<i></i>'.repeat(k)}${'<i class="f"></i>'.repeat(falta)}</div>`;
   };
   const linha = (l, antiga) => {
-    const x = l.x, meta = [x.dataBR.slice(0, 5), f.grupo ? '' : x.grupo, x.quem, !x.vr && x.cartao !== princ ? x.cartao : ''].filter(Boolean).join(' · ');
-    return `<div class="ult-i${x.enviando ? ' enviando' : ''}${antiga ? ' antiga' : ''}"><span class="ult-ic"${x.vr ? ' style="color:var(--vr)"' : ''}>${ic(icCat(x.grupo), 18)}</span>
+    const x = l.x, outro = fora(l), meta = [x.dataBR.slice(0, 5), f.grupo ? '' : x.grupo, x.quem, outro ? x.cartao : ''].filter(Boolean).join(' · ');
+    const cor = x.vr ? 'var(--vr)' : outro ? corCartao(x.cartao) : '';
+    return `<div class="ult-i${x.enviando ? ' enviando' : ''}${antiga ? ' antiga' : ''}"><span class="ult-ic"${cor ? ` style="color:${escA(cor)}"` : ''}>${ic(icCat(x.grupo), 18)}</span>
       <div style="flex:1;min-width:0"><div class="ult-d">${esc(x.desc)}${lsTags(x)}</div><div class="ult-m">${esc(meta)}</div>${riscas(l)}</div>
       <div><div class="ult-v">${nbr(l.noMes)}</div><div class="ult-p">${x.n > 1 ? `${l.k}/${x.n} · de ${nbr(x.valor)}` : 'à vista'}</div></div></div>`;
   };
@@ -1963,8 +1967,8 @@ function cmPintar() {
   const filtros = [f.cartao ? [f.cartao === 'VR' ? 'só VR' : 'só ' + f.cartao, 'cartao'] : null,
                    f.quem ? [f.quem === 'sem nome' ? 'sem "quem"' : f.quem, 'quem'] : null].filter(Boolean);
   const chips = filtros.map(([t, k]) => `<button type="button" class="cm-chip fil" aria-label="Tirar o filtro ${escA(t)}" onclick="cmSet('${k}','')">${esc(t)} ✕</button>`).join('')
-    + `<button type="button" class="cm-chip${f.grupo ? '' : ' on'}" onclick="cmSet('grupo','')">Todos <b>${nbr(soma(base.filter(l => l.k <= 1)))}</b></button>`
-    + grupos.map(g => `<button type="button" class="cm-chip${g === f.grupo ? ' on' : ''}" onclick="cmSet('grupo',${escA(JSON.stringify(g))})">${esc(g)} <b>${nbr(pg[g] || 0)}</b></button>`).join('');
+    + `<button type="button" class="cm-chip${f.grupo ? '' : ' on'}" onclick="cmSet('grupo','')">Todos <b>${nbr(soma(base.filter(l => !fora(l) && l.k <= 1)))}</b></button>`
+    + grupos.map(g => `<button type="button" class="cm-chip${g === f.grupo ? ' on' : ''}" onclick="cmSet('grupo',${escA(JSON.stringify(g))})">${esc(g)} <b${pg[g] || !po[g] ? '' : ' class="apag"'}>${nbr(pg[g] || po[g] || 0)}</b></button>`).join('');
 
   // os fixos do cartão (assinaturas, contas) vêm da PROJEÇÃO, não da LANÇAMENTOS
   const fixos = !f.grupo && !f.quem && f.cartao !== 'VR' && (f.cartao || _chave !== 'vr')
@@ -1973,14 +1977,15 @@ function cmPintar() {
   host.innerHTML = `<div class="cm-top">
       <div class="cm-h"><div style="flex:1;min-width:0"><div class="cm-tit" id="cmTit">${esc(tit)}</div>
         <div class="cm-tot">${brl(soma(novas))} <span class="cm-agora">agora</span></div>
-        <div class="cm-sub">fatura de ${esc(d.mesNome || rotMes(_mes))} · ${novas.length} ${novas.length === 1 ? 'compra nova' : 'compras novas'}${antigas.length ? ` <span class="apag">· + ${brl(sAnt)} de parcelas de antes = ${brl(soma(linhas))}</span>` : ''}</div></div>${fechar}</div>
-      ${antigas.length || sVr && sCred ? `<div class="barra tri cm-barra"><i style="width:${(sCred / sTot * 100).toFixed(1)}%"></i><b style="width:${(sVr / sTot * 100).toFixed(1)}%"></b><s style="width:${(sAnt / sTot * 100).toFixed(1)}%"></s></div>` : ''}
+        <div class="cm-sub">fatura de ${esc(d.mesNome || rotMes(_mes))} · ${novas.length} ${novas.length === 1 ? 'compra nova' : 'compras novas'}${antigas.length || outras.length ? ` <span class="apag">·${antigas.length ? ` + ${brl(sAnt)} de parcelas de antes` : ''}${outras.length ? ` + ${brl(sOut)} em outros cartões` : ''} = ${brl(soma(linhas))}</span>` : ''}</div></div>${fechar}</div>
+      ${antigas.length || outras.length || sVr && sCred ? `<div class="barra tri cm-barra"><i style="width:${(sCred / sTot * 100).toFixed(1)}%"></i><b style="width:${(sVr / sTot * 100).toFixed(1)}%"></b><s style="width:${(sAnt / sTot * 100).toFixed(1)}%"></s><u style="width:${(sOut / sTot * 100).toFixed(1)}%"></u></div>` : ''}
       <div class="cm-chips" role="group" aria-label="Filtrar por grupo">${chips}</div>
       <div class="cm-ord"><span>${f.grupo ? 'toque em "Todos" para ver tudo de novo' : 'toque num grupo para filtrar'}</span>
         <div class="seg">${[['valor', 'Maior valor'], ['data', 'Data']].map(([v, t]) => `<button type="button" class="${v === f.ordem ? 'on' : ''}" onclick="cmSet('ordem','${v}')">${t}</button>`).join('')}</div></div>
     </div>
     ${linhas.length ? secao('Compras novas desta fatura', 'à vista ou 1ª parcela: o que entrou de gasto agora', novas, 'sw-ag', false)
                     + secao('Parcelas de compras anteriores', 'já estavam comprometidas antes deste ciclo', antigas, 'sw-ant', true)
+                    + secao('Outros cartões', `${[...new Set(outras.map(l => l.x.cartao))].join(', ')} · fora da fatura do ${esc(dono)}`, outras, 'sw-out', true)
                     : '<div class="empty">Nada neste filtro.</div>'}
     ${fixos ? `<div class="cm-nota">Fora desta lista: <strong>${brl(fixos)}</strong> de fixos no cartão (assinaturas e contas da PROJEÇÃO). Eles completam a fatura prevista.</div>` : ''}`;
   // o grupo escolhido fica à vista na fileira, mesmo lá no fim
@@ -3277,9 +3282,10 @@ function chaveHtml() {
 /** Por grupo no mês: cred = compra nova no crédito (à vista ou 1ª parcela), ant = parcela de compra
     de antes, vr = VR. Sem a lista de compras no aparelho, usa os totais do servidor (aí sem separar). */
 function porGrupoMes(d) {
-  const m = {}, g = nome => (m[nome] = m[nome] || { nome: nome, cred: 0, vr: 0, ant: 0 });
-  const L = cmLinhas(d.yyyymm);
-  if (L) L.forEach(l => { const x = g(l.x.grupo); if (l.x.vr) x.vr += l.noMes; else if (l.k > 1) x.ant += l.noMes; else x.cred += l.noMes; });
+  const m = {}, g = nome => (m[nome] = m[nome] || { nome: nome, cred: 0, vr: 0, ant: 0, out: 0 });
+  const L = cmLinhas(d.yyyymm), princ = (_cfg.cartoes[0] || {}).nome;
+  // out = outros cartões (LATAM, Inter…): somam no total, mas a conta que manda é a do principal
+  if (L) L.forEach(l => { const x = g(l.x.grupo); if (l.x.vr) x.vr += l.noMes; else if (l.x.cartao !== princ) x.out += l.noMes; else if (l.k > 1) x.ant += l.noMes; else x.cred += l.noMes; });
   else {
     (d.categorias || []).forEach(c => { g(c.nome).cred += c.valor; });
     ((d.vr || {}).categorias || []).forEach(c => { g(c.nome).vr += c.valor; });
@@ -3289,24 +3295,27 @@ function porGrupoMes(d) {
 // "agora" = o que entrou de gasto nesta fatura; "antes" = parcelas de compras de outros meses
 const agoraDe = x => _chave === 'cred' ? x.cred : _chave === 'vr' ? x.vr : x.cred + x.vr;
 const antesDe = x => _chave === 'vr' ? 0 : x.ant;
+const outDe = x => _chave === 'vr' ? 0 : x.out || 0;
 function paraOndeHtml(d, limite) {
-  const lista = porGrupoMes(d).filter(x => agoraDe(x) + antesDe(x) > 0)
-    .sort((a, b) => agoraDe(b) - agoraDe(a) || antesDe(b) - antesDe(a));
+  // os grupos com gasto no principal vêm primeiro; os que só têm outros cartões ficam no fim
+  const lista = porGrupoMes(d).filter(x => agoraDe(x) + antesDe(x) + outDe(x) > 0)
+    .sort((a, b) => agoraDe(b) - agoraDe(a) || antesDe(b) - antesDe(a) || outDe(b) - outDe(a));
   if (!lista.length) return `<div class="cx-s" style="padding:8px 0">${_chave === 'vr' ? 'Nada no VR neste mês.' : 'Nada lançado ainda.'}</div>`;
-  const max = Math.max(...lista.map(x => agoraDe(x) + antesDe(x))) || 1, toca = !ehPC();   // no celular, tocar no grupo abre as compras dele
-  const temAnt = lista.some(x => antesDe(x) > 0), temVr = _chave !== 'cred' && lista.some(x => x.vr > 0);
-  const legenda = temAnt || temVr ? `<div class="leg-po">${_chave !== 'vr' ? '<span><i class="sw-ag"></i>agora</span>' : ''}${temVr ? '<span><i class="sw-vr"></i>VR</span>' : ''}${temAnt ? '<span><i class="sw-ant"></i>parcelas de antes</span>' : ''}</div>` : '';
+  const max = Math.max(...lista.map(x => agoraDe(x) + antesDe(x) + outDe(x))) || 1, toca = !ehPC();   // no celular, tocar no grupo abre as compras dele
+  const temAnt = lista.some(x => antesDe(x) > 0), temVr = _chave !== 'cred' && lista.some(x => x.vr > 0), temOut = lista.some(x => outDe(x) > 0);
+  const princ = (_cfg.cartoes[0] || {}).nome || 'principal';
+  const legenda = temAnt || temVr || temOut ? `<div class="leg-po">${_chave !== 'vr' ? `<span><i class="sw-ag"></i>agora no ${esc(princ)}</span>` : ''}${temVr ? '<span><i class="sw-vr"></i>VR</span>' : ''}${temAnt ? '<span><i class="sw-ant"></i>parcelas de antes</span>' : ''}${temOut ? '<span><i class="sw-out"></i>outros cartões</span>' : ''}</div>` : '';
   return legenda + lista.slice(0, limite || 99).map(x => {
-    const c = _chave === 'vr' ? 0 : x.cred, v = _chave === 'cred' ? 0 : x.vr, a = antesDe(x);
-    const dentro = `<div class="cat-linha-t"><span>${esc(x.nome)}</span><span class="num">${brl(c + v)}${a ? ` <small class="apag">de ${nbr(c + v + a)}</small>` : ''}${_chave === 'tudo' && x.vr ? ` <small class="vr-tx">${nbr(x.vr)} VR</small>` : ''}${toca ? ic('chevR', 12) : ''}</span></div>
-      <div class="barra tri"><i style="width:${(c / max * 100).toFixed(1)}%"></i><b style="width:${(v / max * 100).toFixed(1)}%"></b><s style="width:${(a / max * 100).toFixed(1)}%"></s></div>`;
+    const c = _chave === 'vr' ? 0 : x.cred, v = _chave === 'cred' ? 0 : x.vr, a = antesDe(x), o = outDe(x);
+    const dentro = `<div class="cat-linha-t"><span>${esc(x.nome)}</span><span class="num">${c + v || !o ? brl(c + v) : `<small class="apag">${brl(o)} em outros cartões</small>`}${a || (o && c + v) ? ` <small class="apag">de ${nbr(c + v + a + o)}</small>` : ''}${_chave === 'tudo' && x.vr ? ` <small class="vr-tx">${nbr(x.vr)} VR</small>` : ''}${toca ? ic('chevR', 12) : ''}</span></div>
+      <div class="barra tri"><i style="width:${(c / max * 100).toFixed(1)}%"></i><b style="width:${(v / max * 100).toFixed(1)}%"></b><s style="width:${(a / max * 100).toFixed(1)}%"></s><u style="width:${(o / max * 100).toFixed(1)}%"></u></div>`;
     return toca ? `<button type="button" class="cat-linha" onclick="cmAbrir({grupo:${escA(JSON.stringify(x.nome))}})">${dentro}</button>` : `<div class="cat-linha">${dentro}</div>`;
   }).join('');
 }
 /** O total do "Para onde foi": o de agora em destaque; com as parcelas de antes, apagado (HTML) */
 function totChave(d) {
-  const l = porGrupoMes(d), ag = l.reduce((s, x) => s + agoraDe(x), 0), an = l.reduce((s, x) => s + antesDe(x), 0);
-  const rot = _chave === 'cred' ? ' agora no crédito' : _chave === 'vr' ? ' no VR' : ' agora';
+  const l = porGrupoMes(d), ag = l.reduce((s, x) => s + agoraDe(x), 0), an = l.reduce((s, x) => s + antesDe(x) + outDe(x), 0);
+  const rot = _chave === 'cred' ? ' agora no ' + ((_cfg.cartoes[0] || {}).nome || 'crédito') : _chave === 'vr' ? ' no VR' : ' agora';
   return esc(brl(ag) + rot) + (an ? ` <span class="apag">· de ${esc(brl(ag + an))}</span>` : '');
 }
 /** O cartão azul do VR (Painel e Casa) */
@@ -3907,7 +3916,7 @@ function lsExcluir() {
 /* ── Configurações ── */
 let _cf = null, _cfSel = 0;
 const NIVEIS_PADRAO = ['0-Intocável', '1-Essencial', '2-Importante', '3-Conforto', '4-Dívida', '9-Investimento'];
-const CORES_CARTAO = [['Âmbar', '#F2B33D'], ['Grafite', '#3A3A40'], ['Verde', '#2F7D55'], ['Azul', '#3D6AC8'], ['Vinho', '#8E3346'], ['Areia', '#D9C9A3']];
+const CORES_CARTAO = [['Âmbar', '#F2B33D'], ['Grafite', '#3A3A40'], ['Verde', '#2F7D55'], ['Azul', '#3D6AC8'], ['Vinho', '#8E3346'], ['Areia', '#D9C9A3'], ['Laranja', '#FF7A00'], ['Azul-escuro', '#123C7C']];
 function carregarConfig(forcar) {
   if (_dados.config && (!_cf || forcar)) _cf = JSON.parse(JSON.stringify(_dados.config));
   if (_cf) pintarConfig();
@@ -4278,4 +4287,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v14 -------- -->
+<!-- -------- index.html v15 -------- -->
