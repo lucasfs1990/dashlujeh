@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v13 -------- -->
+<!-- -------- index.html v14 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -487,6 +487,55 @@ body.pc { padding-left:248px }
 body.pc .nav, body.pc .so-cel { display:none !important }
 body.pc .pc-side { display:flex; position:fixed; top:0; left:0; bottom:0; width:248px; flex-direction:column; gap:4px; padding:24px 16px 18px; background:var(--nav); border-right:1px solid var(--bd); z-index:60; overflow-y:auto }
 body.pc .tela.pc-only.on { display:block }
+/* Configurações no celular (só para quem está em CONFIG_NO_CELULAR): a tela do
+   computador em coluna única */
+body:not(.pc) #t-config.on { display:block }
+body:not(.pc) #t-config .pcw { padding:16px 16px 0; gap:14px }
+body:not(.pc) #t-config .cx { padding:16px !important; scroll-margin-top:64px }
+.cfg-topo { display:flex; align-items:center; gap:10px }
+.cfg-topo h1 { font-size:21px; font-weight:800; letter-spacing:-.4px }
+body:not(.pc) #t-config .abas { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin:0 -16px; padding:0 16px; position:sticky; top:0; z-index:5; background:var(--bg); padding-block:8px }
+body:not(.pc) #t-config .abas::-webkit-scrollbar { display:none }
+body:not(.pc) #t-config .abas button { flex-shrink:0 }
+body:not(.pc) #t-config .cfg-g { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:12px }
+body:not(.pc) #t-config .cfg-g > :first-child { grid-column:1 / -1 }
+body:not(.pc) #t-config .cfg-g input, body:not(.pc) #t-config .cfg-g select { height:48px; font-size:15px }
+body:not(.pc) #t-config .cfg-acoes .bt.acc { flex:1 1 100%; justify-content:center; height:50px; font-size:15px }
+body:not(.pc) #t-config .pess { grid-template-columns:minmax(0,1fr) auto; padding:12px 0 }
+body:not(.pc) #t-config .pess > :nth-child(1) { grid-column:1; grid-row:1 }
+body:not(.pc) #t-config .pess > :nth-child(5) { grid-column:2; grid-row:1 }
+body:not(.pc) #t-config .pess > :nth-child(2) { grid-column:1 / -1; grid-row:2 }
+body:not(.pc) #t-config .pess > :nth-child(3) { grid-column:1; grid-row:3 }
+body:not(.pc) #t-config .pess > :nth-child(4) { grid-column:2; grid-row:3 }
+body:not(.pc) #t-config .pess input { height:44px }
+body:not(.pc) #t-config .pess .x-bt { width:44px; height:44px }
+body:not(.pc) #t-config .pess-h { display:none }
+body:not(.pc) #t-config .grp input { flex:1 1 calc(100% - 150px); min-width:0 }
+body:not(.pc) #t-config .grp select { flex:1 1 110px; min-width:0 }
+body:not(.pc) #t-config .grp-uso { width:auto }
+body:not(.pc) #t-config .apel { padding-left:0 }
+body:not(.pc) #t-config .grp-x { margin-left:0 }
+.grp-seta { width:40px; height:40px; border-radius:10px; border:1px solid var(--bd); background:transparent; color:var(--txt); display:flex; align-items:center; justify-content:center; flex-shrink:0 }
+.grp-seta:disabled { color:var(--mut2); opacity:.5 }
+/* fechamento no celular: um cartão por fatura */
+.fc { background:var(--bg); border:1px solid var(--bd); border-radius:16px; padding:12px 14px }
+.fc + .fc { margin-top:8px }
+.fc.aberta { border:1.5px solid var(--acc) }
+.fc.velha { opacity:.6 }
+.fc-h { display:flex; justify-content:space-between; align-items:center; gap:8px; width:100%; border:0; background:transparent; padding:0; text-align:left; color:var(--txt); font:inherit }
+.fc-h b { font-size:15px; font-weight:800 }
+.fc-s { font-size:12px; color:var(--mut); margin-top:4px }
+.fc-s b { color:var(--acc-tx) }
+.fc-d { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:10px }
+.fc-d label { display:block; font-size:12px; font-weight:700; color:var(--mut); margin-bottom:5px }
+.fc-d input { height:46px; font-size:14px; border-radius:12px; background:var(--s1) }
+/* cartão de Ajustes que abre as Configurações */
+#ajCfg.cfg-on { padding:0; border:1.5px solid var(--acc) }
+.aj-cfg { display:flex; align-items:center; gap:14px; width:100%; padding:16px; border:0; background:transparent; color:var(--txt); text-align:left; font:inherit }
+.aj-cfg-ic { width:44px; height:44px; border-radius:14px; background:var(--acc-soft); color:var(--acc-tx); display:flex; align-items:center; justify-content:center; flex-shrink:0 }
+.aj-cfg b { display:block; font-size:15px; font-weight:800 }
+.aj-cfg small { display:block; font-size:12.5px; color:var(--mut); margin-top:2px }
+.aj-cfg em { display:inline-block; margin-top:8px; font-style:normal; font-size:11px; font-weight:700; color:var(--acc-tx); background:var(--acc-soft); border-radius:999px; padding:3px 9px }
 body.pc .tela { padding:0 0 64px }
 .ps-marca { display:flex; align-items:center; gap:10px; padding:0 8px 22px; font-weight:800; font-size:18px }
 .ps-logo { width:36px; height:36px; border-radius:10px; background:var(--acc); color:var(--acc-on); display:flex; align-items:center; justify-content:center }
@@ -1247,7 +1296,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
     <p class="aj-p" id="ajQuemP">Vem marcado primeiro no "Quem comprou" e nas fotos.</p>
     <div class="seg" id="ajQuem"></div>
   </div>
-  <div class="card">
+  <div class="card" id="ajCfg">
     <div class="sec">Cartões, pessoas e grupos</div>
     <p class="aj-p" style="margin:0">Ficam em <strong>Configurações</strong>, no computador. Importar o C6 e o Plano também estão lá.</p>
   </div>
@@ -1259,7 +1308,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v13</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v14</p>
   </div>
 </section>
 
@@ -1318,7 +1367,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v13';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v14';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1328,7 +1377,7 @@ const IC = {
   plano: 'M4 20V11M10 20V5M16 20v-6M2 20h20',
   recibo: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h4',
   engrenagem: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',
-  chevD: 'M6 9l6 6 6-6', chevR: 'M9 6l6 6-6 6', voltar: 'M15 6l-6 6 6 6', x: 'M6 6l12 12M18 6 6 18',
+  chevD: 'M6 9l6 6 6-6', chevU: 'M6 15l6-6 6 6', chevR: 'M9 6l6 6-6 6', voltar: 'M15 6l-6 6 6 6', x: 'M6 6l12 12M18 6 6 18',
   cal: 'M5 5h14a1.5 1.5 0 0 1 1.5 1.5v12A1.5 1.5 0 0 1 19 20H5a1.5 1.5 0 0 1-1.5-1.5v-12A1.5 1.5 0 0 1 5 5zM3.5 10h17M8 3v4M16 3v4',
   camera: 'M5 7h2.5L9 5h6l1.5 2H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z',
   refresh: 'M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6',
@@ -1441,6 +1490,9 @@ const _pc = window.matchMedia('(min-width: 1024px)');
 const ehPC = () => document.body.classList.contains('pc');
 // quem usa: a conta Google (quando o Google informa) > a escolha deste aparelho > a 1ª pessoa
 const quemAparelho = () => (_cfg.eu && _cfg.eu.nome) || LS.get('jl_quem', _cfg.pessoas[0]);
+// Configurações no celular: só para quem está nesta lista (no computador, para todos)
+const CONFIG_NO_CELULAR = ['Lucas'];
+const podeCfgCel = () => CONFIG_NO_CELULAR.indexOf(quemAparelho()) >= 0;
 
 /* ══ datas de fatura (a mesma regra do code.gs) ═════════════════ */
 const ymDe = d => d.getFullYear() * 100 + d.getMonth() + 1;
@@ -1629,7 +1681,7 @@ function repintar(forcar) {
    Lançamentos, Importar C6, Pendências, Plano e Configurações. */
 function ir(nome) {
   if (ehPC()) nome = { casa: 'painel', recentes: 'lancs', ajustes: 'config' }[nome] || nome;
-  else nome = { painel: 'casa', lancs: 'recentes', config: 'ajustes', cartao: 'casa', plano: 'casa', fluxo: 'casa' }[nome] || nome;
+  else nome = { painel: 'casa', lancs: 'recentes', config: podeCfgCel() ? 'config' : 'ajustes', cartao: 'casa', plano: 'casa', fluxo: 'casa' }[nome] || nome;
   document.body.classList.remove('em-lancar');
   document.querySelectorAll('.tela').forEach(t => t.classList.toggle('on', t.id === 't-' + nome));
   if (_barra && ['casa', 'consultas', 'pend', 'ajustes'].indexOf(nome) >= 0) _barra.set(nome, true);
@@ -2240,6 +2292,12 @@ function pintarAjustes() {
     : 'Vem marcado primeiro no "Quem comprou" e nas fotos.';
   document.getElementById('ajQuem').innerHTML = _cfg.pessoas.map(p =>
     `<button type="button" class="${p === q ? 'on' : ''}" ${eu ? 'disabled' : ''} onclick="LS.set('jl_quem',${escA(JSON.stringify(p))});pintarAjustes();pintarQuem()">${esc(p)}</button>`).join('');
+  document.getElementById('ajCfg').innerHTML = podeCfgCel()
+    ? `<button type="button" class="aj-cfg" onclick="ir('config')"><span class="aj-cfg-ic">${ic('engrenagem', 22)}</span>
+        <span style="flex:1;min-width:0"><b>Configurações</b><small>cartões, fechamento, pessoas, VR e grupos</small><em>só aparece para você</em></span>${ic('chevR', 18)}</button>`
+    : `<div class="sec">Cartões, pessoas e grupos</div>
+       <p class="aj-p" style="margin:0">Ficam em <strong>Configurações</strong>, no computador. Importar o C6 e o Plano também estão lá.</p>`;
+  document.getElementById('ajCfg').classList.toggle('cfg-on', podeCfgCel());
   const n = filaLer().length;
   document.getElementById('ajFila').textContent = n ? `${n} ${n > 1 ? 'itens' : 'item'} esperando para subir para a planilha.` : 'Tudo enviado para a planilha.';
 }
@@ -3863,17 +3921,23 @@ function cfIr(id) { const el = document.getElementById(id); if (el) el.scrollInt
 function pintarConfig() {
   const C = _cf; if (!C) return;
   if (_cfSel >= C.cartoes.length) _cfSel = 0;
+  const pc = ehPC();
+  // no celular, "Este aparelho" já está em Ajustes
+  const secoes = [['cfCart', 'Cartões'], ['cfMeses', 'Fechamento'], ['cfVr', pc ? 'VR e cheque especial' : 'VR'], ['cfPess', pc ? 'Pessoas e acesso' : 'Pessoas'], ['cfGrup', pc ? 'Grupos de gastos' : 'Grupos']]
+    .concat(pc ? [['cfApar', 'Este aparelho']] : []);
   document.getElementById('cfConteudo').innerHTML = `
-    <header class="pch"><div><h1>Configurações</h1><div class="pch-s">vale para o celular e para o computador · fica gravado na planilha (abas CONFIG e _MAPA)</div></div></header>
-    <nav class="abas" aria-label="Seções">${[['cfCart', 'Cartões'], ['cfMeses', 'Fechamento'], ['cfVr', 'VR e cheque especial'], ['cfPess', 'Pessoas e acesso'], ['cfGrup', 'Grupos de gastos'], ['cfApar', 'Este aparelho']]
-      .map(([id, n], i) => `<button type="button" class="${i ? '' : 'on'}" onclick="cfIr('${id}')">${n}</button>`).join('')}</nav>
-    ${cfSecCartoes()}${cfSecMeses()}${cfSecVr()}${cfSecPessoas()}${cfSecGrupos()}${cfSecAparelho()}`;
+    ${pc ? `<header class="pch"><div><h1>Configurações</h1><div class="pch-s">vale para o celular e para o computador · fica gravado na planilha (abas CONFIG e _MAPA)</div></div></header>`
+         : `<header class="cfg-topo"><button type="button" class="btn-ic" aria-label="Voltar" onclick="ir('ajustes')">${ic('voltar', 20)}</button>
+              <div><h1>Configurações</h1><div class="pch-s" style="font-size:11.5px">grava na planilha · vale para os dois aparelhos</div></div></header>`}
+    <nav class="abas" aria-label="Seções">${secoes.map(([id, n], i) => `<button type="button" class="${i ? '' : 'on'}" onclick="cfIr('${id}')">${n}</button>`).join('')}</nav>
+    ${cfSecCartoes()}${cfSecMeses()}${cfSecVr()}${cfSecPessoas()}${cfSecGrupos()}${pc ? cfSecAparelho() : ''}`;
   arrastavel(document.getElementById('cfCards'));
 }
 
 function cfSecCartoes() {
   const C = _cf, c = C.cartoes[_cfSel], nomes = C.pessoas.map(p => p.nome);
-  const tiles = C.cartoes.map((k, i) => `<button type="button" class="cpc${i === _cfSel ? ' sel' : ''}" style="flex-basis:300px;min-height:172px;background:${escA(k.cor)};color:${tintaSobre(k.cor)}" onclick="_cfSel=${i};pintarConfig()">
+  const tam = ehPC() ? 'flex-basis:300px;min-height:172px' : 'flex-basis:240px;min-height:140px;padding:16px';
+  const tiles = C.cartoes.map((k, i) => `<button type="button" class="cpc${i === _cfSel ? ' sel' : ''}" style="${tam};background:${escA(k.cor)};color:${tintaSobre(k.cor)}" onclick="_cfSel=${i};pintarConfig()">
       <span class="anel"></span><div class="cpc-l"><span style="font-size:15px;font-weight:800">${esc(k.nome || '(sem nome)')}</span><span style="opacity:.75">${i === 0 ? 'principal' : ''}</span></div>
       <div class="cpc-v" style="font-size:22px">fecha dia ${esc(k.fecha)}</div>
       <div class="cpc-l"><span>vence dia ${esc(dois(k.vence))}</span><span>${k.uso ? k.uso + ' lançamentos' : 'novo'}</span></div></button>`).join('');
@@ -3883,7 +3947,7 @@ function cfSecCartoes() {
   return `<section class="cx" id="cfCart" style="padding:22px">
     <div class="cx-h"><h2 style="font-size:18px">Cartões</h2><span class="cx-s">arraste para o lado · o primeiro é o principal (é o mês dele que o app abre)</span></div>
     <div class="cards-pc" id="cfCards" style="margin-top:16px">${tiles}
-      <button type="button" class="cpc novo" style="min-height:172px" onclick="cfNovoCartao()">${ic('mais', 26)}Adicionar cartão</button></div>
+      <button type="button" class="cpc novo" style="min-height:${ehPC() ? 172 : 140}px;${ehPC() ? '' : 'flex-basis:150px'}" onclick="cfNovoCartao()">${ic('mais', 26)}Adicionar cartão</button></div>
     <div class="cfg-g">
       ${campo('ccNome', 'Nome', c.nome, `oninput="_cf.cartoes[${_cfSel}].nome=this.value" ${c.uso ? 'disabled' : ''}`, c.uso ? `${c.uso} lançamentos usam este nome na coluna Forma` : 'é o que aparece em "Forma" no Lançar')}
       ${campo('ccFecha', 'Dia do fechamento', c.fecha, `type="number" min="1" max="31" inputmode="numeric" oninput="_cf.cartoes[${_cfSel}].fecha=+this.value"`, 'compra depois deste dia vai para a fatura seguinte')}
@@ -3914,7 +3978,7 @@ function cfPrincipal() { const c = _cf.cartoes.splice(_cfSel, 1)[0]; _cf.cartoes
 
 /* Fechamento fatura por fatura: o dia de Cartões é o padrão; aqui se ajusta
    só a fatura em que o C6 mudou o corte (bloco "Fechamentos" da aba CONFIG) */
-let _cfFechCart = 0;
+let _cfFechCart = 0, _cfFechAb = 0;
 function cfSecMeses() {
   const C = _cf, abre = (C.prefs && C.prefs.abre_mes) || 'fatura';
   if (_cfFechCart >= C.cartoes.length) _cfFechCart = 0;
@@ -3923,10 +3987,26 @@ function cfSecMeses() {
   const padrao = Object.assign({}, c, { ajustes: {} }), aberto = ymDe(compDe(new Date(), c));
   const mesK = k => ymDe(new Date(Math.floor(aberto / 100), aberto % 100 - 1 + k, 1));
   const br = d => dois(d.getDate()) + '/' + dois(d.getMonth() + 1);
-  const linhas = [];
+  const linhas = [], cel = !ehPC();
   for (let k = -1; k <= 8; k++) {
     const ym = mesK(k), aj = c.ajustes[ym] || {}, ant = fechamentoDe(mesK(k - 1), c);
     const fecha = isoDe(fechamentoDe(ym, c)), vence = isoDe(vencDe(ym, c)), ajustado = !!(aj.fecha || aj.vence);
+    if (cel) {
+      // celular: um cartão por fatura; as datas aparecem na aberta, nas ajustadas e na que for tocada
+      const abre = ym === aberto || ajustado || ym === _cfFechAb, fd = fechamentoDe(ym, c), vd = vencDe(ym, c);
+      const aPartir = br(new Date(ant.getFullYear(), ant.getMonth(), ant.getDate() + 1));
+      linhas.push(`<div class="fc${ym === aberto ? ' aberta' : k < 0 ? ' velha' : ''}">
+        <button type="button" class="fc-h" aria-expanded="${abre}" onclick="_cfFechAb=_cfFechAb===${ym}?0:${ym};pintarConfig()">
+          <b>${esc(rotMes(ym))}${ym === aberto ? ' <span style="font-size:12px;color:var(--acc-tx)">· aberta</span>' : ''}</b>
+          <span class="etq${ajustado ? ' aj' : ''}">${ajustado ? 'ajustado à mão' : 'padrão'}</span></button>
+        <div class="fc-s">compras de ${aPartir} a ${aj.fecha ? `<b>${br(fd)}</b>` : br(fd)} · vence ${aj.vence ? `<b>${br(vd)}</b>` : br(vd)}</div>
+        ${abre ? `<div class="fc-d">
+          <div><label for="fcF${ym}">Fecha em</label><input type="date" id="fcF${ym}" value="${fecha}" onchange="cfFech(${ym},'fecha',this.value)"/></div>
+          <div><label for="fcV${ym}">Vence em</label><input type="date" id="fcV${ym}" value="${vence}" onchange="cfFech(${ym},'vence',this.value)"/></div></div>
+          ${ajustado ? `<button type="button" class="bt pq" style="margin-top:10px" onclick="cfFechPadrao(${ym})">voltar ao padrão</button>` : ''}` : ''}
+      </div>`);
+      continue;
+    }
     linhas.push(`<tr class="${ym === aberto ? 'aberta' : ''}">
       <td style="font-weight:800">${esc(rotMes(ym))}${ym === aberto ? ' <span class="cx-s">· aberta</span>' : ''}</td>
       <td class="mu nm">${br(new Date(ant.getFullYear(), ant.getMonth(), ant.getDate() + 1))}</td>
@@ -3940,9 +4020,9 @@ function cfSecMeses() {
     <div class="cx-h"><h2 style="font-size:18px">Fechamento, fatura por fatura</h2>
       ${C.cartoes.length > 1 ? `<div class="mseg">${C.cartoes.map((k, i) => `<button type="button" class="${i === _cfFechCart ? 'on' : ''}" onclick="_cfFechCart=${i};pintarConfig()">${esc(k.nome)}</button>`).join('')}</div>` : ''}</div>
     <p class="cx-s" style="margin-top:4px;font-size:13px;line-height:1.55">O ${esc(c.nome)} fecha dia ${esc(c.fecha)} e vence dia ${dois(c.vence)} (o padrão, em Cartões). Quando o banco mudar o corte de uma fatura, troque só a data dela aqui: as compras daquele período passam para a fatura certa no app inteiro.</p>
-    <div class="tb-box" style="margin-top:12px"><table class="tb fech-tb" style="min-width:640px">
+    ${cel ? `<div style="margin-top:12px">${linhas.join('')}</div>` : `<div class="tb-box" style="margin-top:12px"><table class="tb fech-tb" style="min-width:640px">
       <thead><tr><th>Fatura</th><th>Compras a partir de</th><th>Fecha em</th><th>Vence em</th><th><span class="so-leitor">Situação</span></th></tr></thead>
-      <tbody>${linhas.join('')}</tbody></table></div>
+      <tbody>${linhas.join('')}</tbody></table></div>`}
     <div class="cfg-acoes"><button type="button" class="bt acc" onclick="cfSalvar('fechamentos',this)">Salvar fechamentos</button>
       <span class="cx-s">ficam na aba CONFIG (colunas R:U). A coluna Competência da LANÇAMENTOS e a PROJEÇÃO continuam no dia ${esc(c.fecha)}; nas faturas ajustadas o app usa a própria conta.</span></div>
     <div class="cfg-g" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
@@ -3992,7 +4072,7 @@ function cfSecPessoas() {
    escolher outro, "Juntar com…" explica antes de juntar */
 let _cfIcAberto = -1, _cfJunta = -1, _cfArr = -1;
 function cfSecGrupos() {
-  const C = _cf, nomes = C.grupos.map(g => g.nome), niveis = C.niveis || NIVEIS_PADRAO;
+  const C = _cf, nomes = C.grupos.map(g => g.nome), niveis = C.niveis || NIVEIS_PADRAO, pc = ehPC();
   const sem = (C.semGrupo || []).filter(s => !C.apelidos.some(a => a.de.toLowerCase() === s.nome.toLowerCase()) && nomes.indexOf(s.nome) < 0);
   const aviso = sem.map((s, i) => `<div class="aviso-cx" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <span style="flex:1;min-width:240px"><b>"${esc(s.nome)}"</b> (${s.uso} ${s.uso > 1 ? 'lançamentos' : 'lançamento'}) não está em nenhum grupo. Em qual ele conta?</span>
@@ -4002,11 +4082,13 @@ function cfSecGrupos() {
     const ap = C.apelidos.filter(a => a.para === g.nome), icone = icCat(g.nome, g.icone), vazio = icone === 'pontos';
     return `<div class="grp-w">
       <div class="grp${_cfArr === i ? ' arr' : ''}" draggable="false" ondragstart="cfArrIni(event,${i})" ondragover="cfArrSobre(event,${i})" ondragleave="this.classList.remove('sobre')" ondrop="cfArrSolta(event,${i})" ondragend="cfArrFim()">
-        <span class="grip" aria-hidden="true" title="Arraste para mudar a ordem" onpointerdown="this.closest('.grp').draggable=true">⠿</span>
+        ${pc ? `<span class="grip" aria-hidden="true" title="Arraste para mudar a ordem" onpointerdown="this.closest('.grp').draggable=true">⠿</span>
         <button type="button" class="so-leitor" onclick="cfMover(${i},-1)">Subir ${esc(g.nome)}</button><button type="button" class="so-leitor" onclick="cfMover(${i},1)">Descer ${esc(g.nome)}</button>
-        <span class="grp-n">${i + 1}</span>
+        <span class="grp-n">${i + 1}</span>` : ''}
         <button type="button" class="grp-ic${vazio ? ' vazio' : ''}" aria-label="Trocar o ícone de ${escA(g.nome)}" data-tip="Trocar o ícone" onclick="_cfIcAberto=_cfIcAberto===${i}?-1:${i};_cfJunta=-1;pintarConfig()">${ic(icone, 18)}</button>
         <input aria-label="Nome do grupo" value="${escA(g.nome)}" onchange="cfRenomear(${i},this.value)"/>
+        ${pc ? '' : `<button type="button" class="grp-seta" aria-label="Subir ${escA(g.nome)}" ${i ? '' : 'disabled'} onclick="cfMover(${i},-1)">${ic('chevU', 16)}</button>
+        <button type="button" class="grp-seta" aria-label="Descer ${escA(g.nome)}" ${i < C.grupos.length - 1 ? '' : 'disabled'} onclick="cfMover(${i},1)">${ic('chevD', 16)}</button>`}
         <select aria-label="Nível de ${escA(g.nome)}" onchange="_cf.grupos[${i}].nivel=this.value">${niveis.map(n => `<option${n === g.nivel ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>
         <span class="grp-uso">${g.uso} ${g.uso === 1 ? 'uso' : 'usos'}</span>
         ${g.uso ? `<button type="button" class="bt pq" style="flex:0 0 auto" onclick="_cfJunta=_cfJunta===${i}?-1:${i};_cfIcAberto=-1;pintarConfig()">Juntar com…</button>`
@@ -4025,7 +4107,7 @@ function cfSecGrupos() {
   }).join('');
   return `<section class="cx" id="cfGrup" style="padding:22px">
     <div class="cx-h"><h2 style="font-size:18px">Grupos de gastos</h2><button type="button" class="bt pq acc" onclick="_cf.grupos.push({nome:'Novo grupo',nivel:'3-Conforto',icone:'',uso:0});_cfIcAberto=_cf.grupos.length-1;pintarConfig()">+ Novo grupo</button></div>
-    <p class="cx-s" style="margin:4px 0 10px;font-size:13px;line-height:1.55">É a aba _MAPA: a mesma regra que a planilha e o 📊 ANÁLISE usam. Arraste pela alça <b style="color:var(--txt)">⠿</b> para mudar a ordem; clique no ícone para escolher outro.</p>
+    <p class="cx-s" style="margin:4px 0 10px;font-size:13px;line-height:1.55">É a aba _MAPA: a mesma regra que a planilha e o 📊 ANÁLISE usam. ${pc ? 'Arraste pela alça <b style="color:var(--txt)">⠿</b>' : 'Use as setas'} para mudar a ordem; ${pc ? 'clique' : 'toque'} no ícone para escolher outro.</p>
     ${aviso}
     <div style="margin-top:8px">${linhas}</div>
     <div class="cfg-acoes"><button type="button" class="bt acc" onclick="cfSalvar('grupos',this)">Salvar grupos</button><span class="cx-s">nada muda na planilha até salvar</span></div>
@@ -4196,4 +4278,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v13 -------- -->
+<!-- -------- index.html v14 -------- -->
