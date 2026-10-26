@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v23 -------- -->
+<!-- -------- index.html v24 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -34,13 +34,17 @@ try { var _t = localStorage.getItem('jl_tema'); if (_t === 'claro' || _t === 'es
   const ler = () => { try { return JSON.parse(localStorage.getItem(CFG) || 'null'); } catch (e) { return null; } };
   let login = null;
   try { login = JSON.parse(localStorage.getItem(TOK) || 'null'); } catch (e) { /* sem login guardado */ }
-  const valido = () => !!(login && login.exp * 1000 > Date.now() + 60000);
+  // sessão do app (30 dias, dada pela API) ou, logo depois de entrar, o login Google (1 h)
+  const sessaoOk = () => !!(login && login.sessao && login.sessaoExp > Date.now() + 60000);
+  const googleOk = () => !!(login && login.jwt && login.exp * 1000 > Date.now() + 60000);
+  const valido = () => sessaoOk() || googleOk();
+  const credencial = () => sessaoOk() ? { sessao: login.sessao } : { idToken: login.jwt };
   let esperando = [];
   /** Chama fn com o login válido; sem login, pede para entrar e espera até 2 min */
   function comLogin(fn, falha) {
     const c = ler();
-    if (!c || !c.clientId) return fn('');
-    if (valido()) return fn(login.jwt);
+    if (!c || !c.clientId) return fn({});
+    if (valido()) return fn(credencial());
     const item = { fn: fn };
     item.t = setTimeout(() => { esperando = esperando.filter(x => x !== item); falha('Entre com a sua conta Google para continuar.'); }, 120000);
     esperando.push(item);
@@ -51,12 +55,16 @@ try { var _t = localStorage.getItem('jl_tema'); if (_t === 'claro' || _t === 'es
     const erro = (msg, off) => { if (falha) { const e = new Error(msg); e.offline = !!off; falha(e); } };
     if (!c || !c.url || !(c.token || c.clientId)) return erro('Conecte o app ao backend primeiro.');
     if (navigator.onLine === false) return erro('Sem internet.', true);
-    comLogin(jwt => {
+    comLogin(cred => {
       // text/plain evita o "preflight" de CORS, que o Apps Script não responde
       fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                     body: JSON.stringify({ fn: fn, args: args, token: c.token || '', idToken: jwt }) })
+                     body: JSON.stringify({ fn: fn, args: args, token: c.token || '', idToken: cred.idToken || '', sessao: cred.sessao || '' }) })
         .then(r => r.json())
         .then(r => {
+          if (r.sessao && login) {   // entrou com o Google agora: guarda a sessão de 30 dias
+            login.sessao = r.sessao.id; login.sessaoExp = r.sessao.exp;
+            try { localStorage.setItem(TOK, JSON.stringify(login)); } catch (e) { /* vale só nesta sessão */ }
+          }
           if (r.ok) { if (ok) ok(r.data); return; }
           if (r.login) { login = null; localStorage.removeItem(TOK); erro(r.erro || 'Entre de novo com a conta Google.', true); if (JL.pedirLogin) JL.pedirLogin(); return; }
           erro(r.erro || 'Erro no backend');
@@ -90,7 +98,7 @@ try { var _t = localStorage.getItem('jl_tema'); if (_t === 'claro' || _t === 'es
       login = { jwt: jwt, exp: p.exp, email: String(p.email || '').toLowerCase() };
       try { localStorage.setItem(TOK, JSON.stringify(login)); } catch (e) { /* sem espaço: vale só nesta sessão */ }
       const lista = esperando; esperando = [];
-      lista.forEach(x => { clearTimeout(x.t); x.fn(jwt); });
+      lista.forEach(x => { clearTimeout(x.t); x.fn({ idToken: jwt }); });
     },
     email: () => (login && login.email) || '',
     temLogin: valido,
@@ -1357,7 +1365,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v23</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v24</p>
   </div>
 </section>
 
@@ -1416,7 +1424,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v23';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v24';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -4498,4 +4506,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v23 -------- -->
+<!-- -------- index.html v24 -------- -->
