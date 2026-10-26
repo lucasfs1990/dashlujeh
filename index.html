@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v24 -------- -->
+<!-- -------- index.html v25 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -729,7 +729,31 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .lin-m { display:block; font-size:12px; color:var(--mut) }
 .av-q { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0; background:var(--s3); color:var(--txt) }
 .av-q.vazio { background:transparent; border:1px dashed var(--mut2); color:var(--mut) }
-.gcards { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:14px; align-items:start }
+.gcards { display:grid; grid-template-columns:repeat(auto-fill,minmax(max(300px,calc(25% - 14px)),1fr)); gap:14px; align-items:start }   /* no máximo 4 por linha: os nomes cabem */
+#lsKpis { grid-template-columns:repeat(4,minmax(0,1fr)) }
+/* à vista (V) ou parcelado (P), no começo de cada compra */
+.pg { display:inline-block; min-width:18px; padding:0 5px; margin-right:7px; border-radius:5px; font-size:10px; font-weight:800; line-height:16px; text-align:center; font-style:normal; vertical-align:1px }
+.pg.v { background:var(--ok-soft); color:var(--ok) }
+.pg.p { background:var(--acc-soft); color:var(--acc-tx) }
+/* o mês, no pé da barra lateral */
+.ps-mes { margin-top:auto; padding-bottom:14px }
+.ps-mes:not([hidden]) + .ps-pe { margin-top:0 }
+.ps-mes-t { font-size:11px; font-weight:800; color:var(--mut2); text-transform:uppercase; letter-spacing:.06em; padding:0 4px 6px }
+.ps-mes .mseg button:nth-child(2) { flex:1; display:flex; align-items:center; justify-content:center; gap:6px }
+.ps-mes .mseg button:disabled { opacity:.35 }
+/* aba Fixos no cartão */
+.fc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(420px,1fr)); gap:14px; align-items:start }
+.fc-li { display:flex; align-items:center; gap:12px; padding:8px 4px; border-bottom:1px solid var(--bd) }
+.fc-li:last-of-type { border-bottom:0 }
+.fc-ic { border:0; cursor:pointer }
+.fc-ic:hover, .fc-ic[aria-expanded="true"] { outline:2px solid var(--acc) }
+.fc-nome { flex:1; min-width:0; display:block; border:0; background:transparent; color:var(--txt); text-align:left; font:inherit; padding:0 }
+.fc-nome b { display:block; font-weight:700; font-size:14px }
+.fc-nome small { display:block; font-size:12px; color:var(--mut) }
+.fc-ics { display:flex; flex-wrap:wrap; gap:6px; padding:8px 4px 12px 52px; border-bottom:1px solid var(--bd) }
+.fc-ics button { width:40px; height:40px; border-radius:10px; border:1px solid var(--bd); background:var(--s2); color:var(--txt); display:flex; align-items:center; justify-content:center }
+.fc-ics button.on { border-color:var(--acc); background:var(--acc-soft); color:var(--acc-tx) }
+.fc-ics .fc-auto { width:auto; padding:0 12px; font-size:12px; font-weight:700 }
 .gcard { display:flex; flex-direction:column; gap:10px; padding:16px 16px 10px }
 .gcard.vr { border-color:var(--vr) }
 .gcard-h { display:flex; align-items:center; gap:12px; border:0; background:transparent; color:var(--txt); text-align:left; padding:0; font-family:var(--f-tx) }
@@ -1044,12 +1068,14 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   <button type="button" class="ps-b" data-t="painel" onclick="ir('painel')"><i data-ic="casa" data-s="19"></i><span>Painel</span></button>
   <button type="button" class="ps-b" data-t="lancs" onclick="ir('lancs')"><i data-ic="recibo" data-s="19"></i><span>Lançamentos</span></button>
   <button type="button" class="ps-b" data-t="fluxo" onclick="ir('fluxo')"><i data-ic="dinheiro" data-s="19"></i><span>Fluxo do mês</span></button>
+  <button type="button" class="ps-b" data-t="fixos" onclick="ir('fixos')"><i data-ic="cartao" data-s="19"></i><span>Fixos no cartão</span></button>
   <button type="button" class="ps-b" data-t="cartao" onclick="ir('cartao')"><i data-ic="baixar" data-s="19"></i><span>Importar C6</span></button>
   <button type="button" class="ps-b" data-t="consultas" onclick="ir('consultas')"><i data-ic="coracao" data-s="19"></i><span>Consultas</span></button>
   <button type="button" class="ps-b" data-t="pend" onclick="ir('pend')"><i data-ic="camera" data-s="19"></i><span>Pendências</span><b class="ps-badge" id="psBadge" hidden></b></button>
   <button type="button" class="ps-b" data-t="plano" onclick="ir('plano')"><i data-ic="plano" data-s="19"></i><span>Plano</span></button>
   <button type="button" class="ps-b" data-t="config" onclick="ir('config')"><i data-ic="engrenagem" data-s="19"></i><span>Configurações</span></button>
   <button type="button" class="ps-b bt-sinc" onclick="sincronizar(true)"><i data-ic="refresh" data-s="19"></i><span>Atualizar</span></button>
+  <div class="ps-mes" id="psMes" hidden></div>
   <div class="ps-pe"><span class="av" id="psAv">?</span><div style="min-width:0"><div style="font-size:13px;font-weight:700" id="psNome">—</div><small id="psComo"></small></div></div>
   <div class="ps-ver" id="psVer"></div>
 </aside>
@@ -1121,6 +1147,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 
 <!-- ══ COMPUTADOR: Fluxo do mês ══════════════════════════════ -->
 <section class="tela pc-only" id="t-fluxo"><div class="pcw" id="fxConteudo"><div class="esq" style="height:190px"></div></div></section>
+<section class="tela pc-only" id="t-fixos"><div class="pcw" id="fcConteudo"><div class="esq" style="height:190px"></div></div></section>
 
 <!-- ══ CONSULTAS (celular: guardar; computador: acompanhar o reembolso) ═ -->
 <section class="tela" id="t-consultas">
@@ -1365,7 +1392,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v24</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v25</p>
   </div>
 </section>
 
@@ -1424,7 +1451,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v24';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v25';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1469,12 +1496,17 @@ const IC = {
   crianca: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9 10h.01M15 10h.01M9 15a4 4 0 0 0 6 0',
   pata: 'M8 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM16 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM5 13a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM19 13a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM12 12c-3 0-5 4-5 6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2c0-2-2-6-5-6z',
   dinheiro: 'M3 6h18v12H3zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
-  grade: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'
+  grade: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
+  tv: 'M3 7h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zM8 22h8M9 3l3 4 3-4',
+  wifi: 'M2 9a15 15 0 0 1 20 0M5 12.5a10.5 10.5 0 0 1 14 0M8.5 16a5.5 5.5 0 0 1 7 0M12 19.5h.01',
+  escudo: 'M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z',
+  estrela: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',
+  agua: 'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z'
 };
 const ICONES_GRUPO = [['cesta', 'mercado'], ['burger', 'lanche'], ['cafe', 'café'], ['carro', 'carro'], ['onibus', 'ônibus'], ['aviao', 'viagem'],
   ['coracao', 'saúde'], ['pilula', 'remédio'], ['halter', 'academia'], ['presente', 'presente'], ['camisa', 'roupa'], ['sacola', 'compras'],
   ['brilho', 'beleza'], ['casa', 'casa'], ['martelo', 'reforma'], ['lampada', 'contas'], ['celular', 'celular'], ['ticket', 'lazer'],
-  ['musica', 'música'], ['livro', 'estudo'], ['crianca', 'crianças'], ['pata', 'pet'], ['pessoa', 'pessoa'], ['dinheiro', 'dinheiro'], ['grade', 'outros']];
+  ['musica', 'música'], ['livro', 'estudo'], ['crianca', 'crianças'], ['pata', 'pet'], ['pessoa', 'pessoa'], ['dinheiro', 'dinheiro'], ['tv', 'streaming'], ['wifi', 'internet'], ['escudo', 'seguro'], ['agua', 'água'], ['estrela', 'favorito'], ['grade', 'outros']];
 function ic(nome, s, w) {
   s = s || 20; w = w || 1.8;
   const pontos = nome === 'pontos';
@@ -1721,6 +1753,7 @@ function sincronizar(manual) {
 /** Pinta de novo a tela aberta com os dados novos */
 function repintar(forcar) {
   pintarBadge();
+  pintarMesSide();
   if (_cm) cmPintar();
   if (_tela === 'casa') carregarCasa();
   else if (_tela === 'painel') carregarPainel();   // a sincronização já trouxe o mês; fora da faixa, ele busca
@@ -1730,6 +1763,7 @@ function repintar(forcar) {
   else if (_tela === 'recentes') loadRecent();
   else if (_tela === 'consultas') pintarConsultas();
   else if (_tela === 'fluxo') carregarFluxo(forcar);
+  else if (_tela === 'fixos') carregarFixos(forcar);
   else if (_tela === 'plano' && forcar) { _plLoaded = false; entrarPlano(); }
 }
 
@@ -1738,7 +1772,7 @@ function repintar(forcar) {
    Lançamentos, Importar C6, Pendências, Plano e Configurações. */
 function ir(nome) {
   if (ehPC()) nome = { casa: 'painel', recentes: 'lancs', ajustes: 'config' }[nome] || nome;
-  else nome = { painel: 'casa', lancs: 'recentes', config: podeCfgCel() ? 'config' : 'ajustes', cartao: 'casa', plano: 'casa', fluxo: 'casa' }[nome] || nome;
+  else nome = { painel: 'casa', lancs: 'recentes', config: podeCfgCel() ? 'config' : 'ajustes', cartao: 'casa', plano: 'casa', fluxo: 'casa', fixos: 'casa' }[nome] || nome;
   document.body.classList.remove('em-lancar');
   document.querySelectorAll('.tela').forEach(t => t.classList.toggle('on', t.id === 't-' + nome));
   if (_barra && ['casa', 'consultas', 'pend', 'ajustes'].indexOf(nome) >= 0) _barra.set(nome, true);
@@ -1746,6 +1780,7 @@ function ir(nome) {
   _tela = nome;
   window.scrollTo(0, 0);
   pintarBadge();
+  pintarMesSide();
   if (nome === 'casa') carregarCasa();
   if (nome === 'painel') carregarPainel();
   if (nome === 'lancs') carregarLancs();
@@ -1756,6 +1791,7 @@ function ir(nome) {
   if (nome === 'ajustes') pintarAjustes();
   if (nome === 'consultas') carregarConsultas();
   if (nome === 'fluxo') carregarFluxo();
+  if (nome === 'fixos') carregarFixos();
 }
 function modoPC() {
   const antes = ehPC();
@@ -2072,8 +2108,27 @@ function escolherMes(ym) {
   if (_tela === 'painel') carregarPainel();
   else if (_tela === 'lancs') { document.getElementById('lsMes').value = String(ym); lsMesMudou(); }
   else if (_tela === 'fluxo') carregarFluxo();
+  else if (_tela === 'fixos') pintarFixos();
   else carregarCasa();
   if (_tela === 'plano') loadBudget(_mes);
+  pintarMesSide();
+}
+/** O mês escolhido, no pé da barra lateral: vale para Painel, Lançamentos, Fluxo, Fixos e Plano */
+function pintarMesSide() {
+  const el = document.getElementById('psMes');
+  if (!el) return;
+  const vale = !!_mes && ['painel', 'lancs', 'fluxo', 'fixos', 'plano'].indexOf(_tela) >= 0;
+  el.hidden = !vale;
+  if (!vale) return;
+  const i = _meses.findIndex(m => m.yyyymm === _mes);
+  el.innerHTML = `<div class="ps-mes-t">Mês</div><div class="mseg">
+    <button type="button" aria-label="Mês anterior" onclick="mesSide(-1)"${i <= 0 ? ' disabled' : ''}>‹</button>
+    <button type="button" class="on" aria-label="Escolher outro mês" onclick="abrirMeses()">${esc(rotMes(_mes))}${ic('chevD', 13)}</button>
+    <button type="button" aria-label="Próximo mês" onclick="mesSide(1)"${i < 0 || i >= _meses.length - 1 ? ' disabled' : ''}>›</button></div>`;
+}
+function mesSide(k) {
+  const m = _meses[_meses.findIndex(x => x.yyyymm === _mes) + k];
+  if (m) escolherMes(m.yyyymm);
 }
 
 /* ══ LANÇAR ══════════════════════════════════════════════════ */
@@ -3127,10 +3182,10 @@ function carregarFluxo(forcar) {
     .getFluxo(ym);
 }
 function carregarBase() {
-  google.script.run.withSuccessHandler(b => { _dados.base = b; dadosGravar(); if (_tela === 'fluxo' && _fxAba === 'contas') pintarFluxo((_dados.fluxo || {})[_mes]); if (_tela === 'config') pintarConfig(); if (_tela === 'lancs') pintarLancs(); })
+  google.script.run.withSuccessHandler(b => { _dados.base = b; dadosGravar(); if (_tela === 'fluxo' && _fxAba === 'contas') pintarFluxo((_dados.fluxo || {})[_mes]); if (_tela === 'config') pintarConfig(); if (_tela === 'lancs') pintarLancs(); if (_tela === 'fixos') pintarFixos(); })
     .withFailureHandler(err => showToast((err && err.message) || 'Erro ao ler a BASE', 'err')).listarBase();
 }
-function fxMes(k) { _mes = ymMais(_mes, k); carregarFluxo(); }
+function fxMes(k) { _mes = ymMais(_mes, k); carregarFluxo(); pintarMesSide(); }
 function fxAba(a) { _fxAba = a; carregarFluxo(); }
 
 /** Saldo dia a dia, totais, cheque especial e envelopes */
@@ -3178,7 +3233,8 @@ function pintarFluxo(d) {
 
 function fxPainel(d, c, rot) {
   const kp = (n, v, s, cls, extra) => `<div class="kpi${cls ? ' ' + cls : ''}"><div class="kpi-n">${n}</div><div class="kpi-v">${v}</div><div class="kpi-s">${s}</div>${extra || ''}</div>`;
-  const de = d.saldoDe ? `digitado: ${brl(d.saldoDe.valor)} no fim do dia ${d.saldoDe.dia}/${dois(d.saldoDe.yyyymm % 100)}` : 'sem saldo digitado: começa em 0';
+  const de = d.saldoDe ? `digitado: ${brl(d.saldoDe.valor)} no fim do dia ${d.saldoDe.dia}/${dois(d.saldoDe.yyyymm % 100)}`
+    : d.saldoVem ? `vem do fim de ${rotMes(d.saldoVem)} · sem saldo digitado` : 'sem saldo digitado: começa em 0';
   const conf = _fxConf ? `<div class="fx-conf"><label>A conta tinha R$ <input id="fxSv" inputmode="decimal" placeholder="0,00"/></label>
       <label>no fim do dia <input id="fxSd" type="number" min="1" max="${d.dias}" value="${d.yyyymm === ymDe(new Date()) ? new Date().getDate() : 1}" style="width:64px"/></label>
       <button type="button" class="bt pq acc" onclick="fxSaldoSalvar(${d.yyyymm})">Guardar</button></div>`
@@ -3280,9 +3336,9 @@ function fxContas(d) {
     ${grupos.filter(g => g[2].length || g[3]).map(g => `<details class="cx fx-gr"${g[3] ? ' open' : ''}><summary><b>${esc(g[0])}</b><span class="cx-s">${esc(g[1])} · ${g[2].length} · ${brl(tot(g[2]))}</span></summary>
       ${g[2].length ? `<div class="tb-box"><table class="tb" style="min-width:720px"><tbody>${g[2].map(linha).join('')}</tbody></table></div>` : '<div class="cx-s" style="padding:6px 0">Nada neste mês.</div>'}</details>`).join('')}`;
 }
-function fxNova(tipo) {
+function fxNova(tipo, como) {
   const ym = _mes, fim = (_meses[_meses.length - 1] || {}).yyyymm || ymMais(ym, 12);
-  _fxRegra = { linha: 0, f: { item: '', tipo: tipo === 'avulsa' ? 'Entrada' : tipo, valor: '', dia: 1, como: tipo === 'Saída' ? 'Débito automático' : 'Conta',
+  _fxRegra = { linha: 0, f: { item: '', tipo: tipo === 'avulsa' ? 'Entrada' : tipo, valor: '', dia: 1, como: como || (tipo === 'Saída' ? 'Débito automático' : 'Conta'),
     conta: quemAparelho(), grupo: tipo === 'avulsa' ? 'Loja' : '', nivel: '', obs: '', data: tipo === 'avulsa' ? hojeISO() : '', desde: ym, ate: fim },
     avulsa: tipo === 'avulsa', modo: 'tudo' };
   if (tipo === 'avulsa') _fxRegra.f.item = 'Retirada da loja';
@@ -3336,6 +3392,7 @@ function fxDepois(b) {
   _dados.base = b; _dados.fluxo = {}; _dados.inicio = {}; _dados.painel = {}; dadosGravar();
   fxFechar(); showToast('✓ Salvo na BASE', 'ok'); carregarFluxo(true); sincronizar(false);
   if (_tela === 'config') pintarConfig();
+  if (_tela === 'fixos') pintarFixos();
 }
 function fxSalvar() {
   fxLer();
@@ -3354,6 +3411,75 @@ function fxExcluir() {
   const modo = R.r.data ? 'tudo' : R.modo;
   if (!confirm(modo === 'tudo' ? `Excluir "${R.r.item}" da BASE?` : modo === 'mes' ? `Tirar "${R.r.item}" só de ${rotMes(_mes)}?` : `Encerrar "${R.r.item}" em ${rotMes(ymMais(_mes, -1))}?`)) return;
   google.script.run.withSuccessHandler(fxDepois).withFailureHandler(err => showToast((err && err.message) || 'Erro', 'err')).excluirRegra(R.linha, modo, _mes);
+}
+
+/* ══ FIXOS NO CARTÃO (computador) ═════════════════════════════
+   As assinaturas e contas que caem na fatura de cada cartão: as regras
+   da aba BASE com "Como paga" = nome do cartão. Clique na linha para
+   mudar valor, dia, nome ou prazo (o mesmo editor do Fluxo); clique no
+   ícone para trocar o símbolo, que fica guardado em Configurações
+   (prefs "fxic_<nome>") e vale em todos os meses. ══ */
+let _fcIcAberto = '';
+const slugFixo = s => semAc(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
+const icFixoEscolhido = item => { const p = ((_dados.config || {}).prefs || {})['fxic_' + slugFixo(item)]; return IC[p] ? p : ''; };
+/** O ícone de um fixo: o que você escolheu; senão um palpite pelo nome; senão o do grupo */
+function icFixo(r) {
+  const e = icFixoEscolhido(r.item); if (e) return e;
+  const s = semAc(r.item).toLowerCase();
+  if (/crossfit|gympass|academia|treino/.test(s)) return 'halter';
+  if (/natacao|piscina/.test(s)) return 'agua';
+  if (/celular/.test(s)) return 'celular';
+  if (/internet|wifi|fibra/.test(s)) return 'wifi';
+  if (/spotify|deezer/.test(s)) return 'musica';
+  if (/netflix|disney|globoplay|youtube|prime|hbo/.test(s)) return 'tv';
+  if (/chatgpt|claude|gemini|laser|estetic/.test(s)) return 'brilho';
+  if (/leiturinha|livro|curso/.test(s)) return 'livro';
+  if (/seguro/.test(s)) return 'escudo';
+  return icCat(r.grupo);
+}
+function carregarFixos(forcar) {
+  if (!_dados.base || forcar) carregarBase();
+  pintarFixos();
+}
+function pintarFixos() {
+  const host = document.getElementById('fcConteudo');
+  if (!host) return;
+  const B = _dados.base, ym = _mes, cartoes = (B && B.cartoes) || [];
+  const cab = `<header class="pch">
+      <div><h1>Fixos no cartão</h1><div class="pch-s">assinaturas e contas que caem na fatura · ${esc(rotMes(ym))} · grava na aba BASE</div></div>
+      <div class="pch-d">${cartoes.length ? `<button type="button" class="bt acc" onclick="fxNova('Saída', ${escA(JSON.stringify(cartoes[0]))})">+ Novo fixo no ${esc(cartoes[0])}</button>` : ''}</div></header>`;
+  if (!B) { host.innerHTML = cab + '<div class="esq" style="height:240px"></div>'; return; }
+  const dia = r => r.data ? +r.data.slice(8) : r.dia;
+  const secoes = cartoes.map(c => {
+    const l = B.regras.filter(r => r.tipo === 'Saída' && fxAtiva(r, ym) && String(r.como).trim().toUpperCase() === c.toUpperCase())
+      .sort((a, b) => dia(a) - dia(b) || b.valor - a.valor);
+    return { c: c, l: l, tot: l.reduce((s, r) => s + r.valor, 0) };
+  }).filter(s => s.l.length);
+  const picker = item => `<div class="fc-ics" role="group" aria-label="Escolha o ícone">${ICONES_GRUPO.map(([n, t]) =>
+      `<button type="button" class="${icFixoEscolhido(item) === n ? 'on' : ''}" title="${escA(t)}" aria-label="${escA(t)}" onclick="fcIconeEscolher(${escA(JSON.stringify(item))},'${n}')">${ic(n, 20)}</button>`).join('')}
+      <button type="button" class="fc-auto" onclick="fcIconeEscolher(${escA(JSON.stringify(item))},'')">automático</button></div>`;
+  const linha = r => `<div class="fc-li">
+      <button type="button" class="lin-ic fc-ic" aria-label="Trocar o ícone de ${escA(r.item)}" aria-expanded="${_fcIcAberto === r.item}" onclick="fcIcone(${escA(JSON.stringify(r.item))})">${ic(icFixo(r), 20)}</button>
+      <button type="button" class="fc-nome" onclick="fxEditar(${r.linha})"><b>${esc(r.item)}${r.data ? ' <span class="etq">uma vez</span>' : ''}</b>
+        <small>${esc(['dia ' + dois(dia(r)), r.grupo, r.conta].filter(Boolean).join(' · '))}</small></button>
+      <span class="nm">${nbr(r.valor)}</span>
+      <button type="button" class="btn-ic" aria-label="Editar ${escA(r.item)}" onclick="fxEditar(${r.linha})">${ic('lapis', 16)}</button></div>`
+    + (_fcIcAberto === r.item ? picker(r.item) : '');
+  host.innerHTML = cab + (secoes.length
+    ? `<section class="fc-grid">${secoes.map(s => `<div class="cx"><div class="cx-h"><h2>${esc(s.c)} · ${brl(s.tot)}</h2>
+        <button type="button" class="link" onclick="fxNova('Saída', ${escA(JSON.stringify(s.c))})">+ novo</button></div>
+        <div class="cx-s" style="margin-bottom:6px">${s.l.length} ${s.l.length === 1 ? 'fixo' : 'fixos'} · já estão dentro da fatura prevista</div>${s.l.map(linha).join('')}</div>`).join('')}</section>`
+    : `<div class="cx"><div class="empty">Nenhum fixo no cartão em ${esc(rotMes(ym))}.</div></div>`);
+}
+function fcIcone(item) { _fcIcAberto = _fcIcAberto === item ? '' : item; pintarFixos(); }
+function fcIconeEscolher(item, nome) {
+  const chave = 'fxic_' + slugFixo(item);
+  _dados.config = _dados.config || {}; _dados.config.prefs = _dados.config.prefs || {};
+  _dados.config.prefs[chave] = nome;
+  _fcIcAberto = ''; dadosGravar(); pintarFixos();   // aparece na hora; grava na planilha por trás
+  const p = {}; p[chave] = nome;
+  google.script.run.withSuccessHandler(c => { _dados.config = c; dadosGravar(); if (_tela === 'fixos') pintarFixos(); })
+    .withFailureHandler(err => showToast((err && err.message) || 'Não consegui guardar o ícone', 'err')).salvarConfig('prefs', p);
 }
 
 /* ══ "Para onde foi" com o VR: barra dupla (âmbar = crédito, azul = VR)
@@ -3441,7 +3567,7 @@ function cartaoFixos(d, l) {
 /** A lista das contas fixas na folha das compras: só leitura (editar é no Fluxo do mês, no computador) */
 function cmFixos(host, fechar, d) {
   const l = fixosDoMes(d.yyyymm || _mes) || [], soma = a => a.reduce((s, r) => s + r.valor, 0);
-  const linha = r => `<div class="ult-i"><span class="ult-ic">${ic(icCat(r.grupo), 18)}</span>
+  const linha = r => `<div class="ult-i"><span class="ult-ic">${ic(icFixo(r), 18)}</span>
       <div style="flex:1;min-width:0"><div class="ult-d">${esc(r.item)}${r.data ? '<span class="tag-um">uma vez</span>' : ''}</div>
         <div class="ult-m">${esc(['dia ' + dois(r.d), r.grupo, r.cartao ? '' : r.como, r.conta].filter(Boolean).join(' · '))}</div></div>
       <div><div class="ult-v">${nbr(r.valor)}</div></div></div>`;
@@ -3540,8 +3666,6 @@ function cartaoPC(c, d) {
 function pintarPainel(d) {
   const cartoes = d.cartoes || [];
   const total = cartoes.reduce((s, c) => s + (c.real ? c.real.total : c.prevista), 0);
-  const i = _meses.findIndex(m => m.yyyymm === d.yyyymm);
-  const viz = i >= 0 ? _meses.slice(Math.max(0, i - 1), i + 2) : [{ yyyymm: d.yyyymm, label: d.mesCurto }];
   const hoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
   const princ = cartoes[0] || {};
 
@@ -3589,8 +3713,6 @@ function pintarPainel(d) {
     <header class="pch">
       <div><h1>Painel</h1><div class="pch-s">fatura que vence ${esc(princ.venc || d.venc)} · ${esc(textoFecha(d.fecha.dias, d.fecha.data))} · ${esc(hoje)}</div></div>
       <div class="pch-d">
-        <div class="mseg">${viz.map(m => `<button type="button" class="${m.yyyymm === d.yyyymm ? 'on' : ''}" onclick="escolherMes(${m.yyyymm})">${esc(m.label)}</button>`).join('')}
-          <button type="button" aria-label="Outros meses" onclick="abrirMeses()">${ic('chevD', 14)}</button></div>
         <button type="button" class="bt acc" onclick="abrirLancar()">+ Lançar gasto</button>
       </div>
     </header>
@@ -3648,7 +3770,7 @@ function pintarPainel(d) {
 /* ── Lançamentos: 4 visualizações (tabela, por dia, por grupo, calendário)
       e a janela de editar. Grupo e "quem" mudam direto na linha da tabela.
       O VR aparece com a marca azul e fica fora dos totais. ── */
-let _lsVista = LS.get('jl_ls_vista', 'tabela'), _lsSoSem = false, _lsDia = '', _lsPop = null, _lsVisiveis = [];
+let _lsVista = LS.get('jl_ls_vista', 'tabela'), _lsDia = '', _lsPop = null, _lsVisiveis = [];
 const LS_VISTAS = [['tabela', 'Tabela'], ['dia', 'Por dia'], ['grupo', 'Por grupo'], ['cal', 'Calendário']];
 const SEM_LONGO = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 const MES_MIN = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -3660,17 +3782,11 @@ function carregarLancs(forcar) {
   montarFiltros();
   if (_dados.lancs) pintarLancs();
   else { pintarVistas(); document.getElementById('lsCorpo').innerHTML = '<div class="esq" style="height:260px"></div>'; }
-  garantirInicio(+val('lsMes') || _mes);
   if (_dados.lancs && !forcar) return;
   google.script.run
     .withSuccessHandler(l => { _dados.lancs = l; dadosGravar(); if (_tela === 'lancs') { montarFiltros(); pintarLancs(); } })
     .withFailureHandler(err => { if (!_dados.lancs) document.getElementById('lsCorpo').innerHTML = `<div class="alert alert-crit"><span class="alert-icon">⚠️</span><span>${esc((err && err.message) || 'Erro ao carregar')}</span></div>`; })
     .listarLancamentos();
-}
-/** O Início de um mês (para os fixos do cartão), buscado só se não estiver guardado */
-function garantirInicio(ym) {
-  if (!ym || _dados.inicio[ym]) { pintarFixosLs(); return; }
-  google.script.run.withSuccessHandler(x => { x._em = Date.now(); _dados.inicio[x.yyyymm] = x; dadosGravar(); if (_tela === 'lancs') pintarFixosLs(); }).getInicio(ym);
 }
 function montarFiltros() {
   const L = _dados.lancs || [];
@@ -3688,7 +3804,7 @@ function montarFiltros() {
   const quem = _cfg.pessoas.slice(); L.forEach(x => { if (x.quem && quem.indexOf(x.quem) < 0) quem.push(x.quem); });
   sel('lsQuem', [['', 'Todas as pessoas']].concat(quem.map(q => [q, q]), [['-', 'Sem "quem"']]), '');
 }
-function lsMesMudou() { if (+val('lsMes')) { _mes = +val('lsMes'); garantirInicio(_mes); } _lsDia = ''; pintarLancs(); }
+function lsMesMudou() { if (+val('lsMes')) _mes = +val('lsMes'); _lsDia = ''; pintarLancs(); pintarMesSide(); }
 function lsVista(v) { _lsVista = v; LS.set('jl_ls_vista', v); pintarLancs(); }
 function pintarVistas() {
   document.getElementById('lsVistas').innerHTML = LS_VISTAS.map(([v, t]) =>
@@ -3709,7 +3825,7 @@ function lancsComFila() {
   return novos.concat(L);
 }
 /** Linhas que passam nos filtros: [{x, noMes, k}] (k = qual parcela cai no mês) */
-function lsFiltrar(L, ignorarSemQuem) {
+function lsFiltrar(L) {
   const q = semAc(val('lsBusca')).toLowerCase().trim(), mes = +val('lsMes'), forma = val('lsForma'),
         grupo = val('lsGrupo'), quem = val('lsQuem'), tipo = val('lsTipo'), idx = mes ? idxDe(mes) : 0;
   const linhas = [];
@@ -3724,7 +3840,6 @@ function lsFiltrar(L, ignorarSemQuem) {
     if (quem && (quem === '-' ? x.quem : x.quem !== quem)) return;
     if (tipo === 'v' && x.n > 1) return;
     if (tipo === 'p' && x.n <= 1) return;
-    if (!ignorarSemQuem && _lsSoSem && x.quem) return;
     if (q && semAc([x.desc, x.obs, x.cat, x.grupo, x.quem].join(' ')).toLowerCase().indexOf(q) < 0) return;
     linhas.push({ x, noMes, k });
   });
@@ -3735,28 +3850,24 @@ function pintarLancs() {
   pintarVistas();
   const L = lancsComFila();
   if (!L) return;
-  const todas = lsFiltrar(L, true), linhas = _lsSoSem ? lsFiltrar(L, false) : todas;
+  const linhas = lsFiltrar(L);
   _lsVisiveis = linhas.filter(l => !l.x.enviando).map(l => l.x.id);
   const cred = linhas.filter(l => !l.x.vr), vr = linhas.filter(l => l.x.vr);
   const soma = a => a.reduce((s, l) => s + l.noMes, 0);
   const sv = soma(cred.filter(l => l.x.n <= 1)), sp = soma(cred.filter(l => l.x.n > 1)), svr = soma(vr);
-  const semQ = todas.filter(l => !l.x.quem && !l.x.enviando).length;
   const mes = +val('lsMes'), forma = val('lsForma');
   const kp = (n, v, s, cls) => `<div class="kpi${cls ? ' ' + cls : ''}"><div class="kpi-n">${n}</div><div class="kpi-v">${brl(v)}</div><div class="kpi-s">${esc(s)}</div></div>`;
   document.getElementById('lsKpis').innerHTML =
     kp('Total no filtro', sv + sp, `${cred.length} ${cred.length === 1 ? 'lançamento' : 'lançamentos'}${vr.length ? ' · sem o VR' : ''}`) +
     kp('À vista', sv, mes ? 'compras desta fatura' : 'todos os meses') +
     kp('Parcelas', sp, mes ? 'a parcela do mês' : 'pelo valor total') +
-    `<button type="button" class="kpi alerta${_lsSoSem ? ' on' : ''}" onclick="_lsSoSem=!_lsSoSem;pintarLancs()" aria-pressed="${_lsSoSem}">
-      <div class="kpi-n">Sem "quem"</div><div class="kpi-v">${semQ}</div><div class="kpi-s">${_lsSoSem ? 'mostrando só estes · clique para ver todos' : semQ ? 'clique para completar' : 'tudo preenchido'}</div></button>` +
     (vr.length ? kp('Vale-refeição', svr, `${vr.length} no VR · fora do total`, 'vr') : '');
   document.getElementById('lsSub').textContent = mes
-    ? `fatura que vence em ${rotMes(mes).toLowerCase()}${forma ? ' · ' + forma : ''} · ${cicloTxt(mes)} · parcelas contam só a do mês`
-    : 'todos os meses · parcelas pelo valor total';
+    ? `fatura que vence em ${rotMes(mes).toLowerCase()}${forma ? ' · ' + forma : ''} · ${cicloTxt(mes)} · parcelas contam só a do mês · V = à vista, P = parcelado`
+    : 'todos os meses · parcelas pelo valor total · V = à vista, P = parcelado';
   const host = document.getElementById('lsCorpo');
-  if (!linhas.length) { host.innerHTML = `<section class="cx"><div class="empty">${_lsSoSem ? 'Todos com "quem" preenchido.' : 'Nada com esses filtros.'}</div></section>`; return; }
+  if (!linhas.length) { host.innerHTML = `<section class="cx"><div class="empty">Nada com esses filtros.</div></section>`; return; }
   host.innerHTML = _lsVista === 'dia' ? lsVistaDia(linhas) : _lsVista === 'grupo' ? lsVistaGrupo(linhas) : _lsVista === 'cal' ? lsVistaCal(linhas) : lsVistaTabela(linhas);
-  if (_lsVista === 'grupo') pintarFixosLs();
 }
 /** "compras de 28/09 a 27/10" do cartão principal */
 function cicloTxt(ym) {
@@ -3768,6 +3879,10 @@ const lsParcTxt = (x, k) => x.n > 1 ? (k ? `${k}/${x.n} · de ${nbr(x.valor)}` :
 const ehAroeira = g => /aroeira/i.test(String(g || ''));
 const tagAro = g => ehAroeira(g) ? '<span class="tag-aro">Aroeira</span>' : '';
 const lsTags = x => (x.vr ? '<span class="tag-vr">VR</span>' : '') + tagAro(x.grupo) + (x.enviando ? '<span class="tag-env">enviando</span>' : '');
+/** V = à vista, P 2/10 = parcelado (a parcela do mês); o VR já tem a sua marca */
+const pgChip = (x, k) => x.vr ? '' : x.n > 1
+  ? `<span class="pg p" title="${escA('Parcelado · ' + lsParcTxt(x, k))}">P ${k ? k + '/' + x.n : x.n + 'x'}</span>`
+  : '<span class="pg v" title="À vista">V</span>';
 function lsSelGrupo(x) {
   const lista = _cfg.categorias.indexOf(x.grupo) < 0 ? _cfg.categorias.concat([x.grupo]) : _cfg.categorias;
   return `<select class="csel" aria-label="Grupo de ${escA(x.desc)}" onclick="event.stopPropagation()" onchange="lsRapido('${escA(x.id)}','cat',this.value)">${lista.map(g => `<option${g === x.grupo ? ' selected' : ''}>${esc(g)}</option>`).join('')}</select>`;
@@ -3784,7 +3899,7 @@ function lsVistaTabela(linhas) {
     const sub = [x.obs, x.forma !== princ && !x.vr ? x.forma : '', x.ctx && x.ctx !== 'Pessoal' ? 'para ' + x.ctx : ''].filter(Boolean).join(' · ');
     return `<tr class="lnk${x.vr ? ' vr' : ''}"${x.enviando ? ' style="opacity:.6"' : ''} onclick="lsAbrir('${escA(x.id)}')">
       <td class="mu nm">${esc(x.dataBR)}</td>
-      <td><div style="font-weight:700;color:var(--txt)">${esc(x.desc)}${lsTags(x)}</div>${sub ? `<small>${esc(sub)}</small>` : ''}</td>
+      <td><div style="font-weight:700;color:var(--txt)">${pgChip(x, k)}${esc(x.desc)}${lsTags(x)}</div>${sub ? `<small>${esc(sub)}</small>` : ''}</td>
       <td>${x.enviando ? `<span class="gchip">${esc(x.grupo)}</span>` : lsSelGrupo(x)}</td>
       <td>${x.enviando ? esc(x.quem || '—') : lsSelQuem(x)}</td>
       <td class="mu">${esc(lsParcTxt(x, k))}</td>
@@ -3802,7 +3917,7 @@ function lsItemLinha(x, noMes, k) {
   const meta = [x.grupo, x.n > 1 ? lsParcTxt(x, k) : '', x.vr ? 'VR' : x.forma !== (_cfg.cartoes[0] || {}).nome ? x.forma : ''].filter(Boolean).join(' · ');
   return `<button type="button" class="lin-b" onclick="lsAbrir('${escA(x.id)}')"${x.enviando ? ' style="opacity:.6"' : ''}>
     <span class="lin-ic${x.vr ? ' vr' : ''}">${ic(icCat(x.grupo), 19)}</span>
-    <span style="flex:1;min-width:0"><span class="lin-t">${esc(x.desc)}${lsTags(x)}</span><span class="lin-m">${esc(meta)}</span></span>
+    <span style="flex:1;min-width:0"><span class="lin-t">${pgChip(x, k)}${esc(x.desc)}${lsTags(x)}</span><span class="lin-m">${esc(meta)}</span></span>
     <span class="av-q${x.quem ? '' : ' vazio'}" title="${escA(x.quem || 'sem quem')}">${esc(x.quem ? x.quem[0] : '?')}</span>
     <span class="nm" style="min-width:88px;text-align:right${x.vr ? ';color:var(--mut)' : ''}">${nbr(noMes)}</span></button>`;
 }
@@ -3838,10 +3953,9 @@ function lsVistaGrupo(linhas) {
         <span style="text-align:right"><span class="nm" style="font-size:17px;display:block">${brl(c.tot)}</span>${c.vr ? `<small class="vr-tx">+ ${nbr(c.vr)} no VR</small>` : ''}</span></button>
       <div class="barra dupla"><i style="width:${(c.tot / max * 100).toFixed(1)}%"></i><b style="width:${(c.vr / max * 100).toFixed(1)}%"></b></div>
       <div>${c.its.slice(0, 5).map(l => `<button type="button" class="gcard-i" onclick="lsAbrir('${escA(l.x.id)}')">
-          <span><span class="nm mu" style="font-size:12px">${esc(l.x.dataBR.slice(0, 5))}</span> ${esc(l.x.desc)}${lsTags(l.x)}</span><span class="nm">${nbr(l.noMes)}</span></button>`).join('')}
+          <span>${pgChip(l.x, l.k)}<span class="nm mu" style="font-size:12px">${esc(l.x.dataBR.slice(0, 5))}</span> ${esc(l.x.desc)}${lsTags(l.x)}</span><span class="nm">${nbr(l.noMes)}</span></button>`).join('')}
         ${c.its.length > 5 ? `<button type="button" class="link" style="padding:4px 6px" onclick="${filtro}">ver os ${c.its.length}</button>` : ''}</div></div>`;
-  }).join('')}
-    <div class="cx gcard"><div class="cx-h"><h2>Fixos no cartão</h2><span class="cx-s" id="lsFixosMes"></span></div><div id="lsFixos" style="margin-top:8px"></div></div></section>`;
+  }).join('')}</section>`;
 }
 /* ── Calendário: o ciclo da fatura dia a dia ──
    Chips de grupo (começam apagados = mostra tudo; "Todos" acende ou apaga tudo). No topo, o total
@@ -3912,7 +4026,7 @@ function lsVistaCal(linhas) {
     const x = l.x;
     return `<button type="button" class="lin-b${ehAroeira(x.grupo) ? ' cal-aro' : ''}" onclick="lsAbrir('${escA(x.id)}')"${x.enviando ? ' style="opacity:.6"' : ''}>
       <span class="lin-ic${x.vr ? ' vr' : ''}">${ic(icCat(x.grupo), 19)}</span>
-      <span style="flex:1;min-width:0"><span class="lin-t">${esc(x.desc)}${lsTags(x)}</span>
+      <span style="flex:1;min-width:0"><span class="lin-t">${pgChip(x, l.k)}${esc(x.desc)}${lsTags(x)}</span>
         <span class="lin-m">${esc(x.grupo)}${x.vr ? '' : `<span class="tag-ct">${esc(x.cartao || x.forma)}</span>`}</span></span>
       <span class="av-q${x.quem ? '' : ' vazio'}" title="${escA(x.quem || 'sem quem')}">${esc(x.quem ? x.quem[0] : '?')}</span>
       <span class="nm" style="min-width:80px;text-align:right">${nbr(l.noMes)}</span></button>`;
@@ -3942,16 +4056,6 @@ function lsVistaCal(linhas) {
       ${subDia ? `<div class="cx-s" style="margin-bottom:6px">${esc(subDia)}</div>` : ''}
       ${doDia.length ? normais.map(linha).join('') + (daLoja.length ? '<div class="cal-sep">Loja Aroeira</div>' + daLoja.map(linha).join('') : '')
         : '<div class="cx-s" style="padding-top:8px">Nada nos grupos escolhidos neste dia.</div>'}</div></section>`;
-}
-function pintarFixosLs() {
-  const ym = +val('lsMes') || _mes, d = _dados.inicio[ym];
-  const rot = document.getElementById('lsFixosMes'), host = document.getElementById('lsFixos');
-  if (!rot || !host) return;
-  rot.textContent = rotMes(ym);
-  if (!d || !d.cartoes) { host.innerHTML = '<div class="esq" style="height:60px"></div>'; return; }
-  host.innerHTML = d.cartoes.map(c => (c.fixosLista || []).length ? `<div class="cx-s" style="margin:8px 0 2px;font-weight:800">${esc(c.nome)} · ${brl(c.fixos)}</div>` +
-      c.fixosLista.map(f => `<div class="c6-li"><span style="font-size:13px">${esc(f.desc)}</span><span class="num" style="font-size:13px">${nbr(f.valor)}</span></div>`).join('') : '').join('')
-    || '<div class="cx-s">Nenhum fixo de cartão neste mês.</div>';
 }
 
 /** Grupo ou quem trocados direto na linha: aparece na hora e grava por trás */
@@ -4506,4 +4610,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v24 -------- -->
+<!-- -------- index.html v25 -------- -->
