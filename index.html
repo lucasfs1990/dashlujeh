@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v26 -------- -->
+<!-- -------- index.html v27 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -743,6 +743,15 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .ps-mes .mseg button:disabled { opacity:.35 }
 /* aba Fixos no cartão */
 .fc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(420px,1fr)); gap:14px; align-items:start }
+.fc-det summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:14px; color:var(--mut) }
+.fc-det summary::-webkit-details-marker { display:none }
+.fc-det[open] summary { margin-bottom:6px } .fc-det[open] summary > svg { transform:rotate(180deg) }
+.fc-sum b { display:block; font-size:16px; font-weight:800; color:var(--txt) } .fc-sum small { font-size:12px; color:var(--mut) }
+.fc-prev { flex:1; min-width:0; display:flex; flex-wrap:wrap; gap:4px; align-items:center }
+.fc-det[open] .fc-prev { visibility:hidden }
+.fc-prev i { width:28px; height:28px; border-radius:8px; background:var(--acc-soft); color:var(--acc-tx); display:flex; align-items:center; justify-content:center }
+.fc-prev em { font-style:normal; font-size:11px; font-weight:800; color:var(--mut) }
+.fc-tot { color:var(--txt); font-size:16px }
 .fc-li { display:flex; align-items:center; gap:12px; padding:8px 4px; border-bottom:1px solid var(--bd) }
 .fc-li:last-of-type { border-bottom:0 }
 .fc-ic { border:0; cursor:pointer }
@@ -1399,7 +1408,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v26</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v27</p>
   </div>
 </section>
 
@@ -1458,7 +1467,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v26';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v27';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -3453,7 +3462,7 @@ function fxExcluir() {
    mudar valor, dia, nome ou prazo (o mesmo editor do Fluxo); clique no
    ícone para trocar o símbolo, que fica guardado em Configurações
    (prefs "fxic_<nome>") e vale em todos os meses. ══ */
-let _fcIcAberto = '';
+let _fcIcAberto = '', _fcAbertos = {};   // _fcAbertos: quais cartões estão abertos (começam fechados)
 const slugFixo = s => semAc(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
 const icFixoEscolhido = item => { const p = ((_dados.config || {}).prefs || {})['fxic_' + slugFixo(item)]; return IC[p] ? p : ''; };
 /** O ícone de um fixo: o que você escolheu; senão um palpite pelo nome; senão o do grupo */
@@ -3500,9 +3509,12 @@ function pintarFixos() {
       <button type="button" class="btn-ic" aria-label="Editar ${escA(r.item)}" onclick="fxEditar(${r.linha})">${ic('lapis', 16)}</button></div>`
     + (_fcIcAberto === r.item ? picker(r.item) : '');
   host.innerHTML = cab + (secoes.length
-    ? `<section class="fc-grid">${secoes.map(s => `<div class="cx"><div class="cx-h"><h2>${esc(s.c)} · ${brl(s.tot)}</h2>
-        <button type="button" class="link" onclick="fxNova('Saída', ${escA(JSON.stringify(s.c))})">+ novo</button></div>
-        <div class="cx-s" style="margin-bottom:6px">${s.l.length} ${s.l.length === 1 ? 'fixo' : 'fixos'} · já estão dentro da fatura prevista</div>${s.l.map(linha).join('')}</div>`).join('')}</section>`
+    ? `<section class="fc-grid">${secoes.map(s => `<details class="cx fc-det"${_fcAbertos[s.c] ? ' open' : ''} ontoggle="_fcAbertos[${escA(JSON.stringify(s.c))}]=this.open">
+        <summary><span class="fc-sum"><b>${esc(s.c)}</b><small>${s.l.length} ${s.l.length === 1 ? 'fixo' : 'fixos'}</small></span>
+          <span class="fc-prev" aria-hidden="true">${s.l.slice(0, 10).map(r => `<i title="${escA(r.item)}">${ic(icFixo(r), 16)}</i>`).join('')}${s.l.length > 10 ? `<em>+${s.l.length - 10}</em>` : ''}</span>
+          <span class="nm fc-tot">${brl(s.tot)}</span>${ic('chevD', 16)}</summary>
+        <div class="cx-s" style="margin:4px 0 6px">já estão dentro da fatura prevista · clique no ícone para trocá-lo</div>${s.l.map(linha).join('')}
+        <button type="button" class="link" style="margin-top:8px" onclick="fxNova('Saída', ${escA(JSON.stringify(s.c))})">+ novo fixo no ${esc(s.c)}</button></details>`).join('')}</section>`
     : `<div class="cx"><div class="empty">Nenhum fixo no cartão em ${esc(rotMes(ym))}.</div></div>`);
 }
 function fcIcone(item) { _fcIcAberto = _fcIcAberto === item ? '' : item; pintarFixos(); }
@@ -4644,4 +4656,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v26 -------- -->
+<!-- -------- index.html v27 -------- -->
