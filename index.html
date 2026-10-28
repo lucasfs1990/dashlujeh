@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v28 -------- -->
+<!-- -------- index.html v29 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -216,6 +216,10 @@ body.em-lancar .tela { padding-bottom:110px }
 .pessoa b { width:26px; height:26px; border-radius:50%; background:var(--acc); color:var(--acc-on); display:flex; align-items:center; justify-content:center; font-size:12px }
 
 .btn-pend { margin:12px 20px 0; width:calc(100% - 40px); height:50px; border-radius:16px; border:1.5px dashed var(--acc-tx); background:transparent; color:var(--acc-tx); font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; gap:8px }
+.disp { margin:14px 20px 0; background:var(--s1); border:1px solid var(--bd); border-radius:20px; padding:14px 16px }
+.disp-v { font-family:var(--f-num); font-weight:700; font-size:28px; margin-top:4px }
+.disp-s { font-size:12px; color:var(--mut); margin-top:2px }
+.disp-p { display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--mut); margin:12px 0 6px }
 .faixa { margin:12px 20px 0; padding:10px 14px; border-radius:14px; background:var(--acc-soft); color:var(--acc-tx); font-size:13px; font-weight:600; display:flex; align-items:center; gap:10px }
 
 .ult { padding:0 20px }
@@ -1408,7 +1412,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v27</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v29</p>
   </div>
 </section>
 
@@ -1467,7 +1471,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v28';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v29';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1837,19 +1841,28 @@ function comFila(d) {
   const o = JSON.parse(JSON.stringify(d)), idx = idxDe(o.yyyymm);
   const soma = (lista, nome, v) => { const e = lista.find(x => x.nome === nome); if (e) e.valor += v; else lista.push({ nome: nome, valor: v }); };
   f.forEach(p => {
-    const [y, m, dd] = String(p.data).split('-').map(Number);
-    const c = cartaoDe(p.forma), n = p.parc === 'Sim' ? Math.max(1, +p.nparc || 1) : 1;
-    const ci = idxDe(ymDe(compDe(new Date(y, m - 1, dd), c)));
+    const [y, m, dd] = String(p.data).split('-').map(Number), dt = new Date(y, m - 1, dd);
+    const c = cartaoDe(p.forma), n = c && p.parc === 'Sim' ? Math.max(1, +p.nparc || 1) : 1;
+    const ci = idxDe(ymDe(compDe(dt, c)));
     o.ultimos = [{ data: `${dois(dd)}/${dois(m)}/${y}`, desc: p.desc, cat: p.cat, forma: p.forma, parc: p.parc,
                    valor: p.valor, nparc: n, quem: p.quem, enviando: true }].concat(o.ultimos || []);
-    const v = n > 1 ? (ci <= idx && idx <= ci + n - 1 ? p.valor / n : 0) : (ci === idx ? p.valor : 0);
-    if (!v || !c) return;
+    if (ehVR(p.forma)) return;
+    // o que sai da conta até este mês (fatura no vencimento, Pix no dia) baixa o fim do mês e o disponível
+    let ateAqui = 0;
+    for (let k = 0; k < n; k++) if (ci + k <= idx) ateAqui += p.valor / n;
+    if (o.fimMes != null) o.fimMes -= ateAqui;
+    if (o.disponivel != null) o.disponivel -= ateAqui;
+    if (n > 1) (o.serieParcelas || []).forEach(s => { const j = idxDe(s.yyyymm); if (ci <= j && j <= ci + n - 1) s.valor += p.valor / n; });
+    // "Para onde foi": cartão pela fatura; Pix e débito pelo ciclo do cartão principal
+    const v = !c ? (idxDe(ymDe(compDe(dt, _cfg.cartoes[0]))) === idx ? p.valor : 0)
+            : n > 1 ? (ci <= idx && idx <= ci + n - 1 ? p.valor / n : 0) : (ci === idx ? p.valor : 0);
+    if (!v) return;
     soma(o.categorias = o.categorias || [], p.cat, v);
     soma(o.pessoas = o.pessoas || [], p.quem || 'sem nome', v);
+    if (!c) return;
     if (c.nome === _cfg.cartoes[0].nome) {
       if (n > 1) o.parcelas += v; else o.avista += v;
       o.prevista += v; o.sobra -= v;
-      if (o.fimMes != null) o.fimMes -= v;
     }
     const k = (o.cartoes || []).find(x => x.nome === c.nome);
     if (k) { if (n > 1) k.parcelas += v; else k.avista += v; k.prevista += v; k.lancamentos++; if (k.ateHoje != null) k.ateHoje += v; }
@@ -1896,6 +1909,26 @@ function faturaCel(c, d) {
       <div><div class="fat-v">${brl(valor)}</div><div class="fat-sub">${esc(sub)}</div></div>
       <div class="fat-l3"><span>vence ${esc(c.venc)}</span><span>${esc(textoFecha(c.fechaDias, c.fechaData))}</span></div>
     </section>`;
+}
+
+/** Quanto ainda dá para gastar até o fim do mês e o teto das parcelas (code.gs v17+) */
+function dispHtml(d) {
+  if (d.disponivel == null) return '';
+  const a = d.antes, sp = d.serieParcelas || [], t = d.tetoParc || {};
+  const pico = sp.reduce((m, x) => x.valor > m.valor ? x : m, sp[0] || { valor: 0, rot: '' });
+  const faixa = a ? `<button type="button" class="faixa toca" style="width:calc(100% - 40px);text-align:left;border:0;font-family:inherit" onclick="escolherMes(${a.yyyymm})">${ic('folga', 18)}<span style="flex:1">Até ${esc(a.ate)} ainda saem ${esc(brl(a.faltam))} · a conta fica com ${esc(brl(a.saldo))}</span>${ic('chevR', 14)}</button>` : '';
+  const sub = d.sobraMeta ? `fim de ${d.mesNome} previsto ${brl(d.fimMes)} − sobra combinada ${brl(d.sobraMeta)}`
+                          : `fim de ${d.mesNome} previsto · defina em Configurações quanto querem sobrar`;
+  let parc = '';
+  if (t.teto) {
+    const pct = pico.valor / t.teto * 100, cor = pct >= 100 ? 'var(--danger)' : pct >= 80 ? 'var(--warn)' : 'var(--ok)';
+    parc = `<div class="disp-p"><span>Parcelas · mês mais cheio (${esc(pico.rot)})</span><span class="num" style="color:${cor}">${nbr(pico.valor)} de ${nbr(t.teto)}</span></div>
+      <div class="barra"><i style="width:${Math.min(100, pct).toFixed(1)}%;background:${cor}"></i></div>`;
+  }
+  return `${faixa}<section class="disp">
+      <div class="tile-l">Ainda dá para gastar até ${esc(d.mesNome)}</div>
+      <div class="disp-v" style="color:${d.disponivel < 0 ? 'var(--danger)' : 'var(--ok)'}">${brl(d.disponivel)}</div>
+      <div class="disp-s">${esc(sub)}</div>${parc}</section>`;
 }
 
 function pintarCasa(d) {
@@ -1946,6 +1979,7 @@ function pintarCasa(d) {
   }).join('');
 
   document.getElementById('cConteudo').innerHTML = `
+    ${dispHtml(d)}
     ${topo}
     <div class="tiles">
       <div class="tile"><div class="tile-l">Saiu no mês</div><div class="tile-v">${nbr(d.saiu || 0)}</div></div>
@@ -2008,8 +2042,9 @@ function cmLinhas(ym) {
   if (!L) return null;
   const idx = idxDe(ym || _mes), out = [];
   L.forEach(x => {
-    if (!x.vr && !x.cartao) return;   // Pix e débito não caem em fatura (a mesma conta do "Para onde foi")
     let noMes = x.valor, k = 0;
+    // Pix e débito não caem em fatura: entram no ciclo do cartão principal (a mesma conta do "Para onde foi")
+    if (!x.vr && !x.cartao) { if (idxDe(ymDe(compDe(isoParaData(x.data), _cfg.cartoes[0]))) === idx) out.push({ x, noMes, k }); return; }
     if (x.n > 1) { if (!(x.ci <= idx && idx <= x.ci + x.n - 1)) return; noMes = x.valor / x.n; k = idx - x.ci + 1; }
     else if (x.ci !== idx) return;
     out.push({ x, noMes, k });
@@ -2290,7 +2325,17 @@ function lancarSalvar(e) {
   if (_l.foto) payload.foto = _l.foto;
   enfileirar('addLancamento', [payload]);
   fecharLancar();
-  showToast(_l.nparc > 1 ? `✓ ${_l.nparc}× de ${brl(valor / _l.nparc)}` : '✓ Lançado', 'ok');
+  const estoura = _l.nparc > 1 && cartaoDe(payload.forma) ? mesSobreTeto(payload) : null;
+  if (estoura) showToast(`✓ Lançado · ${estoura.rot} passa do teto das parcelas (${nbr(estoura.valor)})`, 'err');
+  else showToast(_l.nparc > 1 ? `✓ ${_l.nparc}× de ${brl(valor / _l.nparc)}` : '✓ Lançado', 'ok');
+}
+/** Avisa, sem impedir: o 1º mês em que a parcelada (já na fila) faz as parcelas passarem do teto */
+function mesSobreTeto(p) {
+  const base = _dados.inicio[mesVigente()] || _dados.inicio[_mes], teto = base && base.tetoParc && base.tetoParc.teto;
+  if (!teto) return null;
+  const [y, m, dd] = String(p.data).split('-').map(Number);
+  const ci = idxDe(ymDe(compDe(new Date(y, m - 1, dd), cartaoDe(p.forma)))), n = Math.max(1, +p.nparc || 1);
+  return (comFila(base).serieParcelas || []).find(s => { const j = idxDe(s.yyyymm); return ci <= j && j <= ci + n - 1 && s.valor > teto + 0.005; }) || null;
 }
 
 /* ══ fila: tudo o que grava passa por aqui ════════════════════
@@ -3546,7 +3591,7 @@ function chaveHtml() {
 function porGrupoMes(d) {
   const m = {}, g = nome => (m[nome] = m[nome] || { nome: nome, cred: 0, vr: 0, ant: 0, out: 0 });
   const L = cmLinhas(d.yyyymm), princ = (_cfg.cartoes[0] || {}).nome;
-  // out = outros cartões (LATAM, Inter…): somam no total, mas a conta que manda é a do principal
+  // out = outros cartões (LATAM, Inter…) e Pix/débito: somam no total, mas a conta que manda é a do principal
   if (L) L.forEach(l => { const x = g(l.x.grupo); if (l.x.vr) x.vr += l.noMes; else if (l.x.cartao !== princ) x.out += l.noMes; else if (l.k > 1) x.ant += l.noMes; else x.cred += l.noMes; });
   else {
     (d.categorias || []).forEach(c => { g(c.nome).cred += c.valor; });
@@ -3566,10 +3611,10 @@ function paraOndeHtml(d, limite) {
   const max = Math.max(...lista.map(x => agoraDe(x) + antesDe(x) + outDe(x))) || 1, toca = !ehPC();   // no celular, tocar no grupo abre as compras dele
   const temAnt = lista.some(x => antesDe(x) > 0), temVr = _chave !== 'cred' && lista.some(x => x.vr > 0), temOut = lista.some(x => outDe(x) > 0);
   const princ = (_cfg.cartoes[0] || {}).nome || 'principal';
-  const legenda = temAnt || temVr || temOut ? `<div class="leg-po">${_chave !== 'vr' ? `<span><i class="sw-ag"></i>agora no ${esc(princ)}</span>` : ''}${temVr ? '<span><i class="sw-vr"></i>VR</span>' : ''}${temAnt ? '<span><i class="sw-ant"></i>parcelas de antes</span>' : ''}${temOut ? '<span><i class="sw-out"></i>outros cartões</span>' : ''}</div>` : '';
+  const legenda = temAnt || temVr || temOut ? `<div class="leg-po">${_chave !== 'vr' ? `<span><i class="sw-ag"></i>agora no ${esc(princ)}</span>` : ''}${temVr ? '<span><i class="sw-vr"></i>VR</span>' : ''}${temAnt ? '<span><i class="sw-ant"></i>parcelas de antes</span>' : ''}${temOut ? '<span><i class="sw-out"></i>outros cartões e Pix</span>' : ''}</div>` : '';
   return legenda + lista.slice(0, limite || 99).map(x => {
     const c = _chave === 'vr' ? 0 : x.cred, v = _chave === 'cred' ? 0 : x.vr, a = antesDe(x), o = outDe(x);
-    const dentro = `<div class="cat-linha-t"><span>${esc(x.nome)}</span><span class="num">${c + v || !o ? brl(c + v) : `<small class="apag">${brl(o)} em outros cartões</small>`}${a || (o && c + v) ? ` <small class="apag">de ${nbr(c + v + a + o)}</small>` : ''}${_chave === 'tudo' && x.vr ? ` <small class="vr-tx">${nbr(x.vr)} VR</small>` : ''}${toca ? ic('chevR', 12) : ''}</span></div>
+    const dentro = `<div class="cat-linha-t"><span>${esc(x.nome)}</span><span class="num">${c + v || !o ? brl(c + v) : `<small class="apag">${brl(o)} em outros cartões e Pix</small>`}${a || (o && c + v) ? ` <small class="apag">de ${nbr(c + v + a + o)}</small>` : ''}${_chave === 'tudo' && x.vr ? ` <small class="vr-tx">${nbr(x.vr)} VR</small>` : ''}${toca ? ic('chevR', 12) : ''}</span></div>
       <div class="barra tri"><i style="width:${(c / max * 100).toFixed(1)}%"></i><b style="width:${(v / max * 100).toFixed(1)}%"></b><s style="width:${(a / max * 100).toFixed(1)}%"></s><u style="width:${(o / max * 100).toFixed(1)}%"></u></div>`;
     return toca ? `<button type="button" class="cat-linha" onclick="cmAbrir({grupo:${escA(JSON.stringify(x.nome))}})">${dentro}</button>` : `<div class="cat-linha">${dentro}</div>`;
   }).join('');
@@ -3653,6 +3698,34 @@ function cfSalvarVr(btn) {
   btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Salvando…';
   google.script.run
     .withSuccessHandler(c => { _dados.config = c; _cf = JSON.parse(JSON.stringify(c)); _dados.fluxo = {}; dadosGravar(); showToast('✓ Salvo', 'ok'); pintarConfig(); sincronizar(false); })
+    .withFailureHandler(err => { btn.disabled = false; btn.textContent = 'Salvar'; showToast((err && err.message) || 'Erro', 'err'); })
+    .salvarConfig('prefs', p);
+}
+
+/* ── Configurações: quanto queremos sobrar e o teto das parcelas ── */
+const SOBRA_MESES = 6;
+function cfSecMeta() {
+  const p = _cf.prefs || {}, ini = mesVigente(), vl = s => s ? nbr(lerValor(s)) : '';
+  const meses = Array.from({ length: SOBRA_MESES }, (_, k) => ymMais(ini, k)).map(ym =>
+    `<div><label for="cfSb${ym}">Sobra em ${esc(rotMes(ym))}</label><input id="cfSb${ym}" inputmode="decimal" value="${escA(vl(p['sobra_' + ym]))}" placeholder="padrão"/></div>`).join('');
+  return `<section class="cx" id="cfMeta" style="padding:22px">
+    <h2 style="font-size:18px">Quanto sobrar e teto das parcelas</h2>
+    <p class="cx-s" style="margin-top:4px;font-size:13px;line-height:1.55">O "Ainda dá para gastar" da Casa é o fim do mês previsto menos a sobra combinada. Mês em branco usa o padrão. O teto das parcelas é por mês, somando todos os cartões.</p>
+    <div class="cfg-g">
+      <div><label for="cfSbP">Sobra no fim do mês · padrão (R$)</label><input id="cfSbP" inputmode="decimal" value="${escA(vl(p.sobra_meta))}" placeholder="0,00"/></div>
+      <div><label for="cfTP">Teto das parcelas por mês (R$)</label><input id="cfTP" inputmode="decimal" value="${escA(vl(p.teto_parcelas))}" placeholder="sem teto"/></div>
+      ${meses}
+    </div>
+    <div class="cfg-acoes"><button type="button" class="bt acc" onclick="cfSalvarMeta(this)">Salvar</button></div>
+  </section>`;
+}
+function cfSalvarMeta(btn) {
+  const v = id => document.getElementById(id).value.trim(), num = s => s === '' ? '' : String(lerValor(s) || 0);
+  const p = { sobra_meta: num(v('cfSbP')), teto_parcelas: num(v('cfTP')) }, ini = mesVigente();
+  for (let k = 0; k < SOBRA_MESES; k++) { const ym = ymMais(ini, k); p['sobra_' + ym] = num(v('cfSb' + ym)); }
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Salvando…';
+  google.script.run
+    .withSuccessHandler(c => { _dados.config = c; _cf = JSON.parse(JSON.stringify(c)); dadosGravar(); showToast('✓ Salvo', 'ok'); pintarConfig(); sincronizar(false); })
     .withFailureHandler(err => { btn.disabled = false; btn.textContent = 'Salvar'; showToast((err && err.message) || 'Erro', 'err'); })
     .salvarConfig('prefs', p);
 }
@@ -4299,7 +4372,7 @@ function pintarConfig() {
          : `<header class="cfg-topo"><button type="button" class="btn-ic" aria-label="Voltar" onclick="ir('ajustes')">${ic('voltar', 20)}</button>
               <div><h1>Configurações</h1><div class="pch-s" style="font-size:11.5px">grava na planilha · vale para os dois aparelhos</div></div></header>`}
     <nav class="abas" aria-label="Seções">${secoes.map(([id, n], i) => `<button type="button" class="${i ? '' : 'on'}" onclick="cfIr('${id}')">${n}</button>`).join('')}</nav>
-    ${pc ? '' : cfSecEntradas()}${cfSecCartoes()}${cfSecMeses()}${cfSecVr()}${cfSecPessoas()}${cfSecGrupos()}${pc ? cfSecAparelho() : ''}`;
+    ${pc ? '' : cfSecEntradas()}${cfSecCartoes()}${cfSecMeses()}${cfSecMeta()}${cfSecVr()}${cfSecPessoas()}${cfSecGrupos()}${pc ? cfSecAparelho() : ''}`;
   arrastavel(document.getElementById('cfCards'));
 }
 
@@ -4669,4 +4742,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v28 -------- -->
+<!-- -------- index.html v29 -------- -->
