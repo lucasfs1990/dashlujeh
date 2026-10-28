@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v27 -------- -->
+<!-- -------- index.html v28 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1467,7 +1467,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v27';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v28';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1849,9 +1849,10 @@ function comFila(d) {
     if (c.nome === _cfg.cartoes[0].nome) {
       if (n > 1) o.parcelas += v; else o.avista += v;
       o.prevista += v; o.sobra -= v;
+      if (o.fimMes != null) o.fimMes -= v;
     }
     const k = (o.cartoes || []).find(x => x.nome === c.nome);
-    if (k) { if (n > 1) k.parcelas += v; else k.avista += v; k.prevista += v; k.lancamentos++; }
+    if (k) { if (n > 1) k.parcelas += v; else k.avista += v; k.prevista += v; k.lancamentos++; if (k.ateHoje != null) k.ateHoje += v; }
   });
   o.categorias.sort((a, b) => b.valor - a.valor);
   o.pessoas.sort((a, b) => b.valor - a.valor);
@@ -1950,9 +1951,12 @@ function pintarCasa(d) {
       <div class="tile"><div class="tile-l">Saiu no mês</div><div class="tile-v">${nbr(d.saiu || 0)}</div></div>
       <div class="tile"><div class="tile-l">À vista no C6</div><div class="tile-v">${nbr(d.avista)}</div></div>
       <div class="tile"><div class="tile-l">Parcelas</div><div class="tile-v">${nbr(d.parcelas)}</div></div>
-      <div class="tile tile-saldo"><div class="tile-l">Saldo do mês</div>
+      ${d.saldoHoje == null ? `<div class="tile tile-saldo"><div class="tile-l">Saldo do mês</div>
         <div class="tile-sl"><div class="tile-v" style="color:${d.sobra < 0 ? 'var(--danger)' : 'var(--ok)'}">${nbr(d.sobra)}</div>
-        <div class="tile-e">entrou<b>${nbr(d.entrou || 0)}</b></div></div></div>
+        <div class="tile-e">entrou<b>${nbr(d.entrou || 0)}</b></div></div></div>`
+      : `<div class="tile tile-saldo"><div class="tile-l">Saldo atual · ${esc(d.hojeDia)}</div>
+        <div class="tile-sl"><div class="tile-v" style="color:${d.saldoHoje < 0 ? 'var(--danger)' : 'var(--ok)'}">${nbr(d.saldoHoje)}</div>
+        <div class="tile-e">fim do mês<b>${nbr(d.fimMes)}</b></div></div></div>`}
     </div>
     ${terminam}${avisoFila}
     <div class="sec-h"><h2>Para onde foi</h2><span>${totChave(d)}</span></div>
@@ -3322,12 +3326,13 @@ function fxPainel(d, c, rot) {
   const env1 = c.envelopes[0], env2 = c.envelopes[1];
   const resumo = env2 ? `O ${env1.base.length ? 'salário do dia 1' : 'começo do mês'} ${env1.sobra < 0 ? `não cobre as contas até o dia ${env1.ate}: falta ${brl(-env1.sobra)}` : 'cobre as contas até o dia ' + env1.ate}. `
     + `O ${env2.base.length ? 'vale do dia ' + env2.ini : 'dinheiro seguinte'} ${env2.sobra < 0 ? 'ainda não fecha o buraco' : env1.sobra < 0 ? `cobre o buraco e ainda sobra ${brl(env2.sobra)}` : `deixa ${brl(env2.sobra)}`}.` : '';
-  const agenda = c.dias.filter(x => x.movs.length).map(x => x.movs.map((m, j) => `<tr><td class="mu nm">${j ? '' : dois(x.d)}</td><td>${esc(m.desc)}</td><td class="mu">${esc(m.como || '')}</td>
+  const ymHj = ymDe(new Date()), corte = d.yyyymm < ymHj ? 99 : d.yyyymm > ymHj ? 0 : new Date().getDate();
+  const agenda = c.dias.filter(x => x.movs.length).map(x => x.movs.map((m, j) => `<tr${x.d > corte ? ' style="opacity:.5"' : ''}><td class="mu nm">${j ? '' : dois(x.d)}</td><td>${esc(m.desc)}</td><td class="mu">${esc(m.como || '')}</td>
       <td class="r nm${m.valor > 0 ? ' fx-pos' : ''}">${m.valor > 0 ? '+' : '−'}${nbr(Math.abs(m.valor))}</td><td class="r nm${x.saldo < 0 && j === x.movs.length - 1 ? ' fx-neg-t' : ''}">${j === x.movs.length - 1 ? nbr(x.saldo) : ''}</td></tr>`).join('')).join('');
   return kpis + grafico
     + (resumo ? `<div class="cx fx-res">${esc(resumo)}${d.aReceber ? ` <span class="cx-s">· ${brl(d.aReceber)} de consultas a receber, sem data, estão fora da conta.</span>` : ''}</div>` : '')
     + `<section class="fx-envs">${envs}</section>`
-    + `<details class="cx fx-ag"><summary><b>Dia a dia</b><span class="cx-s">${d.movs.length} movimentos</span></summary>
+    + `<details class="cx fx-ag"><summary><b>Dia a dia</b><span class="cx-s">${d.movs.length} movimentos${corte > 0 && corte < 99 ? ' · apagado = ainda não caiu' : ''}</span></summary>
         <div class="tb-box"><table class="tb" style="min-width:640px"><thead><tr><th>Dia</th><th>O quê</th><th>Como</th><th class="r">Valor</th><th class="r">Saldo no fim do dia</th></tr></thead><tbody>${agenda}</tbody></table></div></details>`;
 }
 /** Passar o mouse no gráfico: marca o dia, o ponto da linha e mostra o saldo e os movimentos dele */
@@ -3696,6 +3701,12 @@ function carregarPainel(forcar) {
     .getPainel(_mes);
 }
 
+/** "de X previstos · falta Y · " — vazio quando já veio tudo ou o dado é antigo */
+function faltaTx(r, p) {
+  if (p == null) return '';
+  const f = p - (r || 0);
+  return Math.abs(f) < 0.01 ? 'tudo o previsto · ' : `de ${nbr(p)} previstos · falta ${nbr(f)} · `;
+}
 function cartaoPC(c, d) {
   const valor = c.real ? c.real.total : c.prevista;
   let sub;
@@ -3705,7 +3716,7 @@ function cartaoPC(c, d) {
   } else sub = c.lancamentos || c.fixos ? `prevista · à vista ${nbr(c.avista)} + parcelas ${nbr(c.parcelas)} + fixos ${nbr(c.fixos)}` : 'nada lançado nesta fatura ainda';
   return `<div class="cpc" style="background:${escA(c.cor)};color:${tintaSobre(c.cor)}"><span class="anel"></span>
     <div class="cpc-l"><span>${esc(c.nome)} · fatura de ${esc(d.mesNome)}</span><span style="opacity:.75">${c.titular ? 'titular ' + esc(c.titular) : ''}</span></div>
-    <div><div class="cpc-v">${brl(valor)}</div><div class="cpc-s">${esc(sub)}</div></div>
+    <div><div class="cpc-v">${brl(valor)}</div><div class="cpc-s">${esc(sub)}</div>${!c.real && c.ateHoje != null && Math.abs(c.ateHoje - valor) >= 0.01 ? `<div class="cpc-s">hoje deveria estar em ${brl(c.ateHoje)}</div>` : ''}</div>
     <div class="cpc-l"><span>vence ${esc(c.venc)}</span><span>${esc(textoFecha(c.fechaDias, c.fechaData))}</span></div></div>`;
 }
 
@@ -3770,9 +3781,11 @@ function pintarPainel(d) {
       <button type="button" class="cpc novo" onclick="ir('config')">${ic('mais', 26)}<b style="color:var(--txt)">Outro cartão</b><span class="kpi-s">cadastre em Configurações, com o dia de fechamento</span></button>
     </section>
     <section class="kpis">
-      ${kp('Entrou no mês', d.entrou || 0, (d.rendaExtras || []).length ? 'salários, vale e ' + d.rendaExtras.join(', ') : 'salários e vale', 'var(--ok)')}
-      ${kp('Saiu no mês', d.saiu || 0, 'faturas + contas + Pix e consultas')}
-      ${kp('Sobrou', d.sobra, 'entrou − saiu (VR fora)', d.sobra < 0 ? 'var(--danger)' : 'var(--ok)')}
+      ${kp('Entrou no mês', d.entrou || 0, faltaTx(d.entrou, d.entrouPrev) + ((d.rendaExtras || []).length ? 'salários, vale e ' + d.rendaExtras.join(', ') : 'salários e vale'), 'var(--ok)')}
+      ${kp('Saiu no mês', d.saiu || 0, faltaTx(d.saiu, d.saiuPrev) + 'faturas + contas + Pix e consultas')}
+      ${d.saldoHoje == null ? kp('Sobrou', d.sobra, 'entrou − saiu (VR fora)', d.sobra < 0 ? 'var(--danger)' : 'var(--ok)')
+        : kp('Saldo atual', d.saldoHoje, `hoje, ${d.hojeDia} · tem que bater com a conta corrente`, d.saldoHoje < 0 ? 'var(--danger)' : 'var(--ok)')
+          + kp('Fim do mês (previsto)', d.fimMes, `${d.corte >= 99 ? 'passou' : 'passa'} para ${rotMes(ymMais(d.yyyymm, 1))} · começou com ${nbr(d.saldoIni)}`, d.fimMes < 0 ? 'var(--danger)' : 'var(--ok)')}
       ${kp('Loja', (d.loja || {}).bancam || 0, d.loja ? `LATAM loja ${nbr(d.loja.compras)} − retiradas ${nbr(d.loja.retiradas)}` : 'compras do LATAM − retiradas')}
       ${kp('Fixos no cartão', d.fixos, 'assinaturas e contas no ' + (princ.nome || 'C6'))}
     </section>
@@ -4656,4 +4669,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v27 -------- -->
+<!-- -------- index.html v28 -------- -->
