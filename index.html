@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v33 -------- -->
+<!-- -------- index.html v34 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -183,6 +183,10 @@ body.em-lancar .tela { padding-bottom:110px }
 .tile-v { font-family:var(--f-num); font-weight:600; font-size:17px; margin-top:6px }
 /* último card: o saldo grande e o que entrou miúdo ao lado */
 .tile-saldo { flex-basis:196px }
+/* parcelas: todos os cartões, o principal miúdo ao lado e o teto embaixo */
+.tile-parc { flex-basis:230px }
+.tile-n { font-size:10.5px; color:var(--mut); margin-top:6px; line-height:1.3 }
+.tile-n b { font-family:var(--f-num); font-weight:600 }
 .tile-sl { display:flex; align-items:flex-end; justify-content:space-between; gap:10px }
 .tile-e { font-size:10.5px; color:var(--mut); text-align:right; line-height:1.25 }
 .tile-e b { display:block; font-family:var(--f-num); font-weight:600; font-size:12px; color:var(--mut) }
@@ -1416,7 +1420,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v33</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v34</p>
   </div>
 </section>
 
@@ -1475,7 +1479,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v33';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v34';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1940,8 +1944,7 @@ function dispToggle() { _dispAberto = !_dispAberto; LS.set('jl_disp', _dispAbert
 function dispHtml(d) {
   const k = d.camadas;
   if (!k) return '';
-  const v = d.vermelho, sp = d.serieParcelas || [], t = d.tetoParc || {};
-  const pico = sp.reduce((m, x) => x.valor > m.valor ? x : m, sp[0] || { valor: 0, rot: '' });
+  const v = d.vermelho;
   const viv = d.vivido ? d.vivido.nome : d.mesNome, Viv = viv.charAt(0).toUpperCase() + viv.slice(1);
   // só um aviso: o mês vivido passa pelo cheque especial
   const faixa = v && v.ini ? `<div class="faixa" style="background:var(--danger-soft);color:var(--danger)">${ic('info', 18)}<span>${esc(v.fim < 0
@@ -1955,17 +1958,28 @@ function dispHtml(d) {
       ${linha('Sem usar o vale', k.semVale, `menor saldo de 01 a ${k.ate}, já com o salário e as faturas de ${pago}: gastando até aqui, o vale fica inteiro para guardar`)}
       ${k.comVale == null ? '' : linha('Usando o vale', k.comVale, `menor saldo de ${k.deVale} a ${k.fim}: é o respiro, mas aí o vale vai embora`)}
       ${k.inicio < 0 ? `<div class="disp-n">${esc(pago.charAt(0).toUpperCase() + pago.slice(1))} já começa com ${brl(k.inicio)} do mês anterior.</div>` : ''}</div>`;
-  let parc = '';
-  if (t.teto) {
-    const pct = pico.valor / t.teto * 100, cor = pct >= 100 ? 'var(--danger)' : pct >= 80 ? 'var(--warn)' : 'var(--ok)';
-    parc = `<div class="disp-p"><span>Parcelas · mês mais cheio (${esc(pico.rot)})</span><span class="num" style="color:${cor}">${nbr(pico.valor)} de ${nbr(t.teto)}</span></div>
-      <div class="barra"><i style="width:${Math.min(100, pct).toFixed(1)}%;background:${cor}"></i></div>`;
-  }
   return `${faixa}<section class="disp">
       <button type="button" class="disp-h" aria-expanded="${_dispAberto}" onclick="dispToggle()">
         <span style="flex:1;min-width:0"><span class="tile-l" style="display:block${estourou ? ';color:var(--danger)' : ''}">${estourou ? 'Cartão estourado em ' + esc(viv) : 'Pode gastar nos cartões em ' + esc(viv)}</span>
         <span class="disp-v" style="display:block;color:${cor(k.semVale)}">${brl(k.semVale)}</span></span>${ic(_dispAberto ? 'chevU' : 'chevD', 18)}</button>
-      ${faixas}${_dispAberto ? parc : ''}</section>`;
+      ${faixas}</section>`;
+}
+/** Card "Parcelas" da Casa: todos os cartões nesta fatura (o C6 miúdo ao lado), contra o teto,
+    e o mês mais cheio dos próximos */
+function parcTile(d) {
+  const sp = d.serieParcelas || [], t = d.tetoParc || {}, princ = (_cfg.cartoes[0] || {}).nome || 'C6';
+  const deste = sp.find(x => x.yyyymm === d.yyyymm);
+  const todos = deste ? deste.valor : (d.cartoes || []).length ? d.cartoes.reduce((s, c) => s + (c.parcelas || 0), 0) : d.parcelas;
+  const pico = sp.reduce((m, x) => x.valor > m.valor ? x : m, deste || sp[0] || { valor: 0, rot: '' });
+  const corDe = v => !t.teto ? 'var(--txt)' : v > t.teto + 0.005 ? 'var(--danger)' : v >= t.teto * 0.8 ? 'var(--warn)' : 'var(--ok)';
+  const soPrinc = Math.abs(todos - d.parcelas) >= 0.01 ? `<div class="tile-e">só ${esc(princ)}<b>${nbr(d.parcelas)}</b></div>` : '';
+  const barra = t.teto ? `<div class="barra" style="height:4px;margin-top:8px"><i style="width:${Math.min(100, todos / t.teto * 100).toFixed(1)}%;background:${corDe(todos)}"></i></div>` : '';
+  const nota = t.teto
+    ? (pico === deste || !pico.rot ? `teto ${nbr(t.teto)} · este é o mês mais cheio` : `teto ${nbr(t.teto)} · mais cheio: ${esc(pico.rot)} <b style="color:${corDe(pico.valor)}">${nbr(pico.valor)}</b>`)
+    : pico.rot && pico !== deste ? `mais cheio: ${esc(pico.rot)} ${nbr(pico.valor)}` : '';
+  return `<div class="tile tile-parc"><div class="tile-l">Parcelas · todos os cartões</div>
+    <div class="tile-sl"><div class="tile-v" style="color:${corDe(todos)}">${nbr(todos)}</div>${soPrinc}</div>
+    ${barra}${nota ? `<div class="tile-n">${nota}</div>` : ''}</div>`;
 }
 
 function pintarCasa(d) {
@@ -2021,7 +2035,7 @@ function pintarCasa(d) {
     <div class="tiles">
       <div class="tile"><div class="tile-l">Saiu no mês</div><div class="tile-v">${nbr(d.saiu || 0)}</div></div>
       <div class="tile"><div class="tile-l">À vista no C6</div><div class="tile-v">${nbr(d.avista)}</div></div>
-      <div class="tile"><div class="tile-l">Parcelas</div><div class="tile-v">${nbr(d.parcelas)}</div></div>
+      ${parcTile(d)}
       ${d.saldoHoje == null ? `<div class="tile tile-saldo"><div class="tile-l">Saldo do mês</div>
         <div class="tile-sl"><div class="tile-v" style="color:${d.sobra < 0 ? 'var(--danger)' : 'var(--ok)'}">${nbr(d.sobra)}</div>
         <div class="tile-e">entrou<b>${nbr(d.entrou || 0)}</b></div></div></div>`
@@ -4835,4 +4849,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v33 -------- -->
+<!-- -------- index.html v34 -------- -->
