@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v31 -------- -->
+<!-- -------- index.html v32 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -218,7 +218,14 @@ body.em-lancar .tela { padding-bottom:110px }
 .btn-pend { margin:12px 20px 0; width:calc(100% - 40px); height:50px; border-radius:16px; border:1.5px dashed var(--acc-tx); background:transparent; color:var(--acc-tx); font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; gap:8px }
 .disp { margin:14px 20px 0; background:var(--s1); border:1px solid var(--bd); border-radius:20px; padding:14px 16px }
 .disp-v { font-family:var(--f-num); font-weight:700; font-size:28px; margin-top:4px }
-.disp-s { font-size:12px; color:var(--mut); margin-top:2px }
+.disp-h { display:flex; align-items:center; gap:10px; width:100%; border:0; background:none; padding:0; color:var(--txt); text-align:left; font:inherit }
+.disp-h svg { color:var(--mut2) }
+.disp-ls { margin-top:10px }
+.disp-l { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:10px 0; border-top:1px solid var(--bd) }
+.disp-l b { display:block; font-size:13.5px; font-weight:700 }
+.disp-l small { display:block; font-size:12px; color:var(--mut); line-height:1.4; margin-top:2px }
+.disp-l .num { font-size:15px; white-space:nowrap }
+.disp-n { font-size:12px; color:var(--mut); padding-top:8px; border-top:1px solid var(--bd) }
 .disp-p { display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--mut); margin:12px 0 6px }
 .faixa { margin:12px 20px 0; padding:10px 14px; border-radius:14px; background:var(--acc-soft); color:var(--acc-tx); font-size:13px; font-weight:600; display:flex; align-items:center; gap:10px }
 
@@ -1412,7 +1419,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v31</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v32</p>
   </div>
 </section>
 
@@ -1471,7 +1478,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v31';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v32';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1858,15 +1865,18 @@ function comFila(d) {
     for (let k = 0; k < n; k++) if (ci + k <= idx) { ateAqui += p.valor / n; if (ci + k === idx) noMes += p.valor / n; }
     if (o.fimMes != null) o.fimMes -= ateAqui;
     if (o.saiuPrev != null) o.saiuPrev += noMes;
-    // e o envelope: fatura que vence antes do vale (ou Pix antes dele) pesa no salário; depois, no vale;
-    // Pix de um mês anterior só pesa se ele já vem negativo
-    const e = o.env;
-    if (e) {
-      const vale = e.valeDia || 99;
-      if (c) { if (noMes) { if (vencDe(o.yyyymm, c).getDate() < vale) e.faturas += noMes; else e.valeLiq -= noMes; } }
-      else if (ymDe(dt) === o.yyyymm) { if (dd < vale) e.contas += p.valor; else e.valeLiq -= p.valor; }
-      else if (ymDe(dt) < o.yyyymm && e.herdado < 0) e.herdado -= p.valor;
-      o.disponivel = dispDe(o);
+    // e as camadas: a compra baixa o saldo do dia em que sai da conta em diante (fatura no vencimento,
+    // Pix no dia); Pix de um mês anterior só pesa se o mês já começa negativo
+    const cam = o.camadas;
+    if (cam) {
+      const vale = cam.valeDia || 99, sai = c ? noMes : p.valor;
+      const dia = c ? (noMes ? vencDe(o.yyyymm, c).getDate() : 0) : ymDe(dt) === o.yyyymm ? dd : 0;
+      const pesa = dia || (!c && ymDe(dt) < o.yyyymm && cam.inicio < 0);
+      if (pesa) {
+        if (!dia || dia < vale) cam.semVale -= sai;
+        if (cam.comVale != null) cam.comVale -= sai;
+        o.disponivel = cam.semVale;
+      }
     }
     if (n > 1) (o.serieParcelas || []).forEach(s => { const j = idxDe(s.yyyymm); if (ci <= j && j <= ci + n - 1) s.valor += p.valor / n; });
     // "Para onde foi": cartão pela fatura; Pix e débito pelo ciclo do cartão principal
@@ -1927,24 +1937,27 @@ function faturaCel(c, d) {
     </section>`;
 }
 
-/** Ainda cabe nos cartões: o envelope do salário (code.gs v19+) */
-const dispDe = d => { const e = d.env; return e.salario - e.contas - e.faturas - Math.max(0, -e.valeLiq) + Math.min(0, e.herdado) - (d.sobraMeta || 0); };
-/** O quanto ainda cabe nos cartões, o alerta de cheque especial do mês vivido e o teto das parcelas */
+/** Quanto pode gastar nos cartões (code.gs v20+): fechado só o número; tocando, as três faixas */
+let _dispAberto = LS.get('jl_disp', '0') === '1';
+function dispToggle() { _dispAberto = !_dispAberto; LS.set('jl_disp', _dispAberto ? '1' : '0'); if (_inicio) pintarCasa(comFila(_inicio)); }
 function dispHtml(d) {
-  if (d.disponivel == null || !d.env) return '';
-  const e = d.env, v = d.vermelho, sp = d.serieParcelas || [], t = d.tetoParc || {};
+  const k = d.camadas;
+  if (!k) return '';
+  const v = d.vermelho, sp = d.serieParcelas || [], t = d.tetoParc || {};
   const pico = sp.reduce((m, x) => x.valor > m.valor ? x : m, sp[0] || { valor: 0, rot: '' });
   const viv = d.vivido ? d.vivido.nome : d.mesNome, Viv = viv.charAt(0).toUpperCase() + viv.slice(1);
   // só um aviso: o mês vivido passa pelo cheque especial
   const faixa = v && v.ini ? `<div class="faixa" style="background:var(--danger-soft);color:var(--danger)">${ic('info', 18)}<span>${esc(v.fim < 0
       ? `${Viv} fecha com ${brl(v.fim)} · no cheque especial desde ${v.ini}`
       : `${Viv} passa pelo cheque especial a partir de ${v.ini} · pior dia ${brl(v.pior)}`)}</span></div>` : '';
-  const sub = e.salario
-    ? `salário previsto de ${e.salData} ${brl(e.salario)} − contas até o vale ${brl(e.contas)} − faturas previstas ${brl(e.faturas)}`
-      + (e.valeLiq < 0 ? ` − falta do vale ${brl(-e.valeLiq)}` : '')
-      + (e.herdado < 0 ? ` − ${brl(-e.herdado)} que faltou antes` : '')
-      + (d.sobraMeta ? ` − sobra combinada ${brl(d.sobraMeta)}` : ' · defina em Configurações quanto querem sobrar')
-    : 'nenhum salário fixo da aba BASE cai até o vencimento desta fatura';
+  const pago = d.mesNome, estourou = k.semVale < 0;
+  const cor = x => x < 0 ? 'var(--danger)' : 'var(--ok)';
+  const linha = (rot, val, txt) => `<div class="disp-l"><div><b>${esc(rot)}</b><small>${esc(txt)}</small></div><span class="num" style="color:${cor(val)}">${brl(val)}</span></div>`;
+  const faixas = !_dispAberto ? '' : `<div class="disp-ls">
+      ${d.saldoHoje == null ? '' : linha('Saldo da conta hoje', d.saldoHoje, `${d.hojeDia} · o que o extrato tem que mostrar`)}
+      ${linha('Sem usar o vale', k.semVale, `menor saldo de 01 a ${k.ate}, já com o salário e as faturas de ${pago}: gastando até aqui, o vale fica inteiro para guardar`)}
+      ${k.comVale == null ? '' : linha('Usando o vale', k.comVale, `menor saldo de ${k.deVale} a ${k.fim}: é o respiro, mas aí o vale vai embora`)}
+      ${k.inicio < 0 ? `<div class="disp-n">${esc(pago.charAt(0).toUpperCase() + pago.slice(1))} já começa com ${brl(k.inicio)} do mês anterior.</div>` : ''}</div>`;
   let parc = '';
   if (t.teto) {
     const pct = pico.valor / t.teto * 100, cor = pct >= 100 ? 'var(--danger)' : pct >= 80 ? 'var(--warn)' : 'var(--ok)';
@@ -1952,9 +1965,10 @@ function dispHtml(d) {
       <div class="barra"><i style="width:${Math.min(100, pct).toFixed(1)}%;background:${cor}"></i></div>`;
   }
   return `${faixa}<section class="disp">
-      <div class="tile-l">Ainda cabe nos cartões em ${esc(viv)}</div>
-      <div class="disp-v" style="color:${d.disponivel < 0 ? 'var(--danger)' : 'var(--ok)'}">${brl(d.disponivel)}</div>
-      <div class="disp-s">${esc(sub)}</div>${parc}</section>`;
+      <button type="button" class="disp-h" aria-expanded="${_dispAberto}" onclick="dispToggle()">
+        <span style="flex:1;min-width:0"><span class="tile-l" style="display:block${estourou ? ';color:var(--danger)' : ''}">${estourou ? 'Cartão estourado em ' + esc(viv) : 'Pode gastar nos cartões em ' + esc(viv)}</span>
+        <span class="disp-v" style="display:block;color:${cor(k.semVale)}">${brl(k.semVale)}</span></span>${ic(_dispAberto ? 'chevU' : 'chevD', 18)}</button>
+      ${faixas}${_dispAberto ? parc : ''}</section>`;
 }
 
 function pintarCasa(d) {
@@ -3737,7 +3751,7 @@ function cfSecMeta() {
     `<div><label for="cfSb${ym}">Sobra em ${esc(rotMes(ym))}</label><input id="cfSb${ym}" inputmode="decimal" value="${escA(vl(p['sobra_' + ym]))}" placeholder="padrão"/></div>`).join('');
   return `<section class="cx" id="cfMeta" style="padding:22px">
     <h2 style="font-size:18px">Quanto sobrar e teto das parcelas</h2>
-    <p class="cx-s" style="margin-top:4px;font-size:13px;line-height:1.55">O "Ainda cabe nos cartões" da Casa é o salário que paga a fatura, menos as contas até o vale, as faturas e a sobra combinada. Mês em branco usa o padrão. O teto das parcelas é por mês, somando todos os cartões.</p>
+    <p class="cx-s" style="margin-top:4px;font-size:13px;line-height:1.55">O "Pode gastar nos cartões" da Casa é o menor saldo da conta antes do vale; a sobra combinada fica guardada aqui, mas hoje não entra nessa conta (quem guarda é o vale). Mês em branco usa o padrão. O teto das parcelas é por mês, somando todos os cartões.</p>
     <div class="cfg-g">
       <div><label for="cfSbP">Sobra no fim do mês · padrão (R$)</label><input id="cfSbP" inputmode="decimal" value="${escA(vl(p.sobra_meta))}" placeholder="0,00"/></div>
       <div><label for="cfTP">Teto das parcelas por mês (R$)</label><input id="cfTP" inputmode="decimal" value="${escA(vl(p.teto_parcelas))}" placeholder="sem teto"/></div>
@@ -4769,4 +4783,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v31 -------- -->
+<!-- -------- index.html v32 -------- -->
