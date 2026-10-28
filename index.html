@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v32 -------- -->
+<!-- -------- index.html v33 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -985,19 +985,16 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
 .kpi.fx-ent .kpi-v { color:var(--ok) } .kpi.fx-neg { background:var(--danger-soft); border-color:var(--danger) } .kpi.fx-neg .kpi-v, .kpi.fx-neg .kpi-n, .kpi.fx-neg .kpi-s { color:var(--danger) }
 .fx-conf { display:flex; flex-direction:column; gap:6px; margin-top:8px; font-size:12px; color:var(--mut) }
 .fx-conf input { height:34px; width:110px; font-size:13px; border-radius:9px; padding:0 8px; margin-left:4px }
-.fx-graf { position:relative; height:250px; margin-top:12px; padding-left:52px }
-.fx-plot { position:relative; height:100%; cursor:crosshair }
-.fx-y { position:absolute; left:0; width:46px; text-align:right; transform:translateY(-50%); font-family:var(--f-num); font-size:11px; color:var(--mut2); pointer-events:none }
-.fx-band { position:absolute; top:0; height:220px; background:var(--txt); opacity:.07; pointer-events:none }
-.fx-dot { position:absolute; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%; background:var(--acc); box-shadow:0 0 0 3px var(--s1); pointer-events:none }
+.fx-graf { position:relative; margin-top:12px }
+.fx-graf svg { display:block; width:100%; height:auto; cursor:crosshair }
+.fx-tx { fill:var(--mut2); font:500 11px var(--f-num) }
+.fx-tx.forte { fill:var(--txt); font-weight:600 }
+.fx-mes { fill:var(--mut); font:800 11.5px var(--f-tx); letter-spacing:.08em; text-transform:uppercase }
+.fx-fora { fill:var(--s1); opacity:.62 }
+.fx-hl { fill:var(--txt); opacity:.07; pointer-events:none }
 .fx-tip { position:absolute; top:6px; z-index:3; min-width:200px; max-width:280px; padding:10px 12px; border-radius:12px; background:var(--s2); border:1px solid var(--bd); box-shadow:0 6px 20px rgba(0,0,0,.35); font-size:12px; pointer-events:none }
 .fx-tip b { display:block; font-size:13px; margin-bottom:6px }
 .fx-tip .fx-tl { display:flex; justify-content:space-between; gap:12px; color:var(--mut) }
-.fx-graf svg { position:absolute; left:0; top:0; width:100%; height:220px }
-.fx-mc { position:absolute; top:0; font-family:var(--f-num); font-weight:600; font-size:12px; line-height:1.2; pointer-events:none }
-.fx-mc b { display:block; font-weight:600 }
-.fx-mc small { display:block; font-family:var(--f-tx); font-size:10.5px; color:var(--mut2) }
-.fx-ex { position:absolute; bottom:0; font-size:11px; color:var(--mut2) }
 .fx-res { font-size:14px; line-height:1.55 }
 .fx-envs { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; align-items:start }
 .fx-env { padding:0; overflow:hidden }
@@ -1419,7 +1416,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v32</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v33</p>
   </div>
 </section>
 
@@ -1478,7 +1475,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v32';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v33';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -3335,6 +3332,7 @@ function pintarFluxo(d) {
         <div class="mseg"><button type="button" aria-label="Mês anterior" onclick="fxMes(-1)">‹</button><button type="button" class="on" style="min-width:110px;text-transform:capitalize">${esc(nomeMes)} ${d.ano}</button><button type="button" aria-label="Próximo mês" onclick="fxMes(1)">›</button></div>
       </div></header>`;
   host.innerHTML = cab + (_fxAba === 'contas' ? fxContas(d) : fxPainel(d, fxCalc(d), rot));
+  if (_fxAba === 'fluxo') fxVizinhos(d.yyyymm);
 }
 
 function fxPainel(d, c, rot) {
@@ -3353,45 +3351,7 @@ function fxPainel(d, c, rot) {
     ${kp('Cheque especial', c.neg ? brl(c.pior) : 'não usa', esc(negTx), c.neg ? 'fx-neg' : '')}
     ${kp('Fim do mês', brl(c.fim), c.neg ? `≈ ${brl(c.juros)} de juros (${String(d.taxa).replace('.', ',')}% a.m.)` : 'sem juros', c.fim < 0 ? 'fx-neg' : 'fx-ent')}
   </section>`;
-  // gráfico do saldo
-  const vals = [d.saldoIni].concat(c.dias.map(x => x.saldo));
-  const mx = Math.max(0, ...vals) * 1.12 + 1, mn = Math.min(0, ...vals) * 1.2 - 1;
-  const Y = v => (12 + (mx - v) / (mx - mn) * 196).toFixed(1), X = k => ((k - 1) / d.dias * 1000).toFixed(1);
-  let p = 'M0 ' + Y(d.saldoIni);
-  c.dias.forEach(x => { p += ' H' + X(x.d) + ' V' + Y(x.saldo); });
-  p += ' H1000';
-  const y0 = Y(0);
-  // eixo Y: 4 a 5 valores redondos entre o menor e o maior saldo
-  const alvoY = (mx - mn) / 4, pot = Math.pow(10, Math.floor(Math.log10(alvoY))), fr = alvoY / pot;
-  const passo = (fr <= 1 ? 1 : fr <= 2 ? 2 : fr <= 5 ? 5 : 10) * pot, ticks = [];
-  for (let i = Math.ceil(mn / passo); i * passo <= mx; i++) ticks.push(i * passo);
-  const fmtY = v => (v < 0 ? '−' : '') + (Math.abs(v) >= 1000 ? (Math.abs(v) / 1000).toFixed(Math.abs(v) % 1000 ? 1 : 0).replace('.', ',') + 'k' : Math.round(Math.abs(v)));
-  _fxG = { dias: c.dias, n: d.dias, ys: c.dias.map(x => +Y(x.saldo)) };
-  // um rótulo por dia (entrada em cima, saída embaixo), só para os movimentos grandes e sem encostar no vizinho
-  const marcas = [];
-  let ultimo = -99;
-  c.dias.forEach(x => {
-    const ent = x.movs.filter(m => m.tipo === 'entrada').reduce((a, m) => a + m.valor, 0);
-    const sai = -x.movs.filter(m => m.tipo === 'saida').reduce((a, m) => a + m.valor, 0);
-    const l = [];
-    if (ent >= 1000) l.push(`<b style="color:var(--ok)">+${k1(ent)}</b>`);
-    if (sai >= 1500) l.push(`<b style="color:var(--danger)">−${k1(sai)}</b>`);
-    if (!l.length || x.d - ultimo < 3) return;
-    marcas.push([x.d, l.join('')]); ultimo = x.d;
-  });
-  const grafico = `<section class="cx"><div class="cx-h"><h2>Saldo ao longo de ${esc(d.mesNome)}</h2><span class="cx-s">vermelho = abaixo de zero (cheque especial)</span></div>
-    <div class="fx-graf">${ticks.map(v => `<span class="fx-y" style="top:${Y(v)}px">${fmtY(v)}</span>`).join('')}
-    <div class="fx-plot" onpointermove="fxGrafMove(event)" onpointerleave="fxGrafSai()"><svg viewBox="0 0 1000 220" preserveAspectRatio="none" role="img" aria-label="Saldo das contas dia a dia">
-      <defs><clipPath id="fxAb"><rect x="0" y="${y0}" width="1000" height="220"/></clipPath><clipPath id="fxAc"><rect x="0" y="0" width="1000" height="${y0}"/></clipPath></defs>
-      ${ticks.map(v => `<line x1="0" x2="1000" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--bd)" stroke-width="1" vector-effect="non-scaling-stroke"/>`).join('')}
-      <path d="${p} V${y0} H0 Z" fill="var(--danger)" fill-opacity=".25" clip-path="url(#fxAb)"/>
-      <path d="${p} V${y0} H0 Z" fill="var(--acc)" fill-opacity=".1" clip-path="url(#fxAc)"/>
-      <line x1="0" x2="1000" y1="${y0}" y2="${y0}" stroke="var(--mut2)" stroke-dasharray="4 4"/>
-      <path d="${p}" fill="none" stroke="var(--acc)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
-      ${marcas.map(m => `<span class="fx-mc" style="left:calc(${((m[0] - 1) / d.dias * 100).toFixed(2)}% + 4px)">${m[1]}<small>dia ${m[0]}</small></span>`).join('')}
-      ${[1, 5, 10, 15, 20, 25, d.dias].map(k => `<span class="fx-ex" style="left:${((k - 1) / d.dias * 100).toFixed(2)}%">${k}</span>`).join('')}
-      <div class="fx-band" id="fxBand" hidden></div><i class="fx-dot" id="fxDot" hidden></i><div class="fx-tip" id="fxTip" hidden></div>
-    </div></div></section>`;
+  const grafico = fxGrafico(d, c);
   // envelopes
   const linha = m => `<div class="fx-li"><span class="nm mu">${dois(m.dia)}</span><span class="fx-ld">${esc(m.desc)}${m.origem === 'fatura' && !m.real ? '<small> · prevista</small>' : ''}${m.previsto ? '<small> · previsto</small>' : ''}</span>
       <span class="nm${m.valor > 0 ? ' fx-pos' : ''}">${m.valor > 0 ? '+' : '−'}${nbr(Math.abs(m.valor))}</span></div>`;
@@ -3421,23 +3381,115 @@ function fxPainel(d, c, rot) {
     + `<details class="cx fx-ag"><summary><b>Dia a dia</b><span class="cx-s">${d.movs.length} movimentos${corte > 0 && corte < 99 ? ' · apagado = ainda não caiu' : ''}</span></summary>
         <div class="tb-box"><table class="tb" style="min-width:640px"><thead><tr><th>Dia</th><th>O quê</th><th>Como</th><th class="r">Valor</th><th class="r">Saldo no fim do dia</th></tr></thead><tbody>${agenda}</tbody></table></div></details>`;
 }
-/** Passar o mouse no gráfico: marca o dia, o ponto da linha e mostra o saldo e os movimentos dele */
+/* ── gráfico do Fluxo: em cima o saldo, embaixo o que entra (verde) e sai (vermelho) a cada dia.
+      Mostra 10 dias do mês anterior e 10 do seguinte, apagados, com o mês escolhido no meio. ── */
+const FX_VIZ = 10, _fxViz = {};
+/** Busca por trás os meses vizinhos (para as pontas do gráfico) e pinta de novo quando chegam */
+function fxVizinhos(ym) {
+  [ymMais(ym, -1), ymMais(ym, 1)].forEach(k => {
+    if ((_dados.fluxo || {})[k] || _fxViz[k]) return;
+    _fxViz[k] = 1;
+    google.script.run
+      .withSuccessHandler(x => { delete _fxViz[k]; _dados.fluxo = _dados.fluxo || {}; _dados.fluxo[x.yyyymm] = x; dadosGravar();
+        if (_tela === 'fluxo' && _fxAba === 'fluxo' && _mes === ym && _dados.fluxo[_mes]) pintarFluxo(_dados.fluxo[_mes]); })
+      .withFailureHandler(() => { _fxViz[k] = 'erro'; })   // sem esse mês na PROJEÇÃO: o gráfico fica sem a ponta
+      .getFluxo(k);
+  });
+}
+/** Os dias do gráfico: [{ym, d, abre, saldo, movs, ent, sai, noMes}] */
+function fxJanela(d, c) {
+  const F = _dados.fluxo || {}, ant = F[ymMais(d.yyyymm, -1)], dep = F[ymMais(d.yyyymm, 1)], L = [];
+  const fatia = (f, cc, de, ate) => { for (let k = Math.max(1, de); k <= ate; k++) {
+    const x = cc.dias[k - 1];
+    L.push({ ym: f.yyyymm, d: k, abre: k === 1 ? f.saldoIni : cc.dias[k - 2].saldo, saldo: x.saldo, movs: x.movs, noMes: f.yyyymm === d.yyyymm,
+             ent: x.movs.filter(m => m.tipo === 'entrada').reduce((a, m) => a + m.valor, 0),
+             sai: -x.movs.filter(m => m.tipo === 'saida').reduce((a, m) => a + m.valor, 0) });
+  } };
+  if (ant) fatia(ant, fxCalc(ant), ant.dias - FX_VIZ + 1, ant.dias);
+  fatia(d, c, 1, d.dias);
+  if (dep) fatia(dep, fxCalc(dep), 1, FX_VIZ);
+  return L;
+}
 let _fxG = null;
+function fxGrafico(d, c) {
+  const L = fxJanela(d, c), n = L.length, W = 1000, H = 346, PL = 52, PR = 10, CW = (W - PL - PR) / n, X = i => +(PL + i * CW).toFixed(1);
+  const t0 = 36, t1 = 196, b0 = 214, b1 = 298, ly = 338;   // datas abaixo dos rótulos das saídas grandes
+  const i0 = L.findIndex(x => x.noMes), i1 = i0 + d.dias - 1;
+  // escala do saldo com 4 a 5 valores redondos
+  const vals = L.flatMap(x => [x.abre, x.saldo]);
+  let mn = Math.min(0, ...vals), mx = Math.max(0, ...vals);
+  const pad = (mx - mn) * 0.08 || 1; mn -= pad; mx += pad;
+  const Y = v => +(t0 + (mx - v) / (mx - mn) * (t1 - t0)).toFixed(1), y0 = Y(0);
+  const alvoY = (mx - mn) / 4, pot = Math.pow(10, Math.floor(Math.log10(alvoY))), fr = alvoY / pot;
+  const passo = (fr <= 1 ? 1 : fr <= 2 ? 2 : fr <= 5 ? 5 : 10) * pot, ticks = [];
+  for (let i = Math.ceil(mn / passo); i * passo <= mx; i++) ticks.push(i * passo);
+  const fmtY = v => (v < 0 ? '−' : '') + (Math.abs(v) >= 1000 ? (Math.abs(v) / 1000).toFixed(Math.abs(v) % 1000 ? 1 : 0).replace('.', ',') + 'k' : Math.round(Math.abs(v)));
+  let p = `M${X(0)} ${Y(L[0].abre)}`;
+  L.forEach((x, i) => { p += ` V${Y(x.saldo)} H${X(i + 1)}`; });
+  // barras do dia: entra para cima, sai para baixo; rótulo só nos grandes, sem encostar no vizinho
+  const mid = (b0 + b1) / 2, mxMov = Math.max(1, ...L.map(x => Math.max(x.ent, x.sai))), B = v => v / mxMov * ((b1 - b0) / 2 - 2);
+  let ultE = -9, ultS = -9;
+  const barras = L.map((x, i) => {
+    let h = '';
+    if (x.ent) h += `<rect fill="var(--ok)" x="${X(i) + 1.5}" y="${mid - B(x.ent)}" width="${Math.max(1, CW - 3)}" height="${Math.max(1.5, B(x.ent))}" rx="2"/>`;
+    if (x.sai) h += `<rect fill="var(--danger)" x="${X(i) + 1.5}" y="${mid}" width="${Math.max(1, CW - 3)}" height="${Math.max(1.5, B(x.sai))}" rx="2"/>`;
+    if (x.ent >= 1000 && i - ultE >= 3) { h += `<text class="fx-tx" style="fill:var(--ok)" x="${X(i) + CW / 2}" y="${mid - B(x.ent) - 5}" text-anchor="middle">+${k1(x.ent)}</text>`; ultE = i; }
+    if (x.sai >= 1500 && i - ultS >= 3) { h += `<text class="fx-tx" style="fill:var(--danger)" x="${X(i) + CW / 2}" y="${mid + Math.max(1.5, B(x.sai)) + 13}" text-anchor="middle">−${k1(x.sai)}</text>`; ultS = i; }
+    return h;
+  }).join('');
+  // eixo de baixo: 1/11, 5/11, 10/11… (o dia 1 em destaque)
+  const datas = L.map((x, i) => [1, 5, 10, 15, 20, 25].indexOf(x.d) < 0 ? '' :
+    `<text class="fx-tx${x.d === 1 ? ' forte' : ''}" x="${X(i) + CW / 2}" y="${ly}" text-anchor="middle">${x.d}/${x.ym % 100}</text>`).join('');
+  // fora do mês: apagado; nome de cada mês em cima
+  const nomeDe = ym => MES_MIN[ym % 100 - 1];
+  const fora = (i0 > 0 ? `<rect class="fx-fora" x="${X(0)}" y="${t0 - 14}" width="${X(i0) - X(0)}" height="${b1 - t0 + 16}"/>
+      <text class="fx-tx" x="${(X(0) + X(i0)) / 2}" y="14" text-anchor="middle">${nomeDe(L[0].ym)}</text>` : '')
+    + (i1 < n - 1 ? `<rect class="fx-fora" x="${X(i1 + 1)}" y="${t0 - 14}" width="${X(n) - X(i1 + 1)}" height="${b1 - t0 + 16}"/>
+      <text class="fx-tx" x="${(X(i1 + 1) + X(n)) / 2}" y="14" text-anchor="middle">${nomeDe(L[n - 1].ym)}</text>` : '')
+    + [i0, i1 + 1].filter(i => i > 0 && i < n).map(i => `<line x1="${X(i)}" x2="${X(i)}" y1="${t0 - 14}" y2="${b1 + 2}" stroke="var(--bd)"/>`).join('')
+    + `<text class="fx-mes" x="${(X(i0) + X(i1 + 1)) / 2}" y="14" text-anchor="middle">${esc(d.mesNome)}</text>`;
+  const hj = new Date(), ih = L.findIndex(x => x.ym === ymDe(hj) && x.d === hj.getDate());
+  const hoje = ih < 0 ? '' : `<line x1="${X(ih) + CW / 2}" x2="${X(ih) + CW / 2}" y1="${t0 - 14}" y2="${b1}" stroke="var(--acc)" stroke-dasharray="2 3"/>
+      <text class="fx-tx" style="fill:var(--acc-tx)" x="${X(ih) + CW / 2 + 4}" y="${t0 - 4}">hoje</text>`;
+  _fxG = { L, W, PL, CW, ys: L.map(x => Y(x.saldo)) };
+  const ini = L[0], fim = L[n - 1];
+  return `<section class="cx"><div class="cx-h"><h2>Saldo ao longo de ${esc(d.mesNome)}</h2>
+      <span class="cx-s">${ini.d}/${ini.ym % 100} a ${fim.d}/${fim.ym % 100} · os meses vizinhos ficam apagados · vermelho = cheque especial</span></div>
+    <div class="fx-graf"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Saldo das contas dia a dia e o que entra e sai em cada dia" onpointermove="fxGrafMove(event)" onpointerleave="fxGrafSai()">
+      <defs><clipPath id="fxAb"><rect x="0" y="${y0}" width="${W}" height="${H}"/></clipPath><clipPath id="fxAc"><rect x="0" y="0" width="${W}" height="${y0}"/></clipPath></defs>
+      ${ticks.map(v => `<line x1="${PL}" x2="${W - PR}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--bd)"/><text class="fx-tx" x="${PL - 8}" y="${Y(v) + 4}" text-anchor="end">${fmtY(v)}</text>`).join('')}
+      <path d="${p} V${y0} H${X(0)} Z" fill="var(--danger)" fill-opacity=".25" clip-path="url(#fxAb)"/>
+      <path d="${p} V${y0} H${X(0)} Z" fill="var(--acc)" fill-opacity=".1" clip-path="url(#fxAc)"/>
+      <line x1="${PL}" x2="${W - PR}" y1="${y0}" y2="${y0}" stroke="var(--mut2)" stroke-dasharray="4 4"/>
+      <path d="${p}" fill="none" stroke="var(--acc)" stroke-width="2.5"/>
+      <line x1="${PL}" x2="${W - PR}" y1="${mid}" y2="${mid}" stroke="var(--bd)"/>
+      <text class="fx-tx" x="${PL - 8}" y="${mid - 8}" text-anchor="end">entra</text><text class="fx-tx" x="${PL - 8}" y="${mid + 16}" text-anchor="end">sai</text>
+      ${barras}${fora}${hoje}${datas}
+      <rect class="fx-hl" id="fxHl" x="0" y="${t0 - 14}" width="0" height="${b1 - t0 + 16}"/><circle id="fxPt" r="5" fill="var(--acc)" stroke="var(--s1)" stroke-width="3" cx="-20" cy="-20"/>
+    </svg><div class="fx-tip" id="fxTip" hidden></div></div></section>`;
+}
+/** Passar o mouse no gráfico: marca o dia e mostra o saldo e os movimentos dele */
 function fxGrafMove(ev) {
-  const g = _fxG, band = document.getElementById('fxBand'), dot = document.getElementById('fxDot'), tip = document.getElementById('fxTip');
-  if (!g || !band) return;
-  const r = ev.currentTarget.getBoundingClientRect(), x = ev.clientX - r.left;
-  const k = Math.min(g.n, Math.max(1, Math.floor(x / r.width * g.n) + 1)), dia = g.dias[k - 1], w = r.width / g.n;
-  band.style.left = (k - 1) * w + 'px'; band.style.width = w + 'px'; band.hidden = false;
-  dot.style.left = (k - 0.5) * w + 'px'; dot.style.top = g.ys[k - 1] + 'px'; dot.hidden = false;
-  const movs = dia.movs.slice(0, 7).map(m => `<div class="fx-tl"><span>${esc(m.desc)}</span><span class="nm${m.valor > 0 ? ' fx-pos' : ''}">${m.valor > 0 ? '+' : '−'}${nbr(Math.abs(m.valor))}</span></div>`).join('')
-    + (dia.movs.length > 7 ? `<div class="fx-tl"><span>+ ${dia.movs.length - 7} movimentos</span></div>` : '');
-  tip.innerHTML = `<b>Dia ${k} · saldo ${brl(dia.saldo)}</b>${movs || '<div class="fx-tl"><span>sem movimento neste dia</span></div>'}`;
+  const g = _fxG, tip = document.getElementById('fxTip'), hl = document.getElementById('fxHl'), pt = document.getElementById('fxPt');
+  if (!g || !tip) return;
+  const r = ev.currentTarget.getBoundingClientRect(), vx = (ev.clientX - r.left) / r.width * g.W;
+  const i = Math.floor((vx - g.PL) / g.CW), x = g.L[i];
+  if (!x) return fxGrafSai();
+  hl.setAttribute('x', g.PL + i * g.CW); hl.setAttribute('width', g.CW);
+  pt.setAttribute('cx', g.PL + (i + 0.5) * g.CW); pt.setAttribute('cy', g.ys[i]);
+  const movs = x.movs.slice(0, 7).map(m => `<div class="fx-tl"><span>${esc(m.desc)}</span><span class="nm${m.valor > 0 ? ' fx-pos' : ' fx-neg-t'}">${m.valor > 0 ? '+' : '−'}${nbr(Math.abs(m.valor))}</span></div>`).join('')
+    + (x.movs.length > 7 ? `<div class="fx-tl"><span>+ ${x.movs.length - 7} movimentos</span></div>` : '');
+  const dt = new Date(Math.floor(x.ym / 100), x.ym % 100 - 1, x.d);
+  tip.innerHTML = `<b>${SEM_LONGO[dt.getDay()]}, ${x.d}/${x.ym % 100} · saldo <span class="${x.saldo < 0 ? 'fx-neg-t' : ''}">${brl(x.saldo)}</span></b>${movs || '<div class="fx-tl"><span>sem movimento neste dia</span></div>'}`;
   tip.hidden = false;
-  tip.style.left = Math.max(0, x + 16 + tip.offsetWidth > r.width ? x - 16 - tip.offsetWidth : x + 16) + 'px';
+  const px = ev.clientX - r.left;
+  tip.style.left = Math.max(0, px + 16 + tip.offsetWidth > r.width ? px - 16 - tip.offsetWidth : px + 16) + 'px';
 }
 function fxGrafSai() {
-  ['fxBand', 'fxDot', 'fxTip'].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; });
+  const tip = document.getElementById('fxTip'), hl = document.getElementById('fxHl'), pt = document.getElementById('fxPt');
+  if (tip) tip.hidden = true;
+  if (hl) hl.setAttribute('width', 0);
+  if (pt) pt.setAttribute('cx', -20);
 }
 function fxSaldoSalvar(ym) {
   const v = lerValor(document.getElementById('fxSv').value), dia = Math.max(1, parseInt(document.getElementById('fxSd').value, 10) || 1);
@@ -4783,4 +4835,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v32 -------- -->
+<!-- -------- index.html v33 -------- -->
