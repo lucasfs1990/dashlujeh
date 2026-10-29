@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v35 -------- -->
+<!-- -------- index.html v36 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -175,6 +175,7 @@ body.em-lancar .tela { padding-bottom:110px }
 .fat-mu { font-size:12px; font-weight:600; opacity:.78 }
 .fat-v { font-family:var(--f-num); font-weight:600; font-size:34px; letter-spacing:-1px; position:relative; line-height:1.1 }
 .fat-sub { font-size:12px; font-weight:600; opacity:.82; margin-top:4px; position:relative }
+.fat-hoje { opacity:1; font-size:11.5px } .fat-hoje b { font-family:var(--f-num); font-weight:600 }
 
 .tiles { display:flex; gap:10px; padding:14px 20px 2px; overflow-x:auto; scrollbar-width:none }
 .tiles::-webkit-scrollbar { display:none }
@@ -756,8 +757,9 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .ps-mes-t { font-size:11px; font-weight:800; color:var(--mut2); text-transform:uppercase; letter-spacing:.06em; padding:0 4px 6px }
 .ps-mes .mseg button:nth-child(2) { flex:1; display:flex; align-items:center; justify-content:center; gap:6px }
 .ps-mes .mseg button:disabled { opacity:.35 }
-/* aba Fixos no cartão */
+/* aba Contas fixas */
 .fc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(420px,1fr)); gap:14px; align-items:start }
+.fc-det summary .lin-ic { flex-shrink:0 }
 .fc-det summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:14px; color:var(--mut) }
 .fc-det summary::-webkit-details-marker { display:none }
 .fc-det[open] summary { margin-bottom:6px } .fc-det[open] summary > svg { transform:rotate(180deg) }
@@ -1096,7 +1098,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   <button type="button" class="ps-b" data-t="painel" onclick="ir('painel')"><i data-ic="casa" data-s="19"></i><span>Painel</span></button>
   <button type="button" class="ps-b" data-t="lancs" onclick="ir('lancs')"><i data-ic="recibo" data-s="19"></i><span>Lançamentos</span></button>
   <button type="button" class="ps-b" data-t="fluxo" onclick="ir('fluxo')"><i data-ic="dinheiro" data-s="19"></i><span>Fluxo do mês</span></button>
-  <button type="button" class="ps-b" data-t="fixos" onclick="ir('fixos')"><i data-ic="cartao" data-s="19"></i><span>Fixos no cartão</span></button>
+  <button type="button" class="ps-b" data-t="fixos" onclick="ir('fixos')"><i data-ic="cartao" data-s="19"></i><span>Contas fixas</span></button>
   <button type="button" class="ps-b" data-t="cartao" onclick="ir('cartao')"><i data-ic="baixar" data-s="19"></i><span>Importar C6</span></button>
   <button type="button" class="ps-b" data-t="consultas" onclick="ir('consultas')"><i data-ic="coracao" data-s="19"></i><span>Consultas</span></button>
   <button type="button" class="ps-b" data-t="pend" onclick="ir('pend')"><i data-ic="camera" data-s="19"></i><span>Pendências</span><b class="ps-badge" id="psBadge" hidden></b></button>
@@ -1420,7 +1422,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v35</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v36</p>
   </div>
 </section>
 
@@ -1479,7 +1481,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v35';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v36';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1929,11 +1931,14 @@ function faturaCel(c, d) {
     rot = `Fatura de ${d.mesNome} · prevista`; valor = c.prevista;
     sub = c.nome === 'C6' ? 'cole a fatura do C6 no computador para comparar com a real' : 'à vista + parcelas + fixos deste cartão';
   }
+  // fatura aberta: o que o app do banco já deveria mostrar hoje (compras até hoje + fixos cujo dia já passou)
+  const hoje = !c.real && c.ateHoje != null && Math.abs(c.ateHoje - valor) >= 0.01
+    ? `<div class="fat-sub fat-hoje">hoje no app do ${esc(c.nome)}: <b>${brl(c.ateHoje)}</b></div>` : '';
   const cor = c.cor && c.cor.toUpperCase() !== '#F2B33D' ? `style="background:${c.cor};color:${tintaSobre(c.cor)}"` : '';
   return `<section class="fatura toca" role="button" tabindex="0" aria-label="Ver as compras da fatura ${escA(c.nome)}" onclick="cmAbrir({cartao:${escA(JSON.stringify(c.nome))}})" ${cor}>
       <span class="anel a1"></span><span class="anel a2"></span>
       <div class="fat-l1"><span>${esc(rot)}</span><span class="fat-mu">cartão ${esc(c.nome)}</span></div>
-      <div><div class="fat-v">${brl(valor)}</div><div class="fat-sub">${esc(sub)}</div></div>
+      <div><div class="fat-v">${brl(valor)}</div><div class="fat-sub">${esc(sub)}</div>${hoje}</div>
       <div class="fat-l3"><span>vence ${esc(c.venc)}</span><span>${esc(textoFecha(c.fechaDias, c.fechaData))}</span></div>
     </section>`;
 }
@@ -3532,10 +3537,10 @@ function fxContas(d) {
     ${grupos.filter(g => g[2].length || g[3]).map(g => `<details class="cx fx-gr"${g[3] ? ' open' : ''}><summary><b>${esc(g[0])}</b><span class="cx-s">${esc(g[1])} · ${g[2].length} · ${brl(tot(g[2]))}</span></summary>
       ${g[2].length ? `<div class="tb-box"><table class="tb" style="min-width:720px"><tbody>${g[2].map(linha).join('')}</tbody></table></div>` : '<div class="cx-s" style="padding:6px 0">Nada neste mês.</div>'}</details>`).join('')}`;
 }
-function fxNova(tipo, como) {
+function fxNova(tipo, como, grupo) {
   const ym = _mes, fim = (_meses[_meses.length - 1] || {}).yyyymm || ymMais(ym, 12);
   _fxRegra = { linha: 0, f: { item: '', tipo: tipo === 'avulsa' ? 'Entrada' : tipo, valor: '', dia: 1, como: como || (tipo === 'Saída' ? 'Débito automático' : 'Conta'),
-    conta: quemAparelho(), grupo: tipo === 'avulsa' ? 'Loja' : '', nivel: '', obs: '', data: tipo === 'avulsa' ? hojeISO() : '', desde: ym, ate: fim },
+    conta: quemAparelho(), grupo: grupo || (tipo === 'avulsa' ? 'Loja' : ''), nivel: '', obs: '', data: tipo === 'avulsa' ? hojeISO() : '', desde: ym, ate: fim },
     avulsa: tipo === 'avulsa', modo: 'tudo' };
   if (tipo === 'avulsa') _fxRegra.f.item = 'Retirada da loja';
   fxPop();
@@ -3609,13 +3614,13 @@ function fxExcluir() {
   google.script.run.withSuccessHandler(fxDepois).withFailureHandler(err => showToast((err && err.message) || 'Erro', 'err')).excluirRegra(R.linha, modo, _mes);
 }
 
-/* ══ FIXOS NO CARTÃO (computador) ═════════════════════════════
-   As assinaturas e contas que caem na fatura de cada cartão: as regras
-   da aba BASE com "Como paga" = nome do cartão. Clique na linha para
+/* ══ CONTAS FIXAS (computador) ════════════════════════════════
+   Todas as saídas fixas da aba BASE (no cartão, boleto, débito automático,
+   Pix), agrupadas pelo Grupo de cada uma. Clique na linha para
    mudar valor, dia, nome ou prazo (o mesmo editor do Fluxo); clique no
    ícone para trocar o símbolo, que fica guardado em Configurações
    (prefs "fxic_<nome>") e vale em todos os meses. ══ */
-let _fcIcAberto = '', _fcAbertos = {};   // _fcAbertos: quais cartões estão abertos (começam fechados)
+let _fcIcAberto = '', _fcAbertos = {}, _fcFiltro = 'tudo';   // _fcAbertos: quais grupos estão abertos (começam fechados)
 const slugFixo = s => semAc(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
 const icFixoEscolhido = item => { const p = ((_dados.config || {}).prefs || {})['fxic_' + slugFixo(item)]; return IC[p] ? p : ''; };
 /** O ícone de um fixo: o que você escolheu; senão um palpite pelo nome; senão o do grupo */
@@ -3640,35 +3645,46 @@ function carregarFixos(forcar) {
 function pintarFixos() {
   const host = document.getElementById('fcConteudo');
   if (!host) return;
-  const B = _dados.base, ym = _mes, cartoes = (B && B.cartoes) || [];
+  const B = _dados.base, ym = _mes, cartoes = ((B && B.cartoes) || []).map(c => c.toUpperCase());
   const cab = `<header class="pch">
-      <div><h1>Fixos no cartão</h1><div class="pch-s">assinaturas e contas que caem na fatura · ${esc(rotMes(ym))} · grava na aba BASE</div></div>
-      <div class="pch-d">${cartoes.length ? `<button type="button" class="bt acc" onclick="fxNova('Saída', ${escA(JSON.stringify(cartoes[0]))})">+ Novo fixo no ${esc(cartoes[0])}</button>` : ''}</div></header>`;
+      <div><h1>Contas fixas</h1><div class="pch-s">tudo o que sai todo mês, por grupo: no cartão, boleto, débito automático e Pix · ${esc(rotMes(ym))} · grava na aba BASE</div></div>
+      <div class="pch-d"><div class="mseg" role="group" aria-label="Mostrar">${[['tudo', 'Todas'], ['cartao', 'No cartão'], ['conta', 'Saem da conta']].map(([v, t]) =>
+        `<button type="button" class="${v === _fcFiltro ? 'on' : ''}" aria-pressed="${v === _fcFiltro}" onclick="_fcFiltro='${v}';pintarFixos()">${t}</button>`).join('')}</div>
+        <button type="button" class="bt acc" onclick="fxNova('Saída')">+ Nova conta fixa</button></div></header>`;
   if (!B) { host.innerHTML = cab + '<div class="esq" style="height:240px"></div>'; return; }
   const dia = r => r.data ? +r.data.slice(8) : r.dia;
-  const secoes = cartoes.map(c => {
-    const l = B.regras.filter(r => r.tipo === 'Saída' && fxAtiva(r, ym) && String(r.como).trim().toUpperCase() === c.toUpperCase())
-      .sort((a, b) => dia(a) - dia(b) || b.valor - a.valor);
-    return { c: c, l: l, tot: l.reduce((s, r) => s + r.valor, 0) };
-  }).filter(s => s.l.length);
+  const noCartao = r => cartoes.indexOf(String(r.como).trim().toUpperCase()) >= 0;
+  const todas = B.regras.filter(r => r.tipo === 'Saída' && fxAtiva(r, ym));
+  const soma = a => a.reduce((s, r) => s + r.valor, 0);
+  const vis = todas.filter(r => _fcFiltro === 'tudo' || (_fcFiltro === 'cartao') === noCartao(r));
+  const por = {};
+  vis.forEach(r => { const g = String(r.grupo || '').trim() || 'Sem grupo'; (por[g] = por[g] || []).push(r); });
+  const secoes = Object.keys(por).map(g => ({ g: g, l: por[g].sort((a, b) => dia(a) - dia(b) || b.valor - a.valor), tot: soma(por[g]) }))
+    .sort((a, b) => b.tot - a.tot);
+  const kp = (n, v, s) => `<div class="kpi"><div class="kpi-n">${n}</div><div class="kpi-v">${brl(v)}</div><div class="kpi-s">${esc(s)}</div></div>`;
+  const cart = todas.filter(noCartao), conta = todas.filter(r => !noCartao(r));
+  const kpis = `<section class="kpis">${kp('Todas as contas fixas', soma(todas), todas.length + ' contas em ' + rotMes(ym))}
+    ${kp('No cartão', soma(cart), cart.length + ' · já dentro da fatura prevista')}
+    ${kp('Saem da conta', soma(conta), conta.length + ' · boleto, débito automático e Pix')}</section>`;
   const picker = item => `<div class="fc-ics" role="group" aria-label="Escolha o ícone">${ICONES_GRUPO.map(([n, t]) =>
       `<button type="button" class="${icFixoEscolhido(item) === n ? 'on' : ''}" title="${escA(t)}" aria-label="${escA(t)}" onclick="fcIconeEscolher(${escA(JSON.stringify(item))},'${n}')">${ic(n, 20)}</button>`).join('')}
       <button type="button" class="fc-auto" onclick="fcIconeEscolher(${escA(JSON.stringify(item))},'')">automático</button></div>`;
   const linha = r => `<div class="fc-li">
       <button type="button" class="lin-ic fc-ic" aria-label="Trocar o ícone de ${escA(r.item)}" aria-expanded="${_fcIcAberto === r.item}" onclick="fcIcone(${escA(JSON.stringify(r.item))})">${ic(icFixo(r), 20)}</button>
       <button type="button" class="fc-nome" onclick="fxEditar(${r.linha})"><b>${esc(r.item)}${r.data ? ' <span class="etq">uma vez</span>' : ''}</b>
-        <small>${esc(['dia ' + dois(dia(r)), r.grupo, r.conta].filter(Boolean).join(' · '))}</small></button>
+        <small>${esc(['dia ' + dois(dia(r)), r.conta].filter(Boolean).join(' · '))}<span class="tag-ct">${esc(r.como || '—')}</span></small></button>
       <span class="nm">${nbr(r.valor)}</span>
       <button type="button" class="btn-ic" aria-label="Editar ${escA(r.item)}" onclick="fxEditar(${r.linha})">${ic('lapis', 16)}</button></div>`
     + (_fcIcAberto === r.item ? picker(r.item) : '');
-  host.innerHTML = cab + (secoes.length
-    ? `<section class="fc-grid">${secoes.map(s => `<details class="cx fc-det"${_fcAbertos[s.c] ? ' open' : ''} ontoggle="_fcAbertos[${escA(JSON.stringify(s.c))}]=this.open">
-        <summary><span class="fc-sum"><b>${esc(s.c)}</b><small>${s.l.length} ${s.l.length === 1 ? 'fixo' : 'fixos'}</small></span>
-          <span class="fc-prev" aria-hidden="true">${s.l.slice(0, 10).map(r => `<i title="${escA(r.item)}">${ic(icFixo(r), 16)}</i>`).join('')}${s.l.length > 10 ? `<em>+${s.l.length - 10}</em>` : ''}</span>
+  const resumo = l => { const c = l.filter(noCartao).length, o = l.length - c; return [c ? c + ' no cartão' : '', o ? o + ' da conta' : ''].filter(Boolean).join(' · '); };
+  host.innerHTML = cab + kpis + (secoes.length
+    ? `<section class="fc-grid">${secoes.map(s => `<details class="cx fc-det"${_fcAbertos[s.g] ? ' open' : ''} ontoggle="_fcAbertos[${escA(JSON.stringify(s.g))}]=this.open">
+        <summary><span class="lin-ic">${ic(icCat(s.g === 'Sem grupo' ? '' : s.g), 20)}</span><span class="fc-sum"><b>${esc(s.g)}</b><small>${s.l.length} ${s.l.length === 1 ? 'conta' : 'contas'} · ${esc(resumo(s.l))}</small></span>
+          <span class="fc-prev" aria-hidden="true">${s.l.slice(0, 8).map(r => `<i title="${escA(r.item)}">${ic(icFixo(r), 16)}</i>`).join('')}${s.l.length > 8 ? `<em>+${s.l.length - 8}</em>` : ''}</span>
           <span class="nm fc-tot">${brl(s.tot)}</span>${ic('chevD', 16)}</summary>
-        <div class="cx-s" style="margin:4px 0 6px">já estão dentro da fatura prevista · clique no ícone para trocá-lo</div>${s.l.map(linha).join('')}
-        <button type="button" class="link" style="margin-top:8px" onclick="fxNova('Saída', ${escA(JSON.stringify(s.c))})">+ novo fixo no ${esc(s.c)}</button></details>`).join('')}</section>`
-    : `<div class="cx"><div class="empty">Nenhum fixo no cartão em ${esc(rotMes(ym))}.</div></div>`);
+        <div class="cx-s" style="margin:4px 0 6px">clique na conta para editar · no ícone, para trocá-lo</div>${s.l.map(linha).join('')}
+        <button type="button" class="link" style="margin-top:8px" onclick="fxNova('Saída', '', ${escA(JSON.stringify(s.g === 'Sem grupo' ? '' : s.g))})">+ nova conta em ${esc(s.g)}</button></details>`).join('')}</section>`
+    : `<div class="cx"><div class="empty">Nenhuma conta fixa ${_fcFiltro === 'cartao' ? 'no cartão ' : _fcFiltro === 'conta' ? 'saindo da conta ' : ''}em ${esc(rotMes(ym))}.</div></div>`);
 }
 function fcIcone(item) { _fcIcAberto = _fcIcAberto === item ? '' : item; pintarFixos(); }
 function fcIconeEscolher(item, nome) {
@@ -4845,4 +4861,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v35 -------- -->
+<!-- -------- index.html v36 -------- -->
