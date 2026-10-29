@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v34 -------- -->
+<!-- -------- index.html v35 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1420,7 +1420,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v34</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v35</p>
   </div>
 </section>
 
@@ -1479,7 +1479,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v34';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v35';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1964,19 +1964,15 @@ function dispHtml(d) {
         <span class="disp-v" style="display:block;color:${cor(k.semVale)}">${brl(k.semVale)}</span></span>${ic(_dispAberto ? 'chevU' : 'chevD', 18)}</button>
       ${faixas}</section>`;
 }
-/** Card "Parcelas" da Casa: todos os cartões nesta fatura (o C6 miúdo ao lado), contra o teto,
-    e o mês mais cheio dos próximos */
+/** Card "Parcelas" da Casa: todos os cartões nesta fatura (o C6 miúdo ao lado), contra o teto */
 function parcTile(d) {
   const sp = d.serieParcelas || [], t = d.tetoParc || {}, princ = (_cfg.cartoes[0] || {}).nome || 'C6';
   const deste = sp.find(x => x.yyyymm === d.yyyymm);
   const todos = deste ? deste.valor : (d.cartoes || []).length ? d.cartoes.reduce((s, c) => s + (c.parcelas || 0), 0) : d.parcelas;
-  const pico = sp.reduce((m, x) => x.valor > m.valor ? x : m, deste || sp[0] || { valor: 0, rot: '' });
   const corDe = v => !t.teto ? 'var(--txt)' : v > t.teto + 0.005 ? 'var(--danger)' : v >= t.teto * 0.8 ? 'var(--warn)' : 'var(--ok)';
   const soPrinc = Math.abs(todos - d.parcelas) >= 0.01 ? `<div class="tile-e">só ${esc(princ)}<b>${nbr(d.parcelas)}</b></div>` : '';
   const barra = t.teto ? `<div class="barra" style="height:4px;margin-top:8px"><i style="width:${Math.min(100, todos / t.teto * 100).toFixed(1)}%;background:${corDe(todos)}"></i></div>` : '';
-  const nota = t.teto
-    ? (pico === deste || !pico.rot ? `teto ${nbr(t.teto)} · este é o mês mais cheio` : `teto ${nbr(t.teto)} · mais cheio: ${esc(pico.rot)} <b style="color:${corDe(pico.valor)}">${nbr(pico.valor)}</b>`)
-    : pico.rot && pico !== deste ? `mais cheio: ${esc(pico.rot)} ${nbr(pico.valor)}` : '';
+  const nota = t.teto ? `teto ${nbr(t.teto)}` : '';
   return `<div class="tile tile-parc"><div class="tile-l">Parcelas · todos os cartões</div>
     <div class="tile-sl"><div class="tile-v" style="color:${corDe(todos)}">${nbr(todos)}</div>${soPrinc}</div>
     ${barra}${nota ? `<div class="tile-n">${nota}</div>` : ''}</div>`;
@@ -4849,4 +4845,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v34 -------- -->
+<!-- -------- index.html v35 -------- -->
