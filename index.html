@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v37 -------- -->
+<!-- -------- index.html v38 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1126,7 +1126,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
     <div class="filtros">
       <label for="lsBusca" class="so-leitor">Buscar</label>
       <input id="lsBusca" type="search" placeholder="Buscar descrição ou estabelecimento" oninput="pintarLancs()" autocomplete="off"/>
-      <select id="lsMes" aria-label="Mês da fatura" onchange="lsMesMudou()"></select>
+      <select id="lsMes" aria-label="Mês" onchange="lsMesMudou()"></select>
       <select id="lsForma" aria-label="Cartão ou forma" onchange="pintarLancs()"></select>
       <select id="lsGrupo" aria-label="Grupo" onchange="pintarLancs()"></select>
       <select id="lsQuem" aria-label="Quem" onchange="pintarLancs()"></select>
@@ -1422,7 +1422,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v37</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v38</p>
   </div>
 </section>
 
@@ -1458,7 +1458,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <!-- ══ escolher o mês ═══════════════════════════════════════ -->
 <div class="folha" id="folhaMes" hidden onclick="if(event.target===this)fecharMeses()">
   <div class="folha-c">
-    <div class="sec">Mês da fatura</div>
+    <div class="sec">Mês</div>
     <div class="folha-g" id="folhaLista"></div>
   </div>
 </div>
@@ -1481,7 +1481,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v37';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v38';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1664,6 +1664,10 @@ function vividoDe(ym) {
   const f = fechamentoDe(ym, _cfg.cartoes[0]);
   return ymDe(new Date(f.getFullYear(), f.getMonth(), f.getDate() - 15));
 }
+/** O mês escolhido é um só, o vivido: _mes guarda a fatura dele (Painel, Lançamentos) e
+    mesCal() o mesmo mês no calendário (Fluxo, Contas fixas, Entradas) */
+const mesCal = () => vividoDe(_mes);
+const rotViv = ym => rotMes(vividoDe(ym));
 function mesInicial() { return _cfg.abreMes === 'calendario' ? ymDe(new Date()) : mesVigente(); }
 function tintaSobre(hex) {
   const h = String(hex || '#F2B33D').replace('#', '');
@@ -2203,7 +2207,7 @@ function abrirMeses() {
   const lista = _meses.length ? _meses : [{ yyyymm: _mes, label: rotMes(_mes) }];
   // o mês principal (a fatura aberta) fica sozinho no meio; em cima, apagados, os 3 de antes; embaixo, os seguintes
   const hoje = new Date(), princ = _cfg.abreMes === 'calendario' ? ymDe(hoje) : ymDe(compDe(hoje, _cfg.cartoes[0]));
-  const rot = m => _tela === 'casa' ? rotMes(vividoDe(m.yyyymm)) : m.label;
+  const rot = m => rotViv(m.yyyymm);
   const bt = (m, cls, extra) => `<button type="button" class="${[cls, m.yyyymm === _mes ? 'on' : ''].filter(Boolean).join(' ')}"${extra || ''} onclick="escolherMes(${m.yyyymm})">${esc(rot(m))}</button>`;
   const antes = lista.filter(m => m.yyyymm < princ).slice(-3), depois = lista.filter(m => m.yyyymm > princ);
   const p = lista.find(m => m.yyyymm === princ);
@@ -2235,7 +2239,7 @@ function pintarMesSide() {
   const i = _meses.findIndex(m => m.yyyymm === _mes);
   el.innerHTML = `<div class="ps-mes-t">Mês</div><div class="mseg">
     <button type="button" aria-label="Mês anterior" onclick="mesSide(-1)"${i <= 0 ? ' disabled' : ''}>‹</button>
-    <button type="button" class="on" aria-label="Escolher outro mês" onclick="abrirMeses()">${esc(rotMes(_mes))}${ic('chevD', 13)}</button>
+    <button type="button" class="on" aria-label="Escolher outro mês" onclick="abrirMeses()">${esc(rotViv(_mes))}${ic('chevD', 13)}</button>
     <button type="button" aria-label="Próximo mês" onclick="mesSide(1)"${i < 0 || i >= _meses.length - 1 ? ' disabled' : ''}>›</button></div>`;
 }
 function mesSide(k) {
@@ -2383,7 +2387,7 @@ function lancarSalvar(e) {
   enfileirar('addLancamento', [payload]);
   fecharLancar();
   const estoura = _l.nparc > 1 && cartaoDe(payload.forma) ? mesSobreTeto(payload) : null;
-  if (estoura) showToast(`✓ Lançado · ${estoura.rot} passa do teto das parcelas (${nbr(estoura.valor)})`, 'err');
+  if (estoura) showToast(`✓ Lançado · ${rotViv(estoura.yyyymm)} passa do teto das parcelas (${nbr(estoura.valor)})`, 'err');
   else showToast(_l.nparc > 1 ? `✓ ${_l.nparc}× de ${brl(valor / _l.nparc)}` : '✓ Lançado', 'ok');
 }
 /** Avisa, sem impedir: o 1º mês em que a parcelada (já na fila) faz as parcelas passarem do teto */
@@ -3293,18 +3297,18 @@ function csExcluir(id) {
 let _fxAba = 'fluxo', _fxConf = false, _fxRegra = null;
 const COMO_PAGA = ['Débito automático', 'Boleto', 'Pix', 'Transferência', 'Conta', 'Conta da Jéssica', 'FGTS'];
 function carregarFluxo(forcar) {
-  const ym = _mes, d = (_dados.fluxo || {})[ym];
+  const ym = mesCal(), d = (_dados.fluxo || {})[ym];
   if (d) pintarFluxo(d);
   else document.getElementById('fxConteudo').innerHTML = '<div class="esq" style="height:60px"></div><div class="esq" style="height:110px"></div><div class="esq" style="height:240px"></div>';
   if (_fxAba === 'contas' && (!_dados.base || forcar)) carregarBase();
   if (d && !forcar) return;
   google.script.run
-    .withSuccessHandler(x => { _dados.fluxo = _dados.fluxo || {}; _dados.fluxo[x.yyyymm] = x; dadosGravar(); if (_tela === 'fluxo' && x.yyyymm === _mes) pintarFluxo(x); })
+    .withSuccessHandler(x => { _dados.fluxo = _dados.fluxo || {}; _dados.fluxo[x.yyyymm] = x; dadosGravar(); if (_tela === 'fluxo' && x.yyyymm === mesCal()) pintarFluxo(x); })
     .withFailureHandler(err => { if (!(_dados.fluxo || {})[ym]) document.getElementById('fxConteudo').innerHTML = `<div class="alert alert-crit"><span class="alert-icon">⚠️</span><span>${esc((err && err.message) || 'Não consegui ler o fluxo')}</span></div>`; })
     .getFluxo(ym);
 }
 function carregarBase() {
-  google.script.run.withSuccessHandler(b => { _dados.base = b; dadosGravar(); if (_tela === 'fluxo' && _fxAba === 'contas') pintarFluxo((_dados.fluxo || {})[_mes]); if (_tela === 'config') pintarConfig(); if (_tela === 'lancs') pintarLancs(); if (_tela === 'fixos') pintarFixos(); })
+  google.script.run.withSuccessHandler(b => { _dados.base = b; dadosGravar(); if (_tela === 'fluxo' && _fxAba === 'contas') pintarFluxo((_dados.fluxo || {})[mesCal()]); if (_tela === 'config') pintarConfig(); if (_tela === 'lancs') pintarLancs(); if (_tela === 'fixos') pintarFixos(); })
     .withFailureHandler(err => showToast((err && err.message) || 'Erro ao ler a BASE', 'err')).listarBase();
 }
 function fxMes(k) { _mes = ymMais(_mes, k); carregarFluxo(); pintarMesSide(); }
@@ -3410,7 +3414,7 @@ function fxVizinhos(ym) {
     _fxViz[k] = 1;
     google.script.run
       .withSuccessHandler(x => { delete _fxViz[k]; _dados.fluxo = _dados.fluxo || {}; _dados.fluxo[x.yyyymm] = x; dadosGravar();
-        if (_tela === 'fluxo' && _fxAba === 'fluxo' && _mes === ym && _dados.fluxo[_mes]) pintarFluxo(_dados.fluxo[_mes]); })
+        if (_tela === 'fluxo' && _fxAba === 'fluxo' && mesCal() === ym && _dados.fluxo[ym]) pintarFluxo(_dados.fluxo[ym]); })
       .withFailureHandler(() => { _fxViz[k] = 'erro'; })   // sem esse mês na PROJEÇÃO: o gráfico fica sem a ponta
       .getFluxo(k);
   });
@@ -3542,7 +3546,7 @@ function fxContas(d) {
       ${g[2].length ? `<div class="tb-box"><table class="tb" style="min-width:720px"><tbody>${g[2].map(linha).join('')}</tbody></table></div>` : '<div class="cx-s" style="padding:6px 0">Nada neste mês.</div>'}</details>`).join('')}`;
 }
 function fxNova(tipo, como, grupo) {
-  const ym = _mes, fim = (_meses[_meses.length - 1] || {}).yyyymm || ymMais(ym, 12);
+  const ym = mesCal(), fim = (_meses[_meses.length - 1] || {}).yyyymm || ymMais(ym, 12);
   _fxRegra = { linha: 0, f: { item: '', tipo: tipo === 'avulsa' ? 'Entrada' : tipo, valor: '', dia: 1, como: como || (tipo === 'Saída' ? 'Débito automático' : 'Conta'),
     conta: quemAparelho(), grupo: grupo || (tipo === 'avulsa' ? 'Loja' : ''), nivel: '', obs: '', data: tipo === 'avulsa' ? hojeISO() : '', desde: ym, ate: fim },
     avulsa: tipo === 'avulsa', modo: 'tudo' };
@@ -3561,7 +3565,7 @@ function fxLer() {
 }
 function fxSet(k, v) { fxLer(); if (k === 'modo') _fxRegra.modo = v; else _fxRegra.f[k] = v; fxPop(); }
 function fxPop() {
-  const R = _fxRegra, f = R.f, rm = rotMes(_mes), novo = !R.linha;
+  const R = _fxRegra, f = R.f, cal = mesCal(), rm = rotMes(cal), novo = !R.linha;
   const seg = (lista, atual, k) => `<div class="seg">${lista.map(([v, t]) => `<button type="button" class="${v === atual ? 'on' : ''}" onclick="fxSet('${k}',${escA(JSON.stringify(v))})">${esc(t)}</button>`).join('')}</div>`;
   const comos = COMO_PAGA.concat((_dados.base && _dados.base.cartoes) || []);
   if (f.como && comos.indexOf(f.como) < 0) comos.push(f.como);
@@ -3585,7 +3589,7 @@ function fxPop() {
     ${novo || R.r.data ? '' : `<div class="lp-b"><div class="l-rot">A mudança vale para</div>${seg([['mes', 'Só ' + rm], ['daqui', 'De ' + rm + ' em diante'], ['tudo', 'Todos os meses']], R.modo, 'modo')}
       <div class="cfg-h">${R.modo === 'mes' ? 'Os outros meses continuam como estão.' : R.modo === 'daqui' ? 'Os meses antes de ' + rm + ' continuam como estão (é o caso de um aumento ou desconto).' : 'Muda a regra inteira, inclusive os meses que já passaram.'}</div></div>`}
     <div class="lp-pe">
-      ${novo ? '' : `<button type="button" class="lp-x" onclick="fxExcluir()">${R.r.data || R.modo === 'tudo' || (R.modo === 'daqui' && R.r.desde >= _mes) ? 'Excluir' : R.modo === 'mes' ? 'Tirar só de ' + rm : 'Encerrar em ' + rotMes(ymMais(_mes, -1))}</button>`}
+      ${novo ? '' : `<button type="button" class="lp-x" onclick="fxExcluir()">${R.r.data || R.modo === 'tudo' || (R.modo === 'daqui' && R.r.desde >= cal) ? 'Excluir' : R.modo === 'mes' ? 'Tirar só de ' + rm : 'Encerrar em ' + rotMes(ymMais(cal, -1))}</button>`}
       <span style="flex:1"></span>
       <button type="button" class="bt" onclick="fxFechar()">Cancelar</button>
       <button type="button" class="bt acc" id="frSalvar" onclick="fxSalvar()">Salvar</button></div>`;
@@ -3609,13 +3613,13 @@ function fxSalvar() {
   const b = document.getElementById('frSalvar'); b.disabled = true; b.innerHTML = '<span class="spin"></span> Salvando…';
   google.script.run.withSuccessHandler(fxDepois)
     .withFailureHandler(err => { b.disabled = false; b.textContent = 'Salvar'; showToast((err && err.message) || 'Erro ao salvar', 'err'); })
-    .salvarRegra(R.linha, campos, R.r && R.r.data ? 'tudo' : R.modo, _mes);
+    .salvarRegra(R.linha, campos, R.r && R.r.data ? 'tudo' : R.modo, mesCal());
 }
 function fxExcluir() {
   const R = _fxRegra; if (!R || !R.linha) return;
   const modo = R.r.data ? 'tudo' : R.modo;
-  if (!confirm(modo === 'tudo' ? `Excluir "${R.r.item}" da BASE?` : modo === 'mes' ? `Tirar "${R.r.item}" só de ${rotMes(_mes)}?` : `Encerrar "${R.r.item}" em ${rotMes(ymMais(_mes, -1))}?`)) return;
-  google.script.run.withSuccessHandler(fxDepois).withFailureHandler(err => showToast((err && err.message) || 'Erro', 'err')).excluirRegra(R.linha, modo, _mes);
+  if (!confirm(modo === 'tudo' ? `Excluir "${R.r.item}" da BASE?` : modo === 'mes' ? `Tirar "${R.r.item}" só de ${rotMes(mesCal())}?` : `Encerrar "${R.r.item}" em ${rotMes(ymMais(mesCal(), -1))}?`)) return;
+  google.script.run.withSuccessHandler(fxDepois).withFailureHandler(err => showToast((err && err.message) || 'Erro', 'err')).excluirRegra(R.linha, modo, mesCal());
 }
 
 /* ══ CONTAS FIXAS (computador) ════════════════════════════════
@@ -3649,7 +3653,7 @@ function carregarFixos(forcar) {
 function pintarFixos() {
   const host = document.getElementById('fcConteudo');
   if (!host) return;
-  const B = _dados.base, ym = _mes, cartoes = ((B && B.cartoes) || []).map(c => c.toUpperCase());
+  const B = _dados.base, ym = mesCal(), cartoes = ((B && B.cartoes) || []).map(c => c.toUpperCase());
   const cab = `<header class="pch">
       <div><h1>Contas fixas</h1><div class="pch-s">tudo o que sai todo mês, por grupo: no cartão, boleto, débito automático e Pix · ${esc(rotMes(ym))} · grava na aba BASE</div></div>
       <div class="pch-d"><div class="mseg" role="group" aria-label="Mostrar">${[['tudo', 'Todas'], ['cartao', 'No cartão'], ['conta', 'Saem da conta']].map(([v, t]) =>
@@ -3929,9 +3933,9 @@ function pintarPainel(d) {
   const sf = d.serieFatura || [], maxF = Math.max(1, ...sf.map(x => Math.max(x.prevista, x.real || 0)));
   const colunas = sf.map(x => {
     const v = x.real != null ? x.real : x.prevista, on = x.yyyymm === d.yyyymm;
-    const tip = `${x.rot}: ${brl(v)}${x.real != null ? ` (real; planilha ${brl(x.prevista)})` : ' previsto'}`;
+    const tip = `${rotViv(x.yyyymm)} · fatura de ${x.rot}: ${brl(v)}${x.real != null ? ` (real; planilha ${brl(x.prevista)})` : ' previsto'}`;
     return `<button type="button" class="col${on ? ' on' : x.yyyymm > d.yyyymm ? ' fut' : ''}${x.real != null ? ' real' : ''}" data-tip="${escA(tip)}" aria-label="${escA(tip)}" onclick="escolherMes(${x.yyyymm})">
-      <em>${on ? k1(v) : ''}</em><b style="height:${Math.max(2, v / maxF * 240).toFixed(0)}px"></b><span>${esc(x.rot.slice(0, 3).toLowerCase())}</span></button>`;
+      <em>${on ? k1(v) : ''}</em><b style="height:${Math.max(2, v / maxF * 240).toFixed(0)}px"></b><span>${esc(rotViv(x.yyyymm).slice(0, 3).toLowerCase())}</span></button>`;
   }).join('');
 
   const cats = d.categorias || [], maxC = cats.length ? cats[0].valor : 1;
@@ -3939,7 +3943,7 @@ function pintarPainel(d) {
     <div class="barra"><i style="width:${Math.max(2, c.valor / maxC * 100).toFixed(1)}%"></i></div></div>`).join('');
 
   const sp = d.serieParcelas || [], maxP = Math.max(1, ...sp.map(x => x.valor));
-  const parcelas = sp.map((x, k) => `<div class="hbar${k ? '' : ' on'}" data-tip="${escA(x.rot + ': ' + brl(x.valor) + ' em parcelas')}"><span>${esc(x.rot.toLowerCase())}</span>
+  const parcelas = sp.map((x, k) => `<div class="hbar${k ? '' : ' on'}" data-tip="${escA(rotViv(x.yyyymm) + ' · fatura de ' + x.rot + ': ' + brl(x.valor) + ' em parcelas')}"><span>${esc(rotViv(x.yyyymm).toLowerCase())}</span>
     <span class="hbar-t"><i style="width:${(x.valor / maxP * 100).toFixed(1)}%"></i></span><span>${nbr(x.valor)}</span></div>`).join('');
   const t = d.terminam || { qtd: 0 };
 
@@ -3964,7 +3968,7 @@ function pintarPainel(d) {
 
   document.getElementById('pnConteudo').innerHTML = `
     <header class="pch">
-      <div><h1>Painel</h1><div class="pch-s">fatura que vence ${esc(princ.venc || d.venc)} · ${esc(textoFecha(d.fecha.dias, d.fecha.data))} · ${esc(hoje)}</div></div>
+      <div><h1>Painel</h1><div class="pch-s">${esc(rotViv(d.yyyymm))} · fatura que vence ${esc(princ.venc || d.venc)} · ${esc(textoFecha(d.fecha.dias, d.fecha.data))} · ${esc(hoje)}</div></div>
       <div class="pch-d">
         <button type="button" class="bt acc" onclick="abrirLancar()">+ Lançar gasto</button>
       </div>
@@ -3977,8 +3981,8 @@ function pintarPainel(d) {
       <button type="button" class="cpc novo" onclick="ir('config')">${ic('mais', 26)}<b style="color:var(--txt)">Outro cartão</b><span class="kpi-s">cadastre em Configurações, com o dia de fechamento</span></button>
     </section>
     <section class="kpis">
-      ${kp('Entrou no mês', d.entrou || 0, faltaTx(d.entrou, d.entrouPrev) + ((d.rendaExtras || []).length ? 'salários, vale e ' + d.rendaExtras.join(', ') : 'salários e vale'), 'var(--ok)')}
-      ${kp('Saiu no mês', d.saiu || 0, faltaTx(d.saiu, d.saiuPrev) + 'faturas + contas + Pix e consultas')}
+      ${kp('Entrou em ' + d.mesNome, d.entrou || 0, faltaTx(d.entrou, d.entrouPrev) + ((d.rendaExtras || []).length ? 'salários, vale e ' + d.rendaExtras.join(', ') : 'salários e vale'), 'var(--ok)')}
+      ${kp('Saiu em ' + d.mesNome, d.saiu || 0, faltaTx(d.saiu, d.saiuPrev) + 'faturas + contas + Pix e consultas')}
       ${d.saldoHoje == null ? kp('Sobrou', d.sobra, 'entrou − saiu (VR fora)', d.sobra < 0 ? 'var(--danger)' : 'var(--ok)')
         : kp('Saldo atual', d.saldoHoje, `hoje, ${d.hojeDia} · tem que bater com a conta corrente`, d.saldoHoje < 0 ? 'var(--danger)' : 'var(--ok)')
           + kp('Fim do mês (previsto)', d.fimMes, `${d.corte >= 99 ? 'passou' : 'passa'} para ${rotMes(ymMais(d.yyyymm, 1))} · começou com ${nbr(d.saldoIni)}`, d.fimMes < 0 ? 'var(--danger)' : 'var(--ok)')}
@@ -4051,7 +4055,7 @@ function montarFiltros() {
     el.value = opcoes.some(o => String(o[0]) === String(atual)) ? String(atual) : opcoes[0][0];
     el.dataset.feito = '1';
   };
-  sel('lsMes', [['', 'Todos os meses']].concat(_meses.map(m => [String(m.yyyymm), 'Fatura de ' + m.label])), String(_mes));
+  sel('lsMes', [['', 'Todos os meses']].concat(_meses.map(m => [String(m.yyyymm), rotViv(m.yyyymm) + ' · paga em ' + m.label])), String(_mes));
   const formas = []; _cfg.cartoes.map(c => c.nome).concat(L.map(x => x.forma)).forEach(f => { if (f && formas.indexOf(f) < 0) formas.push(f); });
   sel('lsForma', [['', 'Todos os cartões e formas']].concat(formas.map(f => [f, ehVR(f) ? 'VR (vale-refeição)' : f])), '');
   const grupos = _cfg.categorias.slice(); L.forEach(x => { if (x.grupo && grupos.indexOf(x.grupo) < 0) grupos.push(x.grupo); });
@@ -4118,7 +4122,7 @@ function pintarLancs() {
     kp('Parcelas', sp, mes ? 'a parcela do mês' : 'pelo valor total') +
     (vr.length ? kp('Vale-refeição', svr, `${vr.length} no VR · fora do total`, 'vr') : '');
   document.getElementById('lsSub').textContent = mes
-    ? `fatura que vence em ${rotMes(mes).toLowerCase()}${forma ? ' · ' + forma : ''} · ${cicloTxt(mes)} · parcelas contam só a do mês · V = à vista, P = parcelado`
+    ? `${rotViv(mes)} · fatura que vence em ${rotMes(mes).toLowerCase()}${forma ? ' · ' + forma : ''} · ${cicloTxt(mes)} · parcelas contam só a do mês · V = à vista, P = parcelado`
     : 'todos os meses · parcelas pelo valor total · V = à vista, P = parcelado';
   const host = document.getElementById('lsCorpo');
   if (!linhas.length) { host.innerHTML = `<section class="cx"><div class="empty">Nada com esses filtros.</div></section>`; return; }
@@ -4294,7 +4298,7 @@ function lsVistaCal(linhas) {
   return `<section class="linha2" style="align-items:flex-start">
     <div class="cx" style="flex:3 1 600px">
       <div class="cal-topo">
-        <div><h2>Ciclo da fatura ${esc(rotMes(ym))}</h2><div class="cx-s">compras de ${dois(ini.getDate())}/${dois(ini.getMonth() + 1)} a ${dois(fim.getDate())}/${dois(fim.getMonth() + 1)}${passados ? ` · ${passados} ${passados === 1 ? 'dia' : 'dias'} até hoje` : ' · ainda não começou'}</div></div>
+        <div><h2>Ciclo de ${esc(rotViv(ym))} · paga em ${esc(rotMes(ym))}</h2><div class="cx-s">compras de ${dois(ini.getDate())}/${dois(ini.getMonth() + 1)} a ${dois(fim.getDate())}/${dois(fim.getMonth() + 1)}${passados ? ` · ${passados} ${passados === 1 ? 'dia' : 'dias'} até hoje` : ' · ainda não começou'}</div></div>
         <div class="cal-meds">
           <div class="cal-med"><b>${brl(total)}</b><small>${tudo ? 'todos os grupos' : acesos.length + (acesos.length > 1 ? ' grupos escolhidos' : ' grupo escolhido')}</small></div>
           <div class="cal-med princ"><b>${brl(media)}</b><small>por dia do ciclo${passados ? ' (÷ ' + passados + ')' : ''}</small></div>
@@ -4504,7 +4508,7 @@ function pintarConfig() {
 function cfSecEntradas() {
   const B = _dados.base;
   if (!B) return `<section class="cx" id="cfEnt"><h2 style="font-size:18px">Entradas</h2><div class="esq" style="height:120px;margin-top:12px"></div></section>`;
-  const ym = _mes, dia = r => r.data ? +r.data.slice(8) : r.dia;
+  const ym = mesCal(), dia = r => r.data ? +r.data.slice(8) : r.dia;
   const at = B.regras.filter(r => r.tipo === 'Entrada' && fxAtiva(r, ym)).sort((a, b) => dia(a) - dia(b));
   const tot = at.reduce((s, r) => s + r.valor, 0);
   const linhas = at.map(r => `<button type="button" class="ent-l" onclick="fxEditar(${r.linha})">
@@ -4865,4 +4869,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v37 -------- -->
+<!-- -------- index.html v38 -------- -->
