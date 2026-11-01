@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v38 -------- -->
+<!-- -------- index.html v39 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -997,10 +997,14 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
 .fx-tx.forte { fill:var(--txt); font-weight:600 }
 .fx-mes { fill:var(--mut); font:800 11.5px var(--f-tx); letter-spacing:.08em; text-transform:uppercase }
 .fx-fora { fill:var(--s1); opacity:.62 }
-.fx-hl { fill:var(--txt); opacity:.07; pointer-events:none }
-.fx-tip { position:absolute; top:6px; z-index:3; min-width:200px; max-width:280px; padding:10px 12px; border-radius:12px; background:var(--s2); border:1px solid var(--bd); box-shadow:0 6px 20px rgba(0,0,0,.35); font-size:12px; pointer-events:none }
-.fx-tip b { display:block; font-size:13px; margin-bottom:6px }
-.fx-tip .fx-tl { display:flex; justify-content:space-between; gap:12px; color:var(--mut) }
+/* painel do dia, fixo acima do gráfico: altura fixa para o gráfico não pular */
+.fx-tip { display:flex; align-items:center; gap:24px; height:84px; margin-top:12px; padding:10px 16px; border-radius:12px; background:var(--s2); border:1px solid var(--bd); font-size:12px; overflow:hidden }
+.fx-tip-d { flex:0 0 190px }
+.fx-tip-d small { display:block; font-size:12.5px; font-weight:700; color:var(--mut) }
+.fx-tip-d b { display:block; font-family:var(--f-num); font-size:21px; font-weight:600; margin-top:2px }
+.fx-tip-l { flex:1; min-width:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-rows:repeat(3,auto); grid-auto-flow:column; gap:2px 28px }
+.fx-tip .fx-tl { display:flex; justify-content:space-between; gap:10px; color:var(--mut); min-width:0 }
+.fx-tl > span:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 .fx-res { font-size:14px; line-height:1.55 }
 .fx-envs { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; align-items:start }
 .fx-env { padding:0; overflow:hidden }
@@ -1422,7 +1426,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v38</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v39</p>
   </div>
 </section>
 
@@ -1481,7 +1485,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v38';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v39';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -3474,10 +3478,12 @@ function fxGrafico(d, c) {
   const hj = new Date(), ih = L.findIndex(x => x.ym === ymDe(hj) && x.d === hj.getDate());
   const hoje = ih < 0 ? '' : `<line x1="${X(ih) + CW / 2}" x2="${X(ih) + CW / 2}" y1="${t0 - 14}" y2="${b1}" stroke="var(--acc)" stroke-dasharray="2 3"/>
       <text class="fx-tx" style="fill:var(--acc-tx)" x="${X(ih) + CW / 2 + 4}" y="${t0 - 4}">hoje</text>`;
-  _fxG = { L, W, PL, CW, ys: L.map(x => Y(x.saldo)) };
+  const repouso = ih >= 0 ? ih : i0;   // sem o mouse, o painel mostra hoje (ou o dia 1, em outro mês)
+  _fxG = { L, W, PL, CW, ys: L.map(x => Y(x.saldo)), hoje: ih, repouso, i: repouso };
   const ini = L[0], fim = L[n - 1];
   return `<section class="cx"><div class="cx-h"><h2>Saldo ao longo de ${esc(d.mesNome)}</h2>
       <span class="cx-s">${ini.d}/${ini.ym % 100} a ${fim.d}/${fim.ym % 100} · os meses vizinhos ficam apagados · vermelho = cheque especial</span></div>
+    <div class="fx-tip" id="fxTip" aria-live="polite">${fxDiaHtml(repouso)}</div>
     <div class="fx-graf"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Saldo das contas dia a dia e o que entra e sai em cada dia" onpointermove="fxGrafMove(event)" onpointerleave="fxGrafSai()">
       <defs><clipPath id="fxAb"><rect x="0" y="${y0}" width="${W}" height="${H}"/></clipPath><clipPath id="fxAc"><rect x="0" y="0" width="${W}" height="${y0}"/></clipPath></defs>
       ${ticks.map(v => `<line x1="${PL}" x2="${W - PR}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--bd)"/><text class="fx-tx" x="${PL - 8}" y="${Y(v) + 4}" text-anchor="end">${fmtY(v)}</text>`).join('')}
@@ -3488,32 +3494,32 @@ function fxGrafico(d, c) {
       <line x1="${PL}" x2="${W - PR}" y1="${mid}" y2="${mid}" stroke="var(--bd)"/>
       <text class="fx-tx" x="${PL - 8}" y="${mid - 8}" text-anchor="end">entra</text><text class="fx-tx" x="${PL - 8}" y="${mid + 16}" text-anchor="end">sai</text>
       ${barras}${fora}${hoje}${datas}
-      <rect class="fx-hl" id="fxHl" x="0" y="${t0 - 14}" width="0" height="${b1 - t0 + 16}"/><circle id="fxPt" r="5" fill="var(--acc)" stroke="var(--s1)" stroke-width="3" cx="-20" cy="-20"/>
-    </svg><div class="fx-tip" id="fxTip" hidden></div></div></section>`;
+      <circle id="fxPt" r="5" fill="var(--acc)" stroke="var(--s1)" stroke-width="3" cx="${PL + (repouso + 0.5) * CW}" cy="${_fxG.ys[repouso]}"/>
+    </svg></div></section>`;
 }
-/** Passar o mouse no gráfico: marca o dia e mostra o saldo e os movimentos dele */
-function fxGrafMove(ev) {
-  const g = _fxG, tip = document.getElementById('fxTip'), hl = document.getElementById('fxHl'), pt = document.getElementById('fxPt');
-  if (!g || !tip) return;
-  const r = ev.currentTarget.getBoundingClientRect(), vx = (ev.clientX - r.left) / r.width * g.W;
-  const i = Math.floor((vx - g.PL) / g.CW), x = g.L[i];
-  if (!x) return fxGrafSai();
-  hl.setAttribute('x', g.PL + i * g.CW); hl.setAttribute('width', g.CW);
+/** O conteúdo do painel do dia: data, saldo e os movimentos (cabem 9) */
+function fxDiaHtml(i) {
+  const g = _fxG, x = g.L[i], dt = new Date(Math.floor(x.ym / 100), x.ym % 100 - 1, x.d), n = x.movs.length;
+  const movs = x.movs.slice(0, n > 9 ? 8 : 9).map(m => `<div class="fx-tl"><span title="${escA(m.desc)}">${esc(m.desc)}</span><span class="nm${m.valor > 0 ? ' fx-pos' : ' fx-neg-t'}">${m.valor > 0 ? '+' : '−'}${nbr(Math.abs(m.valor))}</span></div>`).join('')
+    + (n > 9 ? `<div class="fx-tl"><span>+ ${n - 8} movimentos</span></div>` : '');
+  return `<div class="fx-tip-d"><small>${i === g.hoje ? 'hoje · ' : ''}${SEM_LONGO[dt.getDay()]}, ${x.d}/${x.ym % 100}</small><b class="${x.saldo < 0 ? 'fx-neg-t' : ''}">${brl(x.saldo)}</b></div>
+    <div class="fx-tip-l">${movs || '<div class="fx-tl"><span>sem movimento neste dia</span></div>'}</div>`;
+}
+/** Leva a bolinha ao dia i e atualiza o painel */
+function fxMarca(i) {
+  const g = _fxG, tip = document.getElementById('fxTip'), pt = document.getElementById('fxPt');
+  if (!g || !tip || !pt || !g.L[i] || g.i === i) return;
+  g.i = i;
   pt.setAttribute('cx', g.PL + (i + 0.5) * g.CW); pt.setAttribute('cy', g.ys[i]);
-  const movs = x.movs.slice(0, 7).map(m => `<div class="fx-tl"><span>${esc(m.desc)}</span><span class="nm${m.valor > 0 ? ' fx-pos' : ' fx-neg-t'}">${m.valor > 0 ? '+' : '−'}${nbr(Math.abs(m.valor))}</span></div>`).join('')
-    + (x.movs.length > 7 ? `<div class="fx-tl"><span>+ ${x.movs.length - 7} movimentos</span></div>` : '');
-  const dt = new Date(Math.floor(x.ym / 100), x.ym % 100 - 1, x.d);
-  tip.innerHTML = `<b>${SEM_LONGO[dt.getDay()]}, ${x.d}/${x.ym % 100} · saldo <span class="${x.saldo < 0 ? 'fx-neg-t' : ''}">${brl(x.saldo)}</span></b>${movs || '<div class="fx-tl"><span>sem movimento neste dia</span></div>'}`;
-  tip.hidden = false;
-  const px = ev.clientX - r.left;
-  tip.style.left = Math.max(0, px + 16 + tip.offsetWidth > r.width ? px - 16 - tip.offsetWidth : px + 16) + 'px';
+  tip.innerHTML = fxDiaHtml(i);
 }
-function fxGrafSai() {
-  const tip = document.getElementById('fxTip'), hl = document.getElementById('fxHl'), pt = document.getElementById('fxPt');
-  if (tip) tip.hidden = true;
-  if (hl) hl.setAttribute('width', 0);
-  if (pt) pt.setAttribute('cx', -20);
+/** Passar o mouse no gráfico: a bolinha corre e o painel segue; saiu, volta para hoje */
+function fxGrafMove(ev) {
+  const g = _fxG; if (!g) return;
+  const r = ev.currentTarget.getBoundingClientRect(), i = Math.floor(((ev.clientX - r.left) / r.width * g.W - g.PL) / g.CW);
+  fxMarca(g.L[i] ? i : g.repouso);
 }
+function fxGrafSai() { if (_fxG) fxMarca(_fxG.repouso); }
 function fxSaldoSalvar(ym) {
   const v = lerValor(document.getElementById('fxSv').value), dia = Math.max(1, parseInt(document.getElementById('fxSd').value, 10) || 1);
   const p = {}; p['saldo_' + ym] = String(v) + '|' + dia;
@@ -4869,4 +4875,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v38 -------- -->
+<!-- -------- index.html v39 -------- -->
