@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v36 -------- -->
+<!-- -------- index.html v37 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -175,7 +175,7 @@ body.em-lancar .tela { padding-bottom:110px }
 .fat-mu { font-size:12px; font-weight:600; opacity:.78 }
 .fat-v { font-family:var(--f-num); font-weight:600; font-size:34px; letter-spacing:-1px; position:relative; line-height:1.1 }
 .fat-sub { font-size:12px; font-weight:600; opacity:.82; margin-top:4px; position:relative }
-.fat-hoje { opacity:1; font-size:11.5px } .fat-hoje b { font-family:var(--f-num); font-weight:600 }
+.fat-sub, .fat-hoje { font-size:11px; line-height:1.35 } .fat-hoje { opacity:1; margin-top:2px }
 
 .tiles { display:flex; gap:10px; padding:14px 20px 2px; overflow-x:auto; scrollbar-width:none }
 .tiles::-webkit-scrollbar { display:none }
@@ -1422,7 +1422,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v36</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v37</p>
   </div>
 </section>
 
@@ -1481,7 +1481,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v36';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v37';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1608,6 +1608,10 @@ let _budData = null;
 const _pc = window.matchMedia('(min-width: 1024px)');
 const ehPC = () => document.body.classList.contains('pc');
 // quem usa: a conta Google (quando o Google informa) > a escolha deste aparelho > a 1ª pessoa
+// opções extras do "Quem": compra de todos juntos e só das crianças (não são contas de ninguém)
+const QUEM_EXTRA = ['Família', 'Crianças'];
+const quemOpcoes = (atual) => { const l = _cfg.pessoas.concat(QUEM_EXTRA); return atual && l.indexOf(atual) < 0 ? l.concat([atual]) : l; };
+const quemSigla = (n) => n === 'Família' ? '👨‍👩‍👧' : n === 'Crianças' ? '🧒' : n === 'sem nome' ? '?' : String(n)[0];
 const quemAparelho = () => (_cfg.eu && _cfg.eu.nome) || LS.get('jl_quem', _cfg.pessoas[0]);
 // Configurações no celular: só para quem está nesta lista (no computador, para todos)
 const CONFIG_NO_CELULAR = ['Lucas'];
@@ -1929,11 +1933,11 @@ function faturaCel(c, d) {
     sub += ` · ${c.nome} de ${c.real.em}`;
   } else {
     rot = `Fatura de ${d.mesNome} · prevista`; valor = c.prevista;
-    sub = c.nome === 'C6' ? 'cole a fatura do C6 no computador para comparar com a real' : 'à vista + parcelas + fixos deste cartão';
+    sub = c.lancamentos || c.fixos ? `à vista ${nbr(c.avista)} + parcelas ${nbr(c.parcelas)} + fixos ${nbr(c.fixos)}` : 'nada lançado nesta fatura ainda';
   }
   // fatura aberta: o que o app do banco já deveria mostrar hoje (compras até hoje + fixos cujo dia já passou)
   const hoje = !c.real && c.ateHoje != null && Math.abs(c.ateHoje - valor) >= 0.01
-    ? `<div class="fat-sub fat-hoje">hoje no app do ${esc(c.nome)}: <b>${brl(c.ateHoje)}</b></div>` : '';
+    ? `<div class="fat-sub fat-hoje">hoje deveria estar em ${brl(c.ateHoje)}</div>` : '';
   const cor = c.cor && c.cor.toUpperCase() !== '#F2B33D' ? `style="background:${c.cor};color:${tintaSobre(c.cor)}"` : '';
   return `<section class="fatura toca" role="button" tabindex="0" aria-label="Ver as compras da fatura ${escA(c.nome)}" onclick="cmAbrir({cartao:${escA(JSON.stringify(c.nome))}})" ${cor}>
       <span class="anel a1"></span><span class="anel a2"></span>
@@ -2008,7 +2012,7 @@ function pintarCasa(d) {
 
   const com = (d.pessoas || []).filter(p => p.nome !== 'sem nome');
   const pessoas = com.length ? `<div class="pessoas">${(d.pessoas || []).map(p =>
-      `<button type="button" class="pessoa" onclick="cmAbrir({quem:${escA(JSON.stringify(p.nome))}})"><b>${esc(p.nome === 'sem nome' ? '?' : p.nome[0])}</b>${esc(p.nome)} <span class="num">${brl(Math.round(p.valor)).replace(',00', '')}</span></button>`).join('')}</div>` : '';
+      `<button type="button" class="pessoa" onclick="cmAbrir({quem:${escA(JSON.stringify(p.nome))}})"><b>${quemSigla(p.nome)}</b><span class="num">${brl(Math.round(p.valor)).replace(',00', '')}</span></button>`).join('')}</div>` : '';
 
   const t = d.terminam || { qtd: 0 };
   const terminam = t.qtd ? `
@@ -2280,8 +2284,8 @@ function pintarLancar() {
     `<button type="button" class="${(v === n) || (v === 0 && n > 3) ? 'on' : ''}" onclick="lParc(${v})">${t}</button>`).join('');
   document.getElementById('lNparc').hidden = !(n > 3);
   pintarFormas();
-  document.getElementById('lQuem').innerHTML = _cfg.pessoas.map(p =>
-    `<button type="button" class="${p === _l.quem ? 'on' : ''}" onclick="_l.quem=${escA(JSON.stringify(p))};pintarLancar()">${esc(p)}</button>`).join('');
+  document.getElementById('lQuem').innerHTML = quemOpcoes().map(p =>
+    `<button type="button" class="${p === _l.quem ? 'on' : ''}" onclick="_l.quem=${escA(JSON.stringify(p))};pintarLancar()">${QUEM_EXTRA.indexOf(p) >= 0 ? quemSigla(p) + ' ' : ''}${esc(p)}</button>`).join('');
   lAtualiza();
 }
 function lParc(v) {
@@ -2907,7 +2911,7 @@ function c6Linha(x) {
     : x.origem === 'historico' ? '<span class="c6-tag h">↺ descrição que vocês já usam</span>'
     : '<span class="c6-tag">estabelecimento novo: revise</span>';
   const opt = (lista, v) => lista.map(o => `<option${o === v ? ' selected' : ''}>${esc(o)}</option>`).join('');
-  const pessoas = _cfg.pessoas.concat(_cfg.pessoas.indexOf(x.quem) < 0 ? [x.quem] : []);
+  const pessoas = quemOpcoes(x.quem);
   return `<tr class="${x.sel ? '' : 'off'}" id="c6i${x.id}">
     <td><input type="checkbox" class="c6-ck"${x.sel ? ' checked' : ''} aria-label="Lançar ${escA(x.estab)}" onchange="c6Sel(${x.id},this.checked)"/></td>
     <td class="mu nm">${esc(x.dataBR)}</td>
@@ -3941,7 +3945,7 @@ function pintarPainel(d) {
 
   const pes = d.pessoas || [], maxPe = Math.max(1, ...pes.map(p => p.valor));
   const pessoas = pes.length ? pes.map((p, k) => `<div style="display:flex;align-items:center;gap:12px">
-      <span class="av${k ? ' b' : ''}">${esc(p.nome === 'sem nome' ? '?' : p.nome[0])}</span>
+      <span class="av${k ? ' b' : ''}">${quemSigla(p.nome)}</span>
       <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700"><span>${esc(p.nome === 'sem nome' ? 'sem "quem"' : p.nome)}</span><span class="num">${brl(p.valor)}</span></div>
       <div class="barra" style="margin-top:5px"><i style="width:${(p.valor / maxPe * 100).toFixed(1)}%"></i></div></div></div>`).join('')
     : '<div class="cx-s">Nada lançado nesta fatura.</div>';
@@ -4052,7 +4056,7 @@ function montarFiltros() {
   sel('lsForma', [['', 'Todos os cartões e formas']].concat(formas.map(f => [f, ehVR(f) ? 'VR (vale-refeição)' : f])), '');
   const grupos = _cfg.categorias.slice(); L.forEach(x => { if (x.grupo && grupos.indexOf(x.grupo) < 0) grupos.push(x.grupo); });
   sel('lsGrupo', [['', 'Todos os grupos']].concat(grupos.map(g => [g, g])), '');
-  const quem = _cfg.pessoas.slice(); L.forEach(x => { if (x.quem && quem.indexOf(x.quem) < 0) quem.push(x.quem); });
+  const quem = quemOpcoes(); L.forEach(x => { if (x.quem && quem.indexOf(x.quem) < 0) quem.push(x.quem); });
   sel('lsQuem', [['', 'Todas as pessoas']].concat(quem.map(q => [q, q]), [['-', 'Sem "quem"']]), '');
 }
 function lsMesMudou() { if (+val('lsMes')) _mes = +val('lsMes'); _lsDia = ''; pintarLancs(); pintarMesSide(); }
@@ -4139,7 +4143,7 @@ function lsSelGrupo(x) {
   return `<select class="csel" aria-label="Grupo de ${escA(x.desc)}" onclick="event.stopPropagation()" onchange="lsRapido('${escA(x.id)}','cat',this.value)">${lista.map(g => `<option${g === x.grupo ? ' selected' : ''}>${esc(g)}</option>`).join('')}</select>`;
 }
 function lsSelQuem(x) {
-  const lista = _cfg.pessoas.concat(x.quem && _cfg.pessoas.indexOf(x.quem) < 0 ? [x.quem] : []);
+  const lista = quemOpcoes(x.quem);
   return `<select class="csel ${x.quem ? 'pes' : 'vazio'}" aria-label="Quem comprou ${escA(x.desc)}" onclick="event.stopPropagation()" onchange="lsRapido('${escA(x.id)}','quem',this.value)">
     <option value="">+ quem</option>${lista.map(p => `<option${p === x.quem ? ' selected' : ''}>${esc(p)}</option>`).join('')}</select>`;
 }
@@ -4372,7 +4376,7 @@ function pintarPop() {
   const grupos = _cfg.categorias.indexOf(f.cat) < 0 ? _cfg.categorias.concat([f.cat]) : _cfg.categorias;
   const formas = _cfg.formas.indexOf(f.forma) < 0 ? _cfg.formas.concat([f.forma]) : _cfg.formas;
   const seg = (lista, atual, campo) => `<div class="seg">${lista.map(([v, t]) => `<button type="button" class="${v === atual ? 'on' : ''}" onclick="lpSet('${campo}',${escA(JSON.stringify(v))})">${esc(t)}</button>`).join('')}</div>`;
-  const pessoas = _cfg.pessoas.concat(f.quem && _cfg.pessoas.indexOf(f.quem) < 0 ? [f.quem] : []);
+  const pessoas = quemOpcoes(f.quem);
   const vr = ehVR(f.forma);
   document.getElementById('lpCaixa').innerHTML = `
     <div class="lp-top">
@@ -4861,4 +4865,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v36 -------- -->
+<!-- -------- index.html v37 -------- -->

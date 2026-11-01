@@ -4,7 +4,7 @@
 // origem, script.google.com) passa direto pela rede.
 // Ao mudar o index.html, suba a versão do CACHE para os celulares
 // pegarem a tela nova.
-const CACHE = 'jl-casca-v33';
+const CACHE = 'jl-casca-v34';
 const CASCA = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
