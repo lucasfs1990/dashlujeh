@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v43 -------- -->
+<!-- -------- index.html v44 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1100,6 +1100,16 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 .ch-med-t .num { color:var(--txt) }
 .kpi.pr { background:var(--acc); border-color:var(--acc) } .kpi.pr .kpi-n, .kpi.pr .kpi-s, .kpi.pr .kpi-v { color:var(--acc-on) }
 .kpi.pr.neg { background:var(--danger-soft); border-color:var(--danger) } .kpi.pr.neg .kpi-n, .kpi.pr.neg .kpi-s, .kpi.pr.neg .kpi-v { color:var(--danger) }
+.pn-bl { display:flex; flex-direction:column; gap:10px; margin:10px 0 6px }
+.pn-bl h2 { font-size:15px; margin:0 }
+.pn-fats { display:flex; flex-wrap:wrap; gap:8px }
+.pn-fat { font-size:12px; color:var(--mut); background:var(--s1); border:1px solid var(--bd); border-radius:10px; padding:6px 10px }
+.pn-fat b { color:var(--txt) } .pn-fat.ok { opacity:.65 } .pn-fat.ab { background:var(--acc-soft); border-color:var(--acc); color:var(--acc-tx) } .pn-fat.ab b { color:var(--acc-tx) }
+.pn-ops { display:flex; flex-direction:column; background:var(--s1); border:1px solid var(--bd); border-radius:16px; overflow:hidden }
+.pn-op { display:flex; align-items:center; gap:12px; padding:10px 16px; border-top:1px solid var(--bd) } .pn-op:first-child { border-top:0 }
+.pn-op i { font-style:normal; font-weight:800; font-size:12px; color:var(--mut); width:16px; flex-shrink:0 }
+.pn-op div { flex:1; min-width:0 } .pn-op b { display:block; font-size:13px } .pn-op small { display:block; font-size:12px; color:var(--mut) }
+.pn-op .num { font-family:var(--f-num); font-weight:600; font-size:16px; white-space:nowrap }
 .pl-data { margin:12px 20px 0; padding:10px 14px; border-radius:12px; background:var(--acc-soft); color:var(--acc-tx); font-size:13px; font-weight:700 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1474,7 +1484,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v43</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v44</p>
   </div>
 </section>
 
@@ -1533,7 +1543,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v43';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v44';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -4039,6 +4049,87 @@ function faltaTx(r, p) {
   const f = p - (r || 0);
   return Math.abs(f) < 0.01 ? 'tudo o previsto · ' : `de ${nbr(p)} previstos · falta ${nbr(f)} · `;
 }
+
+/* ── Painel: duas linhas e o comparador do "quanto dá para gastar" (em teste).
+      Linha 1 = o mês vivido na conta corrente (calendário: novembro).
+      Linha 2 = o mês em que a fatura aberta é paga (dezembro).
+      Os dois vêm prontos da sincronização; fora da faixa, busca aqui. ── */
+const _pnExtra = {};
+function pnBusca(chave, fn, arg, guarda) {
+  if (_pnExtra[chave]) return;
+  _pnExtra[chave] = true;
+  google.script.run
+    .withSuccessHandler(x => { delete _pnExtra[chave]; guarda(x); dadosGravar(); if (_tela === 'painel' && _dados.painel[_mes]) pintarPainel(comFila(_dados.painel[_mes])); })
+    .withFailureHandler(() => { /* fica marcado: não tenta em laço, a próxima sincronização traz */ })[fn](arg);
+}
+/** O menor saldo do mês a partir do dia de, com o dia em que ele acontece */
+function pnMenor(f, de) {
+  const r = fxCalc(f).dias.filter(x => x.d >= de).reduce((a, x) => !a || x.saldo < a.saldo ? x : a, null);
+  return r && { saldo: r.saldo, dia: `${dois(r.d)}/${dois(f.yyyymm % 100)}` };
+}
+function pnMeses(d) {
+  const cal = vividoDe(d.yyyymm), F = _dados.fluxo || {}, hj = new Date();
+  const n0 = cal === d.yyyymm ? d : _dados.painel[cal] || _dados.inicio[cal], fN = F[cal], fD = F[d.yyyymm];
+  if (!n0) pnBusca('i' + cal, 'getInicio', cal, x => { x._em = Date.now(); _dados.inicio[x.yyyymm] = x; });
+  if (!fN) pnBusca('f' + cal, 'getFluxo', cal, x => { _dados.fluxo = _dados.fluxo || {}; _dados.fluxo[x.yyyymm] = x; });
+  if (!fD) pnBusca('f' + d.yyyymm, 'getFluxo', d.yyyymm, x => { _dados.fluxo = _dados.fluxo || {}; _dados.fluxo[x.yyyymm] = x; });
+  if (!n0) return '<div class="esq" style="height:120px"></div>';
+
+  const n = comFila(n0), Mes = s => s.charAt(0).toUpperCase() + s.slice(1), r2 = v => Math.round(v * 100) / 100;
+  const fim = n.corte >= 99, cor = v => v < 0 ? 'var(--danger)' : 'var(--ok)';
+  const kp = (t, v, s, c, cl) => `<div class="kpi${cl || ''}"><div class="kpi-n">${esc(t)}</div><div class="kpi-v"${c ? ` style="color:${c}"` : ''}>${nbr(v)}</div><div class="kpi-s">${esc(s)}</div></div>`;
+  const vaiSair = r2((n.saiuPrev || 0) - (n.saiu || 0)), vaiEntrar = r2((n.entrouPrev || 0) - (n.entrou || 0));
+
+  // as faturas do mês vivido: já paga, a pagar, ou ainda aberta (ainda dá para comprar nela)
+  const fats = (n.cartoes || []).filter(c => (c.real ? c.real.total : c.prevista) > 0).map(c => {
+    const v = c.real ? c.real.total : c.prevista, paga = Number(c.venc.slice(0, 2)) <= n.corte;
+    const st = paga ? 'paga' : c.fechaDias >= 0 ? `ainda aberta · ${textoFecha(c.fechaDias, c.fechaData)}` : `fechada · a pagar`;
+    return `<span class="pn-fat${paga ? ' ok' : c.fechaDias >= 0 ? ' ab' : ''}"><b>${esc(c.nome)}</b> vence ${esc(c.venc)} · <span class="num">${nbr(v)}</span> · ${esc(st)}</span>`;
+  }).join('');
+
+  // linha 1
+  const l1 = `<section class="pn-bl"><h2>${esc(Mes(n.mesNome))} ${fim ? 'fechado' : 'agora'}</h2>
+    <div class="kpis">
+      ${kp('Entrou', n.entrou || 0, faltaTx(n.entrou, n.entrouPrev) + 'salários, vale e extras', 'var(--ok)')}
+      ${kp('Já pagou', n.saiu || 0, 'faturas, contas e Pix que já saíram')}
+      ${d.saldoHoje == null ? '' : kp('Saldo hoje', d.saldoHoje, `${d.hojeDia} · compare com o banco`, cor(d.saldoHoje))}
+      ${fim ? '' : kp('Ainda vai sair', vaiSair, vaiEntrar > 0.004 ? `e ainda entram ${nbr(vaiEntrar)}` : 'nada mais para entrar')}
+      ${kp(`${fim ? 'Fechou' : 'Fecha'} ${n.mesNome} em`, n.fimMes, n.fimMes < 0 ? 'negativo: cheque especial' : `passa para ${d.mesNome}`, cor(n.fimMes), n.fimMes < 0 ? ' fx-neg' : '')}
+    </div>
+    ${fats ? `<div class="pn-fats">${fats}</div>` : ''}</section>`;
+
+  // linha 2: só quando a fatura é paga em outro mês
+  const totFat = (d.cartoes || []).reduce((s, c) => s + (c.real ? c.real.total : c.prevista), 0), pc = (d.cartoes || [])[0];
+  const l2 = cal === d.yyyymm ? '' : `<section class="pn-bl"><h2>Pagar em ${esc(d.mesNome)}</h2>
+    <div class="kpis">
+      ${kp('Começa com', d.saldoIni, `o que sobra de ${n.mesNome}`, cor(d.saldoIni))}
+      ${kp('Vai entrar', d.entrouPrev || 0, (d.rendaExtras || []).length ? 'salários, vale e ' + d.rendaExtras.join(', ') : 'salários e vale', 'var(--ok)')}
+      ${kp('Faturas', totFat, pc ? `${pc.nome} ${nbr(pc.real ? pc.real.total : pc.prevista)} previsto · todos os cartões` : 'todos os cartões')}
+      ${kp('Contas e Pix', r2((d.saiuPrev || 0) - totFat), 'tudo que sai fora das faturas')}
+      ${kp(`Fecha ${d.mesNome} em`, d.fimMes, `previsto · passa para ${rotMes(ymMais(d.yyyymm, 1))}`, cor(d.fimMes), d.fimMes < 0 ? ' fx-neg' : '')}
+    </div></section>`;
+
+  return l1 + l2 + pnOpcoes(d, n, fN, fD);
+}
+/** Cada jeito de responder "quanto ainda dá para gastar", com o valor de hoje, para comparar */
+function pnOpcoes(d, n, fN, fD) {
+  const k = d.camadas || {}, hojeCal = vividoDe(d.yyyymm) === ymDe(new Date());
+  const mN = fN && hojeCal ? pnMenor(fN, new Date().getDate()) : null, mD = fD ? pnMenor(fD, 1) : null;
+  const pior = mN && mD ? (mD.saldo < mN.saldo ? mD : mN) : null;
+  const extras = fD ? fD.movs.filter(m => m.tipo === 'entrada' && m.origem === 'base' && !/^sal/i.test((m.grupo || '').normalize('NFD').replace(/[̀-ͯ]/g, ''))).reduce((s, m) => s + m.valor, 0) : null;
+  const ops = [
+    ['A', `Menor saldo até o fim de ${n.mesNome}`, mN && mN.saldo, mN && `pior dia: ${mN.dia}. Só o resto de ${n.mesNome}: conta o Pix e o cartão que ainda vence neste mês (o Inter aberto, por exemplo)`],
+    ['B', `Até o vale de ${d.mesNome}`, k.semVale, k.ate && `menor saldo de 01 até ${k.ate}. É o "Pode gastar" do visual novo: gastando até aqui, o vale fica inteiro para guardar`],
+    ['C', `Usando o vale de ${d.mesNome}`, k.comVale, k.deVale && `menor saldo de ${k.deVale} a ${k.fim}: o respiro, mas o vale vai embora`],
+    ['D', `Menor saldo de hoje até o fim de ${d.mesNome}`, pior && pior.saldo, pior && `pior dia: ${pior.dia}. A conta mais conservadora: junta os dois meses`],
+    ['E', `Fim de ${d.mesNome}`, d.fimMes, 'o que sobra no último dia, sem olhar se a conta ficou negativa no caminho'],
+    ['F', `${d.mesNome.charAt(0).toUpperCase() + d.mesNome.slice(1)} sozinho`, Math.round(((d.entrouPrev || 0) - (d.saiuPrev || 0)) * 100) / 100, `entra − sai, fingindo que ${n.mesNome} não existe. Conta o 13º e os extras`],
+    ['G', `${d.mesNome.charAt(0).toUpperCase() + d.mesNome.slice(1)} só com o salário`, extras == null ? null : Math.round(((d.entrouPrev || 0) - extras - (d.saiuPrev || 0)) * 100) / 100, `igual ao F, sem 13º e sem extras: o mês normal`]
+  ].filter(o => o[2] != null);
+  return `<section class="pn-bl"><h2>Quanto ainda dá para gastar?</h2>
+    <div class="cx-s">Em teste: cada linha é uma conta diferente, com os valores de hoje. Compare com o banco e escolha a que funciona.</div>
+    <div class="pn-ops">${ops.map(o => `<div class="pn-op"><i>${o[0]}</i><div><b>${esc(o[1])}</b><small>${esc(o[3])}</small></div><span class="num" style="color:${o[2] < 0 ? 'var(--danger)' : 'var(--ok)'}">${brl(o[2])}</span></div>`).join('')}</div></section>`;
+}
 function cartaoPC(c, d) {
   const valor = c.real ? c.real.total : c.prevista;
   let sub;
@@ -4105,24 +4196,7 @@ function pintarPainel(d) {
         <div class="kpi-s">${cartoes.length} ${cartoes.length > 1 ? 'cartões · arraste para o lado' : 'cartão'}</div></div>
       <button type="button" class="cpc novo" onclick="ir('config')">${ic('mais', 26)}<b style="color:var(--txt)">Outro cartão</b><span class="kpi-s">cadastre em Configurações, com o dia de fechamento</span></button>
     </section>`;
-  const kpisPn = `<section class="kpis">
-      ${kp('Entrou em ' + d.mesNome, d.entrou || 0, faltaTx(d.entrou, d.entrouPrev) + ((d.rendaExtras || []).length ? 'salários, vale e ' + d.rendaExtras.join(', ') : 'salários e vale'), 'var(--ok)')}
-      ${kp('Saiu em ' + d.mesNome, d.saiu || 0, faltaTx(d.saiu, d.saiuPrev) + 'faturas + contas + Pix e consultas')}
-      ${d.saldoHoje == null ? kp('Sobrou', d.sobra, 'entrou − saiu (VR fora)', d.sobra < 0 ? 'var(--danger)' : 'var(--ok)')
-        : kp('Saldo atual', d.saldoHoje, `hoje, ${d.hojeDia} · tem que bater com a conta corrente`, d.saldoHoje < 0 ? 'var(--danger)' : 'var(--ok)')
-          + kp('Fim do mês (previsto)', d.fimMes, `${d.corte >= 99 ? 'passou' : 'passa'} para ${rotMes(ymMais(d.yyyymm, 1))} · começou com ${nbr(d.saldoIni)}`, d.fimMes < 0 ? 'var(--danger)' : 'var(--ok)')}
-      ${kp('Loja', (d.loja || {}).bancam || 0, d.loja ? `LATAM loja ${nbr(d.loja.compras)} − retiradas ${nbr(d.loja.retiradas)}` : 'compras do LATAM − retiradas')}
-      ${kp('Fixos no cartão', d.fixos, 'assinaturas e contas no ' + (princ.nome || 'C6'))}
-    </section>`;
-  const novaPn = casaNova() && d.camadas, negPn = novaPn && d.camadas.semVale < 0;
-  const topoPn = !novaPn ? cardsPn + kpisPn : `<section class="kpis">
-      <div class="kpi pr${negPn ? ' neg' : ''}"><div class="kpi-n">${negPn ? 'Cartão estourado' : 'Pode gastar até o vale'}</div><div class="kpi-v">${brl(d.camadas.semVale)}</div><div class="kpi-s">menor saldo antes do vale</div></div>
-      ${d.saldoHoje == null ? kp('Sobrou', d.sobra, 'entrou − saiu (VR fora)', d.sobra < 0 ? 'var(--danger)' : 'var(--ok)')
-        : kp('Saldo atual', d.saldoHoje, `hoje, ${d.hojeDia} · tem que bater com a conta`, d.saldoHoje < 0 ? 'var(--danger)' : 'var(--ok)')
-          + kp('Fim do mês (previsto)', d.fimMes, `começou com ${nbr(d.saldoIni)}`, d.fimMes < 0 ? 'var(--danger)' : 'var(--ok)')}
-      ${kp('Entrou em ' + d.mesNome, d.entrou || 0, faltaTx(d.entrou, d.entrouPrev) + 'salários e vale', 'var(--ok)')}
-      ${kp('Saiu em ' + d.mesNome, d.saiu || 0, faltaTx(d.saiu, d.saiuPrev) + 'faturas e contas')}
-    </section>
+  const topoPn = `${pnMeses(d)}
     ${cardsPn}
     <div class="cx-s">Loja: <span class="num">${nbr((d.loja || {}).bancam || 0)}</span>${d.loja ? ` (LATAM loja ${nbr(d.loja.compras)} − retiradas ${nbr(d.loja.retiradas)})` : ''} · Fixos no ${esc(princ.nome || 'C6')}: <span class="num">${nbr(d.fixos)}</span></div>`;
 
@@ -5016,4 +5090,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v43 -------- -->
+<!-- -------- index.html v44 -------- -->
