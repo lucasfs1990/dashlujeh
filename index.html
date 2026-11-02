@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v46 -------- -->
+<!-- -------- index.html v47 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -510,9 +510,23 @@ body.pc .foto-bts { flex:0 0 auto }
 /* ══ COMPUTADOR ═══════════════════════════════════════════════ */
 .pc-side, .pc-only { display:none }
 .dica { position:fixed; z-index:200; pointer-events:none; background:var(--s1); border:1px solid var(--bd); border-radius:10px; padding:7px 10px; font-size:12px; font-weight:700; box-shadow:var(--sombra); white-space:nowrap }
-body.pc { padding-left:248px }
+body.pc { --side:260px; padding-left:var(--side); transition:padding-left .2s }
+body.pc.side-min { --side:88px }
+body.pc::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(620px 520px at 0% 12%, color-mix(in srgb, var(--acc) 24%, transparent), transparent 70%),
+             radial-gradient(520px 520px at 6% 92%, color-mix(in srgb, #7A5CFF 18%, transparent), transparent 70%) }
 body.pc .nav, body.pc .so-cel { display:none !important }
-body.pc .pc-side { display:flex; position:fixed; top:0; left:0; bottom:0; width:248px; flex-direction:column; gap:4px; padding:24px 16px 18px; background:var(--nav); border-right:1px solid var(--bd); z-index:60; overflow-y:auto }
+body.pc .pc-side { display:flex; position:fixed; top:12px; left:12px; bottom:12px; width:calc(var(--side) - 24px); flex-direction:column; gap:4px; padding:20px 12px 14px; border-radius:22px; z-index:60; overflow-y:auto; overflow-x:hidden; transition:width .2s;
+  background:color-mix(in srgb, var(--nav) 58%, transparent); border:1px solid color-mix(in srgb, var(--txt) 10%, transparent);
+  -webkit-backdrop-filter:blur(22px) saturate(150%); backdrop-filter:blur(22px) saturate(150%);
+  box-shadow:0 14px 40px rgba(0,0,0,.34), inset 0 1px 0 color-mix(in srgb, var(--txt) 9%, transparent) }
+@media (prefers-reduced-transparency: reduce) { body.pc .pc-side { background:var(--nav); -webkit-backdrop-filter:none; backdrop-filter:none } body.pc::before { display:none } }
+body.pc.side-min .ps-marca { font-size:0; justify-content:center; padding:0 0 22px }
+body.pc.side-min .ps-b { justify-content:center; padding:0; position:relative }
+body.pc.side-min .ps-b span, body.pc.side-min .ps-mes, body.pc.side-min .ps-pe > div, body.pc.side-min .ps-ver { display:none }
+body.pc.side-min .ps-pe { justify-content:center; padding-left:0; padding-right:0 }
+body.pc.side-min .ps-badge { position:absolute; top:2px; right:2px; min-width:16px; height:16px; padding:0 4px; font-size:10px }
+body.pc.side-min .ps-tog svg { transform:rotate(180deg) }
 body.pc .tela.pc-only.on { display:block }
 /* Configurações no celular (só para quem está em CONFIG_NO_CELULAR): a tela do
    computador em coluna única */
@@ -702,12 +716,12 @@ body.pc .tela { padding:0 0 64px }
 body.pc #t-pend.on, body.pc #t-plano.on, body.pc #t-recentes.on, body.pc #t-ajustes.on { max-width:none; margin:0; padding:8px 28px 64px }
 body.pc #pLista { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:0 4px }
 body.pc #pl-orc.on { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start }
-body.pc .toast { bottom:28px; margin-left:124px }
-body.pc .folha { align-items:center; justify-content:center; padding-left:248px }
+body.pc .toast { bottom:28px; margin-left:calc(var(--side) / 2) }
+body.pc .folha { align-items:center; justify-content:center; padding-left:var(--side) }
 body.pc .folha-c { max-width:520px; border-radius:22px }
 /* Lançar no computador: janela por cima da tela atual */
 body.pc.em-lancar::before { content:''; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:85 }
-body.pc #t-lancar.on { position:fixed; z-index:90; top:4vh; left:calc(50% + 124px); transform:translateX(-50%); width:min(560px, calc(100vw - 300px)); max-height:92vh; overflow-y:auto; background:var(--bg); border:1px solid var(--bd); border-radius:24px; padding:0 0 0; box-shadow:var(--sombra) }
+body.pc #t-lancar.on { position:fixed; z-index:90; top:4vh; left:calc(50% + var(--side) / 2); transform:translateX(-50%); width:min(560px, calc(100vw - var(--side) - 52px)); max-height:92vh; overflow-y:auto; background:var(--bg); border:1px solid var(--bd); border-radius:24px; padding:0 0 0; box-shadow:var(--sombra) }
 body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0 0 }
 
 .so-leitor { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0 }
@@ -827,7 +841,7 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .chip-acc.vr { color:var(--vr); background:var(--vr-soft) }
 
 .pop { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:120; display:flex; align-items:flex-start; justify-content:center; padding:4vh 16px; overflow-y:auto }
-body.pc .pop { padding-left:264px }
+body.pc .pop { padding-left:calc(var(--side) + 16px) }
 body.com-pop { overflow:hidden }
 .pop-c { width:100%; max-width:640px; background:var(--bg); border:1px solid var(--bd); border-radius:24px; box-shadow:var(--sombra); margin-bottom:4vh }
 .lp-top { display:flex; align-items:center; gap:8px; padding:18px 20px 0 }
@@ -1160,6 +1174,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   <button type="button" class="ps-b" data-t="plano" onclick="ir('plano')"><i data-ic="plano" data-s="19"></i><span>Plano</span></button>
   <button type="button" class="ps-b" data-t="config" onclick="ir('config')"><i data-ic="engrenagem" data-s="19"></i><span>Configurações</span></button>
   <button type="button" class="ps-b bt-sinc" onclick="sincronizar(true)"><i data-ic="refresh" data-s="19"></i><span>Atualizar</span></button>
+  <button type="button" class="ps-b ps-tog" onclick="sideToggle()" title="Recolher ou abrir o menu"><i data-ic="voltar" data-s="19"></i><span>Recolher</span></button>
   <div class="ps-mes" id="psMes" hidden></div>
   <div class="ps-pe"><span class="av" id="psAv">?</span><div style="min-width:0"><div style="font-size:13px;font-weight:700" id="psNome">—</div><small id="psComo"></small></div></div>
   <div class="ps-ver" id="psVer"></div>
@@ -1486,7 +1501,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v46</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v47</p>
   </div>
 </section>
 
@@ -1545,7 +1560,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v46';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v47';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1921,6 +1936,10 @@ function aplicarTema(t) {
 }
 /** Casa e Painel: a tela nova ou a anterior, neste aparelho */
 const casaNova = () => LS.get('jl_casa', 'nova') === 'nova';
+/** Barra lateral do computador: recolhida fica só com os ícones (o aparelho lembra) */
+function sideToggle() { LS.set('jl_side', document.body.classList.toggle('side-min') ? 'min' : ''); }
+document.body.classList.toggle('side-min', LS.get('jl_side', '') === 'min');
+document.querySelectorAll('.ps-b[data-t], .ps-b.bt-sinc').forEach(b => { b.title = b.textContent.trim(); });
 function aplicarCasa(v) { LS.set('jl_casa', v); pintarAjustes(); if (_tela === 'config') pintarConfig(); }
 function corDoTema() {
   const m = document.querySelector('meta[name=theme-color]');
@@ -3574,8 +3593,11 @@ function fxGrafico(d, c) {
   const L = fxJanela(d, c), n = L.length, W = 1000, H = 346, PL = 52, PR = 10, CW = (W - PL - PR) / n, X = i => +(PL + i * CW).toFixed(1);
   const t0 = 36, t1 = 196, b0 = 214, b1 = 298, ly = 338;   // datas abaixo dos rótulos das saídas grandes
   const i0 = L.findIndex(x => x.noMes), i1 = i0 + d.dias - 1;
+  // sombra: o saldo com o dia a dia estimado, que pesa quando cada fatura vence
+  const est = estDia();
+  L.forEach(x => { x.eMin = est ? estExtra(est, x.ym, x.d, 'min') : 0; x.eMax = est ? estExtra(est, x.ym, x.d, 'max') : 0; });
   // escala do saldo com 4 a 5 valores redondos
-  const vals = L.flatMap(x => [x.abre, x.saldo]);
+  const vals = L.flatMap(x => [x.abre, x.saldo, x.saldo - x.eMax]);
   let mn = Math.min(0, ...vals), mx = Math.max(0, ...vals);
   const pad = (mx - mn) * 0.08 || 1; mn -= pad; mx += pad;
   const Y = v => +(t0 + (mx - v) / (mx - mn) * (t1 - t0)).toFixed(1), y0 = Y(0);
@@ -3585,6 +3607,13 @@ function fxGrafico(d, c) {
   const fmtY = v => (v < 0 ? '−' : '') + (Math.abs(v) >= 1000 ? (Math.abs(v) / 1000).toFixed(Math.abs(v) % 1000 ? 1 : 0).replace('.', ',') + 'k' : Math.round(Math.abs(v)));
   let p = `M${X(0)} ${Y(L[0].abre)}`;
   L.forEach((x, i) => { p += ` V${Y(x.saldo)} H${X(i + 1)}`; });
+  const iS = L.findIndex(x => x.eMax > 0);
+  const sombra = iS < 0 ? '' : (() => {
+    const degraus = q => L.map((x, i) => i < iS ? '' : ` V${Y(x.saldo - x[q])} H${X(i + 1)}`).join('');
+    const volta = L.map((x, i) => i < iS ? '' : ` H${X(i + 1)} V${Y(x.saldo - x.eMin)}`).reverse().join('');
+    const base = `M${X(iS)} ${Y(L[iS].saldo)}${degraus('eMax')}`;
+    return `<path d="${base}${volta} H${X(iS)} Z" fill="var(--mut)" fill-opacity=".22"/><path d="${base}" fill="none" stroke="var(--mut)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  })();
   // barras do dia: entra para cima, sai para baixo; rótulo só nos grandes, sem encostar no vizinho
   const mid = (b0 + b1) / 2, mxMov = Math.max(1, ...L.map(x => Math.max(x.ent, x.sai))), B = v => v / mxMov * ((b1 - b0) / 2 - 2);
   let ultE = -9, ultS = -9;
@@ -3614,7 +3643,7 @@ function fxGrafico(d, c) {
   _fxG = { L, W, PL, CW, ys: L.map(x => Y(x.saldo)), hoje: ih, repouso, i: repouso };
   const ini = L[0], fim = L[n - 1];
   return `<section class="cx"><div class="cx-h"><h2>Saldo ao longo de ${esc(d.mesNome)}</h2>
-      <span class="cx-s">${ini.d}/${ini.ym % 100} a ${fim.d}/${fim.ym % 100} · os meses vizinhos ficam apagados · vermelho = cheque especial</span></div>
+      <span class="cx-s">${ini.d}/${ini.ym % 100} a ${fim.d}/${fim.ym % 100} · os meses vizinhos ficam apagados · vermelho = cheque especial${iS < 0 ? '' : ' · sombra = com o dia a dia estimado'}</span></div>
     <div class="fx-tip" id="fxTip" aria-live="polite">${fxDiaHtml(repouso)}</div>
     <div class="fx-graf"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Saldo das contas dia a dia e o que entra e sai em cada dia" onpointermove="fxGrafMove(event)" onpointerleave="fxGrafSai()">
       <defs><clipPath id="fxAb"><rect x="0" y="${y0}" width="${W}" height="${H}"/></clipPath><clipPath id="fxAc"><rect x="0" y="0" width="${W}" height="${y0}"/></clipPath></defs>
@@ -3622,7 +3651,7 @@ function fxGrafico(d, c) {
       <path d="${p} V${y0} H${X(0)} Z" fill="var(--danger)" fill-opacity=".25" clip-path="url(#fxAb)"/>
       <path d="${p} V${y0} H${X(0)} Z" fill="var(--acc)" fill-opacity=".1" clip-path="url(#fxAc)"/>
       <line x1="${PL}" x2="${W - PR}" y1="${y0}" y2="${y0}" stroke="var(--mut2)" stroke-dasharray="4 4"/>
-      <path d="${p}" fill="none" stroke="var(--acc)" stroke-width="2.5"/>
+      ${sombra}<path d="${p}" fill="none" stroke="var(--acc)" stroke-width="2.5"/>
       <line x1="${PL}" x2="${W - PR}" y1="${mid}" y2="${mid}" stroke="var(--bd)"/>
       <text class="fx-tx" x="${PL - 8}" y="${mid - 8}" text-anchor="end">entra</text><text class="fx-tx" x="${PL - 8}" y="${mid + 16}" text-anchor="end">sai</text>
       ${barras}${fora}${hoje}${datas}
@@ -3634,7 +3663,7 @@ function fxDiaHtml(i) {
   const g = _fxG, x = g.L[i], dt = new Date(Math.floor(x.ym / 100), x.ym % 100 - 1, x.d), n = x.movs.length;
   const movs = x.movs.slice(0, n > 9 ? 8 : 9).map(m => `<div class="fx-tl"><span title="${escA(m.desc)}">${esc(m.desc)}</span><span class="nm${m.valor > 0 ? ' fx-pos' : ' fx-neg-t'}">${m.valor > 0 ? '+' : '−'}${nbr(Math.abs(m.valor))}</span></div>`).join('')
     + (n > 9 ? `<div class="fx-tl"><span>+ ${n - 8} movimentos</span></div>` : '');
-  return `<div class="fx-tip-d"><small>${i === g.hoje ? 'hoje · ' : ''}${SEM_LONGO[dt.getDay()]}, ${x.d}/${x.ym % 100}</small><b class="${x.saldo < 0 ? 'fx-neg-t' : ''}">${brl(x.saldo)}</b></div>
+  return `<div class="fx-tip-d"><small>${i === g.hoje ? 'hoje · ' : ''}${SEM_LONGO[dt.getDay()]}, ${x.d}/${x.ym % 100}</small><b class="${x.saldo < 0 ? 'fx-neg-t' : ''}">${brl(x.saldo)}</b>${x.eMax > 0 ? `<small>com o dia a dia: ${nbr(x.saldo - x.eMax)} a ${nbr(x.saldo - x.eMin)}</small>` : ''}</div>
     <div class="fx-tip-l">${movs || '<div class="fx-tl"><span>sem movimento neste dia</span></div>'}</div>`;
 }
 /** Leva a bolinha ao dia i e atualiza o painel */
@@ -4052,6 +4081,53 @@ function faltaTx(r, p) {
   return Math.abs(f) < 0.01 ? 'tudo o previsto · ' : `de ${nbr(p)} previstos · falta ${nbr(f)} · `;
 }
 
+/* ── Estimativa do dia a dia: o que ainda vem até o ciclo do cartão principal fechar, pela
+      faixa dos últimos ciclos fechados (o menor e o maior), sem reembolsos, loja, Célia e
+      compras grandes. O ritmo do ciclo só avisa: no começo do ciclo ele erra demais. ── */
+const EST_DE = '2026-08-28';   // antes disso a planilha só tem as compras parceladas
+const EST_FORA = /^(reembolso|loja aroeira|aroeira|célia)$/i;
+function estDia() {
+  const L = _dados.lancs, c = _cfg.cartoes[0];
+  if (!L || !c) return null;
+  const hoje = new Date(), aberto = ymDe(compDe(hoje, c));
+  const ini = ym => { const f = fechamentoDe(ymMais(ym, -1), c); return new Date(f.getFullYear(), f.getMonth(), f.getDate() + 1); };
+  const soma = (ym, ate) => {
+    const de = isoDe(ini(ym)), fim = ate || isoDe(fechamentoDe(ym, c)), r = { av: 0, parc: 0 };
+    L.forEach(i => {
+      if (i.vr || i.data < de || i.data > fim || EST_FORA.test(i.cat) || EST_FORA.test(i.grupo || '') || i.valor >= 3000) return;
+      if (i.n > 1) r.parc += i.valor / i.n; else r.av += i.valor;
+    });
+    return r;
+  };
+  const ciclos = [];
+  for (let k = 1; k <= 3 && isoDe(ini(ymMais(aberto, -k))) >= EST_DE; k++) ciclos.push(soma(ymMais(aberto, -k)));
+  if (!ciclos.length) return null;
+  const agora = soma(aberto), av = ciclos.map(x => x.av), pa = ciclos.map(x => x.parc);
+  const ciclo = { min: Math.min(...av) + Math.min(...pa), max: Math.max(...av) + Math.max(...pa) };
+  const resto = {
+    min: Math.max(0, Math.min(...av) - agora.av) + Math.max(0, Math.min(...pa) - agora.parc),
+    max: Math.max(0, Math.max(...av) - agora.av) + Math.max(0, Math.max(...pa) - agora.parc)
+  };
+  // ritmo: do dia 15 do ciclo em diante, contra o mesmo dia do ciclo passado
+  const dia = Math.round((hoje - ini(aberto)) / 86400000) + 1;
+  let ritmo = null;
+  if (dia >= 15) {
+    const a = ini(ymMais(aberto, -1)), ate = isoDe(new Date(a.getFullYear(), a.getMonth(), a.getDate() + dia - 1));
+    ritmo = agora.av - soma(ymMais(aberto, -1), ate).av;
+  }
+  return { aberto, ciclos: ciclos.length, ciclo, resto, ritmo };
+}
+/** Quanto a estimativa já tirou da conta até este dia: cada fatura pesa no vencimento dela */
+function estExtra(e, ym, dia, q) {
+  const c = _cfg.cartoes[0];
+  let s = 0;
+  for (let m = e.aberto; m <= ym; m = ymMais(m, 1)) {
+    const v = vencDe(m, c), y = ymDe(v);
+    if (y < ym || (y === ym && v.getDate() <= dia)) s += m === e.aberto ? e.resto[q] : e.ciclo[q];
+  }
+  return s;
+}
+
 /* ── Painel: o quanto ainda cabe no cartão e as duas linhas.
       Linha 1 = o mês vivido na conta corrente (calendário: novembro).
       Linha 2 = o mês em que a fatura aberta é paga (dezembro).
@@ -4087,6 +4163,7 @@ function pnMeses(d) {
   if (!n0) return '<div class="esq" style="height:120px"></div>';
 
   const n = comFila(n0), Mes = s => s.charAt(0).toUpperCase() + s.slice(1), r2 = v => Math.round(v * 100) / 100;
+  const e0 = estDia(), e = e0 && e0.aberto === d.yyyymm ? e0 : null;
   const fim = n.corte >= 99, cor = v => v < 0 ? 'var(--danger)' : 'var(--ok)';
   const kp = (t, v, s, c, cl, lista) => {
     const dentro = `<div class="kpi-n">${esc(t)}</div><div class="kpi-v"${c ? ` style="color:${c}"` : ''}>${nbr(v)}</div><div class="kpi-s">${esc(s)}</div>`;
@@ -4132,17 +4209,18 @@ function pnMeses(d) {
     <div class="kpis">
       ${kp('Começa com', d.saldoIni, `o que sobra de ${n.mesNome}`, cor(d.saldoIni))}
       ${kp('Vai entrar', d.entrouPrev || 0, (d.rendaExtras || []).length ? 'salários, vale e ' + d.rendaExtras.join(', ') : 'salários e vale', 'var(--ok)', '', 'dEnt')}
-      ${kp('Faturas', totFat, pc ? `${pc.nome} ${nbr(pc.real ? pc.real.total : pc.prevista)} previsto · todos os cartões` : 'todos os cartões', '', '', 'dFat')}
+      ${kp('Faturas', totFat, (pc ? `${pc.nome} ${nbr(pc.real ? pc.real.total : pc.prevista)} previsto · todos os cartões` : 'todos os cartões') + (e ? ` · com o dia a dia: ${nbr(totFat + e.resto.min)} a ${nbr(totFat + e.resto.max)}` : ''), '', '', 'dFat')}
       ${kp('Contas e Pix', r2((d.saiuPrev || 0) - totFat), 'tudo que sai fora das faturas', '', '', 'dCon')}
-      ${kp(`Fecha ${d.mesNome} em`, d.fimMes, `previsto · passa para ${rotMes(ymMais(d.yyyymm, 1))}`, cor(d.fimMes), d.fimMes < 0 ? ' fx-neg' : '')}
+      ${kp(`Fecha ${d.mesNome} em`, d.fimMes, e ? `só o lançado · com o dia a dia: ${nbr(d.fimMes - e.resto.max)} a ${nbr(d.fimMes - e.resto.min)}` : `previsto · passa para ${rotMes(ymMais(d.yyyymm, 1))}`, cor(d.fimMes), d.fimMes < 0 ? ' fx-neg' : '')}
     </div>
-    ${lista(['dEnt', 'dFat', 'dCon'])}</section>`;
+    ${lista(['dEnt', 'dFat', 'dCon'])}
+    ${e ? `<div class="cx-s">Dia a dia estimado: ainda faltam ${nbr(e.resto.min)} a ${nbr(e.resto.max)} até o ${esc(pc ? pc.nome : 'cartão')} fechar, pelo menor e pelo maior ${e.ciclos > 1 ? `dos últimos ${e.ciclos} ciclos fechados` : 'ciclo fechado'}.${e.ritmo == null ? '' : ` Ritmo: ${nbr(Math.abs(e.ritmo))} ${e.ritmo > 0 ? 'acima' : 'abaixo'} do ciclo passado neste mesmo dia.`}</div>` : ''}</section>`;
 
-  return pnCabe(d, n, fN) + l1 + l2;
+  return pnCabe(d, n, fN, e) + l1 + l2;
 }
 /** O número grande do Painel: quanto ainda cabe no cartão. A compra de agora só sai da conta no
     vencimento da fatura, então o limite é o menor saldo até o vale do mês em que ela é paga */
-function pnCabe(d, n, fN) {
+function pnCabe(d, n, fN, e) {
   const k = d.camadas;
   if (!k) return '';
   const neg = k.semVale < 0, mN = fN && vividoDe(d.yyyymm) === ymDe(new Date()) ? pnMenor(fN, new Date().getDate()) : null;
@@ -4150,6 +4228,7 @@ function pnCabe(d, n, fN) {
   const tx = [
     neg ? `Compra no cartão de agora ${paga}: até lá a conta já fica negativa, e cada compra aumenta isso.`
         : `Compra no cartão de agora ${paga}: gastando até aqui, o vale fica inteiro para guardar.`,
+    e ? `Com o dia a dia estimado, esse número fica entre ${brl(k.semVale - e.resto.max)} e ${brl(k.semVale - e.resto.min)}.` : '',
     k.comVale == null ? '' : `Depois do vale, o menor saldo de ${d.mesNome} é ${brl(k.comVale)}.`,
     mN && mN.saldo < 0 ? `Pix e débito saem na hora: a conta fica em ${brl(mN.saldo)} no dia ${mN.dia}.` : ''
   ].filter(Boolean);
@@ -5116,4 +5195,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v46 -------- -->
+<!-- -------- index.html v47 -------- -->
