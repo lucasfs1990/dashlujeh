@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v48 -------- -->
+<!-- -------- index.html v49 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -124,6 +124,7 @@ html { font-size:16px; -webkit-text-size-adjust:100%; text-size-adjust:100% }
   --acc2:#6EE7A8; --ok:#6EE7A8; --ok-soft:#163626; --warn:#FB923C; --danger:#FF8A7A; --danger-soft:#3A1D1A; --vr:#6CB6FF; --vr-soft:#12304A; --aro:#E47A92; --aro-soft:#3D1A23;
   --nav:#18181A; --sombra:0 10px 30px rgba(0,0,0,.45); --ant:#8F8B82; --out:#7E776A; --bar:#F2B33D; --on-danger:#1B1405;
   --r:18px; --ih:50px;
+  --fundo-pc:url(fundo.webp); --vidro-pc:rgba(26,26,28,.5); --vidro-bd-pc:rgba(245,243,238,.11); --vidro-fx:blur(18px) saturate(145%); --vidro-luz:inset 0 1px 0 rgba(245,243,238,.08);
   --f-tx:'Manrope',sans-serif; --f-num:'IBM Plex Mono',monospace;
   color-scheme:dark;
 }
@@ -134,6 +135,7 @@ html { font-size:16px; -webkit-text-size-adjust:100%; text-size-adjust:100% }
   --acc:#EDA82A; --acc-on:#1B1405; --acc-tx:#865700; --acc-soft:#FBEBC8; --acc-line:rgba(27,20,5,.14);
   --acc2:#157A47; --ok:#157A47; --ok-soft:#DDF3E6; --warn:#B45309; --danger:#B42318; --danger-soft:#FBE4E1; --vr:#1F6FBF; --vr-soft:#DCEBFA; --aro:#8E3346; --aro-soft:#F6DCE2;
   --nav:#FFFFFF; --sombra:0 10px 30px rgba(60,45,10,.12); --ant:#8A8272; --out:#766F60; --bar:#B87A0F; --on-danger:#FFFFFF;
+  --fundo-pc:none; --vidro-pc:var(--s1); --vidro-bd-pc:var(--bd); --vidro-fx:none; --vidro-luz:none;
   color-scheme:light;
 }
 @media (prefers-color-scheme: light) {
@@ -143,12 +145,13 @@ html { font-size:16px; -webkit-text-size-adjust:100%; text-size-adjust:100% }
     --acc:#EDA82A; --acc-on:#1B1405; --acc-tx:#865700; --acc-soft:#FBEBC8; --acc-line:rgba(27,20,5,.14);
     --acc2:#157A47; --ok:#157A47; --ok-soft:#DDF3E6; --warn:#B45309; --danger:#B42318; --danger-soft:#FBE4E1; --vr:#1F6FBF; --vr-soft:#DCEBFA; --aro:#8E3346; --aro-soft:#F6DCE2;
     --nav:#FFFFFF; --sombra:0 10px 30px rgba(60,45,10,.12); --ant:#8A8272; --out:#766F60; --bar:#B87A0F; --on-danger:#FFFFFF;
+    --fundo-pc:none; --vidro-pc:var(--s1); --vidro-bd-pc:var(--bd); --vidro-fx:none; --vidro-luz:none;
     color-scheme:light;
   }
 }
 
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent }
-body { background:var(--bg); color:var(--txt); font-family:var(--f-tx); font-size:15px; line-height:1.45; overflow-x:hidden }
+body { --vidro:var(--s1); --vidro-bd:var(--bd); background:var(--bg); color:var(--txt); font-family:var(--f-tx); font-size:15px; line-height:1.45; overflow-x:hidden }
 button { font-family:var(--f-tx); color:inherit; cursor:pointer }
 svg { display:block; flex-shrink:0 }
 .num { font-family:var(--f-num); font-weight:600; letter-spacing:-.3px }
@@ -253,7 +256,7 @@ body.em-lancar .tela { padding-bottom:110px }
 .badge { position:absolute; top:-2px; right:8px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--danger); color:var(--on-danger); font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center }
 
 /* ── genéricos (C6, Plano, Ajustes) ── */
-.card { margin:12px 20px 0; background:var(--s1); border:1px solid var(--bd); border-radius:var(--r); padding:16px }
+.card { margin:12px 20px 0; background:var(--vidro); border:1px solid var(--vidro-bd); border-radius:var(--r); padding:16px }
 .sec { font-weight:800; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--mut2); margin-bottom:10px }
 .field { margin-bottom:12px }
 .field label, .l-rot, .l-bloco > label { display:block; font-size:13px; color:var(--mut); margin-bottom:6px; font-weight:600 }
@@ -311,7 +314,7 @@ textarea { height:150px; padding:12px 14px; resize:none; line-height:1.4 }
 .barra-salvar .btn { margin-top:0 }
 
 /* ── Pendências ── */
-.pend { margin:12px 20px 0; background:var(--s1); border:1px solid var(--bd); border-radius:var(--r); padding:12px }
+.pend { margin:12px 20px 0; background:var(--vidro); border:1px solid var(--vidro-bd); border-radius:var(--r); padding:12px }
 .pend-top { display:flex; gap:12px; align-items:flex-start }
 .pend-img { width:72px; height:72px; border-radius:12px; overflow:hidden; background:var(--s2); flex-shrink:0; display:block }
 .pend-img img { width:100%; height:100%; object-fit:cover; display:block }
@@ -368,7 +371,7 @@ textarea { height:150px; padding:12px 14px; resize:none; line-height:1.4 }
 .an-note strong { color:var(--txt) }
 
 /* ── Plano (vindo da versão anterior) ── */
-.pl-hero { margin:12px 20px 0; background:var(--s1); border:1px solid var(--bd); border-radius:var(--r); padding:18px 16px }
+.pl-hero { margin:12px 20px 0; background:var(--vidro); border:1px solid var(--vidro-bd); border-radius:var(--r); padding:18px 16px }
 .pl-hero h2 { font-weight:800; font-size:21px; letter-spacing:-.5px; line-height:1.15; margin-bottom:8px }
 .pl-hero p { font-size:12.5px; color:var(--mut); line-height:1.5 }
 .pl-flow { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin:14px 0 4px }
@@ -510,17 +513,20 @@ body.pc .foto-bts { flex:0 0 auto }
 /* ══ COMPUTADOR ═══════════════════════════════════════════════ */
 .pc-side, .pc-only { display:none }
 .dica { position:fixed; z-index:200; pointer-events:none; background:var(--s1); border:1px solid var(--bd); border-radius:10px; padding:7px 10px; font-size:12px; font-weight:700; box-shadow:var(--sombra); white-space:nowrap }
-body.pc { --side:260px; padding-left:var(--side); transition:padding-left .2s }
+body.pc { --side:260px; --vidro:var(--vidro-pc); --vidro-bd:var(--vidro-bd-pc); padding-left:var(--side); transition:padding-left .2s }
 body.pc.side-min { --side:88px }
 body.pc::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:radial-gradient(620px 520px at 0% 12%, color-mix(in srgb, var(--acc) 24%, transparent), transparent 70%),
              radial-gradient(520px 520px at 6% 92%, color-mix(in srgb, #7A5CFF 18%, transparent), transparent 70%) }
+/* a foto fica no ::after porque o ::before também é o escurecido do Lançar (body.pc.em-lancar) */
+body.pc::after { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; background:var(--fundo-pc) left top / cover no-repeat }
+body.pc .cx, body.pc .kpi, body.pc .cpc.tot, body.pc .pn-fat, body.pc .pn-ls, body.pc .c6-tab, body.pc .cs-it, body.pc .card, body.pc .pend, body.pc .pl-hero { -webkit-backdrop-filter:var(--vidro-fx); backdrop-filter:var(--vidro-fx); box-shadow:var(--vidro-luz) }
 body.pc .nav, body.pc .so-cel { display:none !important }
 body.pc .pc-side { display:flex; position:fixed; top:12px; left:12px; bottom:12px; width:calc(var(--side) - 24px); flex-direction:column; gap:4px; padding:20px 12px 14px; border-radius:22px; z-index:60; overflow-y:auto; overflow-x:hidden; transition:width .2s;
   background:color-mix(in srgb, var(--nav) 58%, transparent); border:1px solid color-mix(in srgb, var(--txt) 10%, transparent);
   -webkit-backdrop-filter:blur(22px) saturate(150%); backdrop-filter:blur(22px) saturate(150%);
   box-shadow:0 14px 40px rgba(0,0,0,.34), inset 0 1px 0 color-mix(in srgb, var(--txt) 9%, transparent) }
-@media (prefers-reduced-transparency: reduce) { body.pc .pc-side { background:var(--nav); -webkit-backdrop-filter:none; backdrop-filter:none } body.pc::before { display:none } }
+@media (prefers-reduced-transparency: reduce) { :root { --fundo-pc:none; --vidro-pc:var(--s1); --vidro-bd-pc:var(--bd); --vidro-fx:none; --vidro-luz:none } body.pc .pc-side { background:var(--nav); -webkit-backdrop-filter:none; backdrop-filter:none } body.pc::before { display:none } }
 body.pc.side-min .ps-marca { font-size:0; gap:0; justify-content:center; padding:0 0 22px }
 body.pc.side-min .ps-b { justify-content:center; padding:0; position:relative }
 body.pc.side-min .ps-b span, body.pc.side-min .ps-mes, body.pc.side-min .ps-pe > div, body.pc.side-min .ps-ver { display:none }
@@ -604,15 +610,15 @@ body.pc .tela { padding:0 0 64px }
 .pch h1 { font-size:26px; font-weight:800; letter-spacing:-.5px }
 .pch-s { font-size:13px; color:var(--mut) }
 .pch-d { display:flex; align-items:center; gap:10px; flex-wrap:wrap }
-.bt { height:44px; padding:0 16px; border-radius:12px; border:1px solid var(--bd); background:var(--s1); font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px; white-space:nowrap }
+.bt { height:44px; padding:0 16px; border-radius:12px; border:1px solid var(--vidro-bd); background:var(--vidro); font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px; white-space:nowrap }
 .bt:hover { border-color:var(--mut2) }
 .bt.acc { border:0; background:var(--acc); color:var(--acc-on); font-weight:800 }
 .bt.pq { height:36px; padding:0 12px; font-size:13px; border-radius:10px }
 .bt:disabled { opacity:.5; pointer-events:none }
-.mseg { display:flex; background:var(--s1); border:1px solid var(--bd); border-radius:12px; padding:3px; gap:2px }
+.mseg { display:flex; background:var(--vidro); border:1px solid var(--vidro-bd); border-radius:12px; padding:3px; gap:2px }
 .mseg button { height:36px; padding:0 12px; border:0; border-radius:9px; background:transparent; color:var(--mut); font-weight:700; font-size:13px }
 .mseg button.on { background:var(--acc); color:var(--acc-on) }
-.cx { background:var(--s1); border:1px solid var(--bd); border-radius:18px; padding:18px 20px; min-width:0 }
+.cx { background:var(--vidro); border:1px solid var(--vidro-bd); border-radius:18px; padding:18px 20px; min-width:0 }
 .cx h2 { font-size:16px; font-weight:800 }
 .cx-h { display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap }
 .cx-s { font-size:12px; color:var(--mut) }
@@ -626,12 +632,12 @@ body.pc .tela { padding:0 0 64px }
 .cpc-l { display:flex; justify-content:space-between; font-weight:700; font-size:13px; position:relative; gap:8px }
 .cpc-v { font-family:var(--f-num); font-weight:600; font-size:32px; letter-spacing:-1px; position:relative; line-height:1.1 }
 .cpc-s { font-size:12px; font-weight:600; opacity:.82; position:relative }
-.cpc.tot { flex-basis:240px; background:var(--s1); border:1px solid var(--bd); color:var(--txt) }
+.cpc.tot { flex-basis:240px; background:var(--vidro); border:1px solid var(--vidro-bd); color:var(--txt) }
 .cpc.novo { flex-basis:240px; background:transparent; border:1.5px dashed var(--bd); color:var(--mut); align-items:center; justify-content:center; text-align:center }
 .cpc.sel { outline:3px solid var(--txt); outline-offset:3px }
 
 .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px }
-.kpi { background:var(--s1); border:1px solid var(--bd); border-radius:16px; padding:14px 16px }
+.kpi { background:var(--vidro); border:1px solid var(--vidro-bd); border-radius:16px; padding:14px 16px }
 .kpi-n { font-size:12px; color:var(--mut); font-weight:700 }
 .kpi-v { font-family:var(--f-num); font-weight:600; font-size:21px; margin:6px 0 2px }
 .kpi-s { font-size:12px; color:var(--mut) }
@@ -887,7 +893,7 @@ body.com-pop { overflow:hidden }
 .c6-res { display:flex; flex-direction:column; gap:14px }
 .c6-res:empty { display:none }
 .c6-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px }
-.c6-tab { text-align:left; border-radius:16px; padding:14px 16px; border:1px solid var(--bd); background:var(--s1); color:var(--txt); font-family:var(--f-tx) }
+.c6-tab { text-align:left; border-radius:16px; padding:14px 16px; border:1px solid var(--vidro-bd); background:var(--vidro); color:var(--txt); font-family:var(--f-tx) }
 .c6-tab:hover { border-color:var(--mut2) }
 .c6-tab span { font-size:12px; font-weight:700 }
 .c6-tab b { display:block; font-family:var(--f-num); font-size:24px; font-weight:600; margin-top:2px }
@@ -998,7 +1004,7 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
 .cs-kpis { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px }
 .cs-kpis .kpi { padding:10px 12px } .cs-kpis .kpi-v { font-size:16px }
 .cs-itens { display:flex; flex-direction:column; gap:8px }
-.cs-it { background:var(--s1); border:1px solid var(--bd); border-radius:16px; padding:12px }
+.cs-it { background:var(--vidro); border:1px solid var(--vidro-bd); border-radius:16px; padding:12px }
 .cs-it.enviando { opacity:.6 }
 .cs-top { display:flex; align-items:center; gap:12px }
 .cs-sit { display:inline-block; margin-top:3px; font-size:12px; font-weight:800; border-radius:999px; padding:2px 8px; background:var(--s3); color:var(--mut) }
@@ -1012,7 +1018,7 @@ body.pc .cs-nova { flex:0 0 380px; position:sticky; top:16px }
 
 /* ── Fluxo do mês ── */
 .kpi .link { min-height:0; margin-top:6px; font-size:12px }
-.kpi.fx-ent .kpi-v { color:var(--ok) } .kpi.fx-neg { background:var(--danger-soft); border-color:var(--danger) } .kpi.fx-neg .kpi-v, .kpi.fx-neg .kpi-n, .kpi.fx-neg .kpi-s { color:var(--danger) }
+.kpi.fx-ent .kpi-v { color:var(--ok) } .kpi.fx-neg { background:color-mix(in srgb, var(--danger-soft) 78%, transparent); border-color:var(--danger) } .kpi.fx-neg .kpi-v, .kpi.fx-neg .kpi-n, .kpi.fx-neg .kpi-s { color:var(--danger) }
 .fx-conf { display:flex; flex-direction:column; gap:6px; margin-top:8px; font-size:12px; color:var(--mut) }
 .fx-conf input { height:34px; width:110px; font-size:13px; border-radius:9px; padding:0 8px; margin-left:4px }
 .fx-graf { position:relative; margin-top:12px }
@@ -1113,16 +1119,16 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 .ch-med-t { display:flex; justify-content:space-between; gap:10px; font-size:12.5px; color:var(--mut); font-weight:600; margin-bottom:7px }
 .ch-med-t .num { color:var(--txt) }
 .kpi.pr { background:var(--acc); border-color:var(--acc) } .kpi.pr .kpi-n, .kpi.pr .kpi-s, .kpi.pr .kpi-v { color:var(--acc-on) }
-.kpi.pr.neg { background:var(--danger-soft); border-color:var(--danger) } .kpi.pr.neg .kpi-n, .kpi.pr.neg .kpi-s, .kpi.pr.neg .kpi-v { color:var(--danger) }
+.kpi.pr.neg { background:color-mix(in srgb, var(--danger-soft) 78%, transparent); border-color:var(--danger) } .kpi.pr.neg .kpi-n, .kpi.pr.neg .kpi-s, .kpi.pr.neg .kpi-v { color:var(--danger) }
 .pn-bl { display:flex; flex-direction:column; gap:10px; margin:10px 0 6px }
 .pn-bl h2 { font-size:15px; margin:0 }
 .pn-fats { display:flex; flex-wrap:wrap; gap:8px }
-.pn-fat { font-size:12px; color:var(--mut); background:var(--s1); border:1px solid var(--bd); border-radius:10px; padding:6px 10px }
+.pn-fat { font-size:12px; color:var(--mut); background:var(--vidro); border:1px solid var(--vidro-bd); border-radius:10px; padding:6px 10px }
 .pn-fat b { color:var(--txt) } .pn-fat.ok { opacity:.65 } .pn-fat.ab { background:var(--acc-soft); border-color:var(--acc); color:var(--acc-tx) } .pn-fat.ab b { color:var(--acc-tx) }
 .pn-cabe { margin:10px 0 6px } .pn-cabe .kpi-v { font-size:30px }
 .kpi.tq { display:flex; flex-direction:column; justify-content:flex-start; text-align:left; font-family:var(--f-tx); color:var(--txt); width:100%; cursor:pointer } .kpi.tq:hover { border-color:var(--mut2) } .kpi.tq.on { border-color:var(--acc) }
 .kpi.tq .kpi-n::after { content:' ▾'; color:var(--mut) } .kpi.tq.on .kpi-n::after { content:' ▴' }
-.pn-ls { background:var(--s1); border:1px solid var(--acc); border-radius:16px; padding:12px 16px; max-height:340px; overflow:auto }
+.pn-ls { background:var(--vidro); border:1px solid var(--acc); border-radius:16px; padding:12px 16px; max-height:340px; overflow:auto }
 .pn-ls h3 { display:flex; justify-content:space-between; gap:12px; font-size:13px; margin:12px 0 4px } .pn-ls h3:first-child { margin-top:0 }
 .pn-li { display:flex; gap:12px; font-size:13px; padding:6px 0; border-top:1px solid var(--bd) } .pn-li span:first-child { color:var(--mut); width:42px; flex-shrink:0 }
 .pn-li em { flex:1; min-width:0; font-style:normal } .pn-li small { color:var(--mut); margin-left:6px }
@@ -1501,7 +1507,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v48</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v49</p>
   </div>
 </section>
 
@@ -1560,7 +1566,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v48';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v49';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -5197,4 +5203,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v48 -------- -->
+<!-- -------- index.html v49 -------- -->
