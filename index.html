@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v49 -------- -->
+<!-- -------- index.html v50 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -663,6 +663,8 @@ body.pc .tela { padding:0 0 64px }
 .tb-box { overflow-x:auto }
 .tb { width:100%; border-collapse:collapse; font-size:13px }
 .tb th { text-align:left; color:var(--mut); font-size:12px; letter-spacing:.06em; text-transform:uppercase; font-weight:800; padding:10px 8px 10px 0; white-space:nowrap }
+.tb-ord { display:inline-flex; align-items:center; gap:4px; padding:0; border:0; background:none; color:inherit; font:inherit; letter-spacing:inherit; text-transform:inherit; cursor:pointer }
+.tb-ord:hover { color:var(--txt) } .tb-ord.on { color:var(--acc-tx) }
 .tb td { padding:9px 8px 9px 0; border-top:1px solid var(--bd); vertical-align:middle }
 .tb .r { text-align:right } .tb .mu { color:var(--mut) } .tb .nm { font-family:var(--f-num); font-weight:600; white-space:nowrap }
 .tb small { display:block; font-size:12px; color:var(--mut); max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
@@ -1507,7 +1509,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v49</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v50</p>
   </div>
 </section>
 
@@ -1566,7 +1568,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v49';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v50';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -4361,7 +4363,7 @@ function pintarPainel(d) {
 /* ── Lançamentos: 4 visualizações (tabela, por dia, por grupo, calendário)
       e a janela de editar. Grupo e "quem" mudam direto na linha da tabela.
       O VR aparece com a marca azul e fica fora dos totais. ── */
-let _lsVista = LS.get('jl_ls_vista', 'tabela'), _lsDia = '', _lsPop = null, _lsVisiveis = [];
+let _lsVista = LS.get('jl_ls_vista', 'tabela'), _lsDia = '', _lsPop = null, _lsVisiveis = [], _lsOrd = (o => ({ c: o[0], d: +o[1] }))(LS.get('jl_ls_ord', 'data:-1').split(':'));
 const LS_VISTAS = [['tabela', 'Tabela'], ['dia', 'Por dia'], ['grupo', 'Por grupo'], ['cal', 'Calendário']];
 const SEM_LONGO = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 const MES_MIN = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -4397,6 +4399,16 @@ function montarFiltros() {
 }
 function lsMesMudou() { if (+val('lsMes')) _mes = +val('lsMes'); _lsDia = ''; pintarLancs(); pintarMesSide(); }
 function lsVista(v) { _lsVista = v; LS.set('jl_ls_vista', v); pintarLancs(); }
+/** clicar no título da coluna da Tabela ordena; clicar de novo inverte */
+function lsOrdenar(c) { _lsOrd = { c: c, d: _lsOrd.c === c ? -_lsOrd.d : 1 }; LS.set('jl_ls_ord', _lsOrd.c + ':' + _lsOrd.d); pintarLancs(); }
+const LS_ORD = { data: l => l.x.data, desc: l => l.x.desc, grupo: l => l.x.grupo, quem: l => l.x.quem || '', parc: l => l.x.n * 1000 + l.k, valor: l => l.noMes };
+function lsOrdenarLinhas(linhas) {
+  const v = LS_ORD[_lsOrd.c] || LS_ORD.data;
+  return linhas.sort((a, b) => {
+    const va = v(a), vb = v(b);
+    return (b.x.enviando ? 1 : 0) - (a.x.enviando ? 1 : 0) || _lsOrd.d * (typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb), 'pt', { sensitivity:'base' }));
+  });
+}
 function pintarVistas() {
   document.getElementById('lsVistas').innerHTML = LS_VISTAS.map(([v, t]) =>
     `<button type="button" class="${v === _lsVista ? 'on' : ''}" aria-pressed="${v === _lsVista}" onclick="lsVista('${v}')">${t}</button>`).join('');
@@ -4442,6 +4454,7 @@ function pintarLancs() {
   const L = lancsComFila();
   if (!L) return;
   const linhas = lsFiltrar(L);
+  if (_lsVista === 'tabela') lsOrdenarLinhas(linhas);
   _lsVisiveis = linhas.filter(l => !l.x.enviando).map(l => l.x.id);
   const cred = linhas.filter(l => !l.x.vr), vr = linhas.filter(l => l.x.vr);
   const soma = a => a.reduce((s, l) => s + l.noMes, 0);
@@ -4486,6 +4499,8 @@ function lsSelQuem(x) {
 
 function lsVistaTabela(linhas) {
   const LIM = 400, princ = (_cfg.cartoes[0] || {}).nome;
+  const th = (c, nome, cls) => { const on = _lsOrd.c === c;
+    return `<th${cls ? ` class="${cls}"` : ''}${on ? ` aria-sort="${_lsOrd.d > 0 ? 'ascending' : 'descending'}"` : ''}><button type="button" class="tb-ord${on ? ' on' : ''}" title="Ordenar por ${nome.toLowerCase()}" onclick="lsOrdenar('${c}')">${nome}${on ? (_lsOrd.d > 0 ? ' ▲' : ' ▼') : ''}</button></th>`; };
   const corpo = linhas.slice(0, LIM).map(({ x, noMes, k }) => {
     const sub = [x.obs, x.forma !== princ && !x.vr ? x.forma : '', x.ctx && x.ctx !== 'Pessoal' ? 'para ' + x.ctx : ''].filter(Boolean).join(' · ');
     return `<tr class="lnk${x.vr ? ' vr' : ''}"${x.enviando ? ' style="opacity:.6"' : ''} onclick="lsAbrir('${escA(x.id)}')">
@@ -4499,7 +4514,7 @@ function lsVistaTabela(linhas) {
       <td class="mu" style="width:24px">${ic('chevR', 16)}</td></tr>`;
   }).join('');
   return `<section class="cx" style="padding:6px 12px 12px"><div class="tb-box"><table class="tb" style="min-width:860px">
-      <thead><tr><th>Data</th><th>Descrição</th><th>Grupo</th><th>Quem</th><th>Parcelas</th><th>Foto</th><th class="r">Valor</th><th><span class="so-leitor">Abrir</span></th></tr></thead>
+      <thead><tr>${th('data', 'Data')}${th('desc', 'Descrição')}${th('grupo', 'Grupo')}${th('quem', 'Quem')}${th('parc', 'Parcelas')}<th>Foto</th>${th('valor', 'Valor', 'r')}<th><span class="so-leitor">Abrir</span></th></tr></thead>
       <tbody>${corpo}</tbody></table></div>
     <div class="tb-pe"><span>${linhas.length > LIM ? `mostrando ${LIM} de ` : ''}${linhas.length} ${linhas.length === 1 ? 'lançamento' : 'lançamentos'} · grupo e quem mudam direto na linha · clique na compra para editar tudo</span></div></section>`;
 }
@@ -5203,4 +5218,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v49 -------- -->
+<!-- -------- index.html v50 -------- -->
