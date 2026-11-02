@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v42 -------- -->
+<!-- -------- index.html v43 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1474,7 +1474,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v42</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v43</p>
   </div>
 </section>
 
@@ -1533,7 +1533,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v42';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v43';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1664,7 +1664,7 @@ const ehPC = () => document.body.classList.contains('pc');
 // opções extras do "Quem": compra de todos juntos e só das crianças (não são contas de ninguém)
 const QUEM_EXTRA = ['Família', 'Crianças'];
 const quemOpcoes = (atual) => { const l = _cfg.pessoas.concat(QUEM_EXTRA); return atual && l.indexOf(atual) < 0 ? l.concat([atual]) : l; };
-const quemSigla = (n) => n === 'sem nome' ? '?' : String(n)[0];
+const quemSigla = (n) => n === 'Família' ? '👨‍👩‍👧' : n === 'Crianças' ? '🧒' : n === 'sem nome' ? '?' : String(n)[0];
 const quemAparelho = () => (_cfg.eu && _cfg.eu.nome) || LS.get('jl_quem', _cfg.pessoas[0]);
 // Configurações no celular: só para quem está nesta lista (no computador, para todos)
 const CONFIG_NO_CELULAR = ['Lucas'];
@@ -2412,7 +2412,7 @@ function pintarLancar() {
   document.getElementById('lNparc').hidden = !(n > 3);
   pintarFormas();
   document.getElementById('lQuem').innerHTML = quemOpcoes().map(p =>
-    `<button type="button" class="${p === _l.quem ? 'on' : ''}" onclick="_l.quem=${escA(JSON.stringify(p))};pintarLancar()">${esc(p)}</button>`).join('');
+    `<button type="button" class="${p === _l.quem ? 'on' : ''}" onclick="_l.quem=${escA(JSON.stringify(p))};pintarLancar()">${QUEM_EXTRA.indexOf(p) >= 0 ? quemSigla(p) + ' ' : ''}${esc(p)}</button>`).join('');
   lAtualiza();
 }
 function lParc(v) {
@@ -5016,4 +5016,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v42 -------- -->
+<!-- -------- index.html v43 -------- -->
