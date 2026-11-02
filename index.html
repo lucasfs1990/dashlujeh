@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v45 -------- -->
+<!-- -------- index.html v46 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1105,11 +1105,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 .pn-fats { display:flex; flex-wrap:wrap; gap:8px }
 .pn-fat { font-size:12px; color:var(--mut); background:var(--s1); border:1px solid var(--bd); border-radius:10px; padding:6px 10px }
 .pn-fat b { color:var(--txt) } .pn-fat.ok { opacity:.65 } .pn-fat.ab { background:var(--acc-soft); border-color:var(--acc); color:var(--acc-tx) } .pn-fat.ab b { color:var(--acc-tx) }
-.pn-ops { display:flex; flex-direction:column; background:var(--s1); border:1px solid var(--bd); border-radius:16px; overflow:hidden }
-.pn-op { display:flex; align-items:center; gap:12px; padding:10px 16px; border-top:1px solid var(--bd) } .pn-op:first-child { border-top:0 }
-.pn-op i { font-style:normal; font-weight:800; font-size:12px; color:var(--mut); width:16px; flex-shrink:0 }
-.pn-op div { flex:1; min-width:0 } .pn-op b { display:block; font-size:13px } .pn-op small { display:block; font-size:12px; color:var(--mut) }
-.pn-op .num { font-family:var(--f-num); font-weight:600; font-size:16px; white-space:nowrap }
+.pn-cabe { margin:10px 0 6px } .pn-cabe .kpi-v { font-size:30px }
 .kpi.tq { display:flex; flex-direction:column; justify-content:flex-start; text-align:left; font-family:var(--f-tx); color:var(--txt); width:100%; cursor:pointer } .kpi.tq:hover { border-color:var(--mut2) } .kpi.tq.on { border-color:var(--acc) }
 .kpi.tq .kpi-n::after { content:' ▾'; color:var(--mut) } .kpi.tq.on .kpi-n::after { content:' ▴' }
 .pn-ls { background:var(--s1); border:1px solid var(--acc); border-radius:16px; padding:12px 16px; max-height:340px; overflow:auto }
@@ -1490,7 +1486,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v45</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v46</p>
   </div>
 </section>
 
@@ -1549,7 +1545,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v45';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v46';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -2107,7 +2103,7 @@ function casaTopo(d, cartoes, fx) {
   const parc = sp ? sp.valor : (d.cartoes || []).reduce((s, c) => s + (c.parcelas || 0), 0);
   const corP = !t ? 'var(--bar)' : parc > t + 0.005 ? 'var(--danger)' : parc >= t * 0.8 ? 'var(--warn)' : 'var(--ok)';
   return `<button type="button" class="ch-hero${neg ? ' neg' : ''}" aria-expanded="${_casaDet}" onclick="casaDet()">
-      <span class="ch-rot"><span>${neg ? 'Cartão estourado em ' + esc(viv) : 'Pode gastar até o vale'}</span>${ic(_casaDet ? 'chevU' : 'chevD', 18)}</span>
+      <span class="ch-rot"><span>${neg ? 'Cartão estourado em ' : 'Ainda cabe no cartão em '}${esc(viv)}</span>${ic(_casaDet ? 'chevU' : 'chevD', 18)}</span>
       <span class="ch-v">${brl(k.semVale)}</span><span class="ch-regua">${regua}</span></button>
     ${dispHtml(d, 'faixa')}
     ${_casaDet ? `<div class="ch-det">${casaLinha()}${dispHtml(d, 'linhas')}</div>` : ''}
@@ -4056,7 +4052,7 @@ function faltaTx(r, p) {
   return Math.abs(f) < 0.01 ? 'tudo o previsto · ' : `de ${nbr(p)} previstos · falta ${nbr(f)} · `;
 }
 
-/* ── Painel: duas linhas e o comparador do "quanto dá para gastar" (em teste).
+/* ── Painel: o quanto ainda cabe no cartão e as duas linhas.
       Linha 1 = o mês vivido na conta corrente (calendário: novembro).
       Linha 2 = o mês em que a fatura aberta é paga (dezembro).
       Os dois vêm prontos da sincronização; fora da faixa, busca aqui. ── */
@@ -4142,26 +4138,23 @@ function pnMeses(d) {
     </div>
     ${lista(['dEnt', 'dFat', 'dCon'])}</section>`;
 
-  return l1 + l2 + pnOpcoes(d, n, fN, fD);
+  return pnCabe(d, n, fN) + l1 + l2;
 }
-/** Cada jeito de responder "quanto ainda dá para gastar", com o valor de hoje, para comparar */
-function pnOpcoes(d, n, fN, fD) {
-  const k = d.camadas || {}, hojeCal = vividoDe(d.yyyymm) === ymDe(new Date());
-  const mN = fN && hojeCal ? pnMenor(fN, new Date().getDate()) : null, mD = fD ? pnMenor(fD, 1) : null;
-  const pior = mN && mD ? (mD.saldo < mN.saldo ? mD : mN) : null;
-  const extras = fD ? fD.movs.filter(m => m.tipo === 'entrada' && m.origem === 'base' && !/^sal/i.test((m.grupo || '').normalize('NFD').replace(/[̀-ͯ]/g, ''))).reduce((s, m) => s + m.valor, 0) : null;
-  const ops = [
-    ['A', `Menor saldo até o fim de ${n.mesNome}`, mN && mN.saldo, mN && `pior dia: ${mN.dia}. Só o resto de ${n.mesNome}: conta o Pix e o cartão que ainda vence neste mês (o Inter aberto, por exemplo)`],
-    ['B', `Até o vale de ${d.mesNome}`, k.semVale, k.ate && `menor saldo de 01 até ${k.ate}. É o "Pode gastar" do visual novo: gastando até aqui, o vale fica inteiro para guardar`],
-    ['C', `Usando o vale de ${d.mesNome}`, k.comVale, k.deVale && `menor saldo de ${k.deVale} a ${k.fim}: o respiro, mas o vale vai embora`],
-    ['D', `Menor saldo de hoje até o fim de ${d.mesNome}`, pior && pior.saldo, pior && `pior dia: ${pior.dia}. A conta mais conservadora: junta os dois meses`],
-    ['E', `Fim de ${d.mesNome}`, d.fimMes, 'o que sobra no último dia, sem olhar se a conta ficou negativa no caminho'],
-    ['F', `${d.mesNome.charAt(0).toUpperCase() + d.mesNome.slice(1)} sozinho`, Math.round(((d.entrouPrev || 0) - (d.saiuPrev || 0)) * 100) / 100, `entra − sai, fingindo que ${n.mesNome} não existe. Conta o 13º e os extras`],
-    ['G', `${d.mesNome.charAt(0).toUpperCase() + d.mesNome.slice(1)} só com o salário`, extras == null ? null : Math.round(((d.entrouPrev || 0) - extras - (d.saiuPrev || 0)) * 100) / 100, `igual ao F, sem 13º e sem extras: o mês normal`]
-  ].filter(o => o[2] != null);
-  return `<section class="pn-bl"><h2>Quanto ainda dá para gastar?</h2>
-    <div class="cx-s">Em teste: cada linha é uma conta diferente, com os valores de hoje. Compare com o banco e escolha a que funciona.</div>
-    <div class="pn-ops">${ops.map(o => `<div class="pn-op"><i>${o[0]}</i><div><b>${esc(o[1])}</b><small>${esc(o[3])}</small></div><span class="num" style="color:${o[2] < 0 ? 'var(--danger)' : 'var(--ok)'}">${brl(o[2])}</span></div>`).join('')}</div></section>`;
+/** O número grande do Painel: quanto ainda cabe no cartão. A compra de agora só sai da conta no
+    vencimento da fatura, então o limite é o menor saldo até o vale do mês em que ela é paga */
+function pnCabe(d, n, fN) {
+  const k = d.camadas;
+  if (!k) return '';
+  const neg = k.semVale < 0, mN = fN && vividoDe(d.yyyymm) === ymDe(new Date()) ? pnMenor(fN, new Date().getDate()) : null;
+  const vale = k.deVale || k.fim, paga = `vence ${d.venc}, antes do vale de ${vale}`;
+  const tx = [
+    neg ? `Compra no cartão de agora ${paga}: até lá a conta já fica negativa, e cada compra aumenta isso.`
+        : `Compra no cartão de agora ${paga}: gastando até aqui, o vale fica inteiro para guardar.`,
+    k.comVale == null ? '' : `Depois do vale, o menor saldo de ${d.mesNome} é ${brl(k.comVale)}.`,
+    mN && mN.saldo < 0 ? `Pix e débito saem na hora: a conta fica em ${brl(mN.saldo)} no dia ${mN.dia}.` : ''
+  ].filter(Boolean);
+  return `<section class="kpi pr pn-cabe${neg ? ' neg' : ''}"><div class="kpi-n">${neg ? 'Cartão estourado em ' : 'Ainda cabe no cartão em '}${esc(n.mesNome)}</div>
+    <div class="kpi-v">${brl(k.semVale)}</div>${tx.map(t => `<div class="kpi-s">${esc(t)}</div>`).join('')}</section>`;
 }
 function cartaoPC(c, d) {
   const valor = c.real ? c.real.total : c.prevista;
@@ -5123,4 +5116,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v45 -------- -->
+<!-- -------- index.html v46 -------- -->
