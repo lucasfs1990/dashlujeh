@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v47 -------- -->
+<!-- -------- index.html v48 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -521,7 +521,7 @@ body.pc .pc-side { display:flex; position:fixed; top:12px; left:12px; bottom:12p
   -webkit-backdrop-filter:blur(22px) saturate(150%); backdrop-filter:blur(22px) saturate(150%);
   box-shadow:0 14px 40px rgba(0,0,0,.34), inset 0 1px 0 color-mix(in srgb, var(--txt) 9%, transparent) }
 @media (prefers-reduced-transparency: reduce) { body.pc .pc-side { background:var(--nav); -webkit-backdrop-filter:none; backdrop-filter:none } body.pc::before { display:none } }
-body.pc.side-min .ps-marca { font-size:0; justify-content:center; padding:0 0 22px }
+body.pc.side-min .ps-marca { font-size:0; gap:0; justify-content:center; padding:0 0 22px }
 body.pc.side-min .ps-b { justify-content:center; padding:0; position:relative }
 body.pc.side-min .ps-b span, body.pc.side-min .ps-mes, body.pc.side-min .ps-pe > div, body.pc.side-min .ps-ver { display:none }
 body.pc.side-min .ps-pe { justify-content:center; padding-left:0; padding-right:0 }
@@ -1501,7 +1501,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
   </div>
   <div class="card">
     <div class="sec">Sobre</div>
-    <p class="aj-p" id="verInfo" style="margin:0">index.html v47</p>
+    <p class="aj-p" id="verInfo" style="margin:0">index.html v48</p>
   </div>
 </section>
 
@@ -1560,7 +1560,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v47';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v48';   // sobe junto com a linha do topo do arquivo
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1936,9 +1936,9 @@ function aplicarTema(t) {
 }
 /** Casa e Painel: a tela nova ou a anterior, neste aparelho */
 const casaNova = () => LS.get('jl_casa', 'nova') === 'nova';
-/** Barra lateral do computador: recolhida fica só com os ícones (o aparelho lembra) */
-function sideToggle() { LS.set('jl_side', document.body.classList.toggle('side-min') ? 'min' : ''); }
-document.body.classList.toggle('side-min', LS.get('jl_side', '') === 'min');
+/** Barra lateral do computador: começa recolhida, só com os ícones (o aparelho lembra se abrir) */
+function sideToggle() { LS.set('jl_side', document.body.classList.toggle('side-min') ? 'min' : 'aberta'); }
+document.body.classList.toggle('side-min', LS.get('jl_side', 'min') !== 'aberta');
 document.querySelectorAll('.ps-b[data-t], .ps-b.bt-sinc').forEach(b => { b.title = b.textContent.trim(); });
 function aplicarCasa(v) { LS.set('jl_casa', v); pintarAjustes(); if (_tela === 'config') pintarConfig(); }
 function corDoTema() {
@@ -4242,9 +4242,11 @@ function cartaoPC(c, d) {
     const dif = c.real.total - c.prevista;
     sub = Math.abs(dif) < 0.01 ? `pelo ${c.nome} · igual ao previsto` : `pelo ${c.nome} · planilha prevê ${brl(c.prevista)}`;
   } else sub = c.lancamentos || c.fixos ? `prevista · à vista ${nbr(c.avista)} + parcelas ${nbr(c.parcelas)} + fixos ${nbr(c.fixos)}` : 'nada lançado nesta fatura ainda';
+  // a estimativa do dia a dia só existe para o cartão principal
+  const e0 = (_cfg.cartoes[0] || {}).nome === c.nome ? estDia() : null, est = e0 && e0.aberto === d.yyyymm ? e0 : null;
   return `<div class="cpc" style="background:${escA(c.cor)};color:${tintaSobre(c.cor)}"><span class="anel"></span>
     <div class="cpc-l"><span>${esc(c.nome)} · fatura de ${esc(d.mesNome)}</span><span style="opacity:.75">${c.titular ? 'titular ' + esc(c.titular) : ''}</span></div>
-    <div><div class="cpc-v">${brl(valor)}</div><div class="cpc-s">${esc(sub)}</div>${!c.real && c.ateHoje != null && Math.abs(c.ateHoje - valor) >= 0.01 ? `<div class="cpc-s">hoje deveria estar em ${brl(c.ateHoje)}</div>` : ''}</div>
+    <div><div class="cpc-v">${brl(valor)}</div><div class="cpc-s">${esc(sub)}</div>${!c.real && c.ateHoje != null && Math.abs(c.ateHoje - valor) >= 0.01 ? `<div class="cpc-s">hoje deveria estar em ${brl(c.ateHoje)}</div>` : ''}${est ? `<div class="cpc-s">com o dia a dia: ${brl(valor + est.resto.min)} a ${brl(valor + est.resto.max)}</div>` : ''}</div>
     <div class="cpc-l"><span>vence ${esc(c.venc)}</span><span>${esc(textoFecha(c.fechaDias, c.fechaData))}</span></div></div>`;
 }
 
@@ -5195,4 +5197,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v47 -------- -->
+<!-- -------- index.html v48 -------- -->
