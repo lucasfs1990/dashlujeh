@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v51 -------- -->
+<!-- -------- index.html v52 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -770,7 +770,7 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .gcards { display:grid; grid-template-columns:repeat(auto-fill,minmax(max(300px,calc(25% - 14px)),1fr)); gap:14px; align-items:start }   /* no máximo 4 por linha: os nomes cabem */
 #lsKpis { grid-template-columns:repeat(4,minmax(0,1fr)) }
 /* à vista (V) ou parcelado (P), no começo de cada compra */
-.pg { display:inline-block; min-width:18px; padding:0 5px; margin-right:7px; border-radius:5px; font-size:12px; font-weight:800; line-height:16px; text-align:center; font-style:normal; vertical-align:1px }
+.pg { display:inline-block; padding:0 5px; margin-left:7px; border-radius:5px; font-size:10px; font-weight:700; line-height:15px; white-space:nowrap; text-align:center; font-style:normal; vertical-align:1px }
 .pg.v { background:var(--ok-soft); color:var(--ok) }
 .pg.p { background:var(--acc-soft); color:var(--acc-tx) }
 /* o mês, no pé da barra lateral */
@@ -791,6 +791,25 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .fc-prev i { width:28px; height:28px; border-radius:8px; background:var(--acc-soft); color:var(--acc-tx); display:flex; align-items:center; justify-content:center }
 .fc-prev em { font-style:normal; font-size:12px; font-weight:800; color:var(--mut) }
 .fc-tot { color:var(--txt); font-size:16px }
+.fc-faixa { display:flex; gap:10px; overflow-x:auto; padding:2px 2px 10px; margin-bottom:6px; scroll-snap-type:x proximity }
+.fc-tile { flex:0 0 auto; min-width:170px; display:flex; flex-direction:column; gap:6px; padding:12px 14px; text-align:left; font:inherit; color:var(--mut); background:var(--vidro); border:1px solid var(--vidro-bd); border-radius:14px; cursor:pointer; scroll-snap-align:start }
+.fc-tile:hover { border-color:var(--acc-soft) } .fc-tile.on { border-color:var(--acc); box-shadow:0 0 0 1px var(--acc) inset }
+.fc-tile-h { display:flex; align-items:center; gap:8px } .fc-tile-h .lin-ic { width:30px; height:30px }
+.fc-tile-n { font-weight:800; font-size:13px; color:var(--txt); white-space:nowrap }
+.fc-tile-v { font-size:17px; color:var(--txt) } .fc-tile.on .fc-tile-v { color:var(--acc-tx) }
+.fc-tile-s { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px }
+.fc-tile-ics { display:flex; gap:3px; align-items:center; color:var(--acc-tx) } .fc-tile-ics em { font-style:normal; font-weight:800; color:var(--mut) }
+.fc-sec { display:flex; justify-content:space-between; font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--mut2); padding:14px 4px 4px; border-bottom:1px solid var(--bd) }
+.tag-ct.ct { background:var(--acc-soft); color:var(--acc-tx) }
+.fcc { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; margin-top:8px }
+.fcc-s { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--mut2); padding:0 4px }
+.fcc-d { min-height:92px; border:1px solid var(--bd); border-radius:10px; padding:6px; display:flex; flex-direction:column; gap:3px; min-width:0 }
+.fcc-d.vazio { border:0 } .fcc-d.tem { background:var(--s2) } .fcc-d.hoje { border-color:var(--acc) }
+.fcc-n { display:flex; justify-content:space-between; gap:4px; font-size:12px; font-weight:800; color:var(--mut) } .fcc-n .nm { color:var(--txt); font-size:11px }
+.fcc-i { display:flex; align-items:center; gap:4px; width:100%; min-width:0; border:0; border-radius:6px; padding:2px 5px; font:inherit; font-size:11px; font-weight:700; text-align:left; cursor:pointer; background:var(--s3); color:var(--txt) }
+.fcc-i span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.fcc-i.ct { background:var(--acc-soft); color:var(--acc-tx) }
+.fcc-leg { display:inline-block; width:10px; height:10px; border-radius:3px; background:var(--s3); vertical-align:-1px } .fcc-leg.ct { background:var(--acc-soft) }
 .fc-li { display:flex; align-items:center; gap:12px; padding:8px 4px; border-bottom:1px solid var(--bd) }
 .fc-li:last-of-type { border-bottom:0 }
 .fc-ic { border:0; cursor:pointer }
@@ -1568,7 +1587,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v51';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v52';   // sobe junto com a linha do topo do arquivo
 
 /* Clique "fora" da janela só fecha se o botão foi APERTADO fora também.
    Sem isso, selecionar texto dentro da janela e soltar o mouse fora dela
@@ -3838,7 +3857,9 @@ function pintarFixos() {
   const B = _dados.base, ym = mesCal(), cartoes = ((B && B.cartoes) || []).map(c => c.toUpperCase());
   const cab = `<header class="pch">
       <div><h1>Contas fixas</h1><div class="pch-s">tudo o que sai todo mês, por grupo: no cartão, boleto, débito automático e Pix · ${esc(rotMes(ym))} · grava na aba BASE</div></div>
-      <div class="pch-d"><div class="mseg" role="group" aria-label="Mostrar">${[['tudo', 'Todas'], ['cartao', 'No cartão'], ['conta', 'Saem da conta']].map(([v, t]) =>
+      <div class="pch-d"><div class="mseg" role="group" aria-label="Ver como">${FC_VISTAS.map(([v, t]) =>
+        `<button type="button" class="${v === _fcVista ? 'on' : ''}" aria-pressed="${v === _fcVista}" onclick="fcVista('${v}')">${t}</button>`).join('')}</div>
+        <div class="mseg" role="group" aria-label="Mostrar">${[['tudo', 'Todas'], ['cartao', 'No cartão'], ['conta', 'Saem da conta']].map(([v, t]) =>
         `<button type="button" class="${v === _fcFiltro ? 'on' : ''}" aria-pressed="${v === _fcFiltro}" onclick="_fcFiltro='${v}';pintarFixos()">${t}</button>`).join('')}</div>
         <button type="button" class="bt acc" onclick="fxNova('Saída')">+ Nova conta fixa</button></div></header>`;
   if (!B) { host.innerHTML = cab + '<div class="esq" style="height:240px"></div>'; return; }
@@ -3866,15 +3887,60 @@ function pintarFixos() {
       <span class="nm">${nbr(r.valor)}</span>
       <button type="button" class="btn-ic" aria-label="Editar ${escA(r.item)}" onclick="fxEditar(${r.linha})">${ic('lapis', 16)}</button></div>`
     + (_fcIcAberto === r.item ? picker(r.item) : '');
-  const resumo = l => { const c = l.filter(noCartao).length, o = l.length - c; return [c ? c + ' no cartão' : '', o ? o + ' da conta' : ''].filter(Boolean).join(' · '); };
-  host.innerHTML = cab + kpis + (secoes.length
-    ? `<section class="fc-grid">${secoes.map(s => `<details class="cx fc-det"${_fcAbertos[s.g] ? ' open' : ''} ontoggle="_fcAbertos[${escA(JSON.stringify(s.g))}]=this.open">
-        <summary><span class="lin-ic">${ic(icCat(s.g === 'Sem grupo' ? '' : s.g), 20)}</span><span class="fc-sum"><b>${esc(s.g)}</b><small>${s.l.length} ${s.l.length === 1 ? 'conta' : 'contas'} · ${esc(resumo(s.l))}</small></span>
-          <span class="fc-prev" aria-hidden="true">${s.l.slice(0, 8).map(r => `<i title="${escA(r.item)}">${ic(icFixo(r), 16)}</i>`).join('')}${s.l.length > 8 ? `<em>+${s.l.length - 8}</em>` : ''}</span>
-          <span class="nm fc-tot">${brl(s.tot)}</span>${ic('chevD', 16)}</summary>
-        <div class="cx-s" style="margin:4px 0 6px">clique na conta para editar · no ícone, para trocá-lo</div>${s.l.map(linha).join('')}
-        <button type="button" class="link" style="margin-top:8px" onclick="fxNova('Saída', '', ${escA(JSON.stringify(s.g === 'Sem grupo' ? '' : s.g))})">+ nova conta em ${esc(s.g)}</button></details>`).join('')}</section>`
-    : `<div class="cx"><div class="empty">Nenhuma conta fixa ${_fcFiltro === 'cartao' ? 'no cartão ' : _fcFiltro === 'conta' ? 'saindo da conta ' : ''}em ${esc(rotMes(ym))}.</div></div>`);
+  if (!secoes.length) {
+    host.innerHTML = cab + kpis + `<div class="cx"><div class="empty">Nenhuma conta fixa ${_fcFiltro === 'cartao' ? 'no cartão ' : _fcFiltro === 'conta' ? 'saindo da conta ' : ''}em ${esc(rotMes(ym))}.</div></div>`;
+    return;
+  }
+  const ctx = { secoes, vis, dia, noCartao, linha, soma, ym };
+  host.innerHTML = cab + kpis + (_fcVista === 'lista' ? fcVistaLista(ctx) : _fcVista === 'cal' ? fcVistaCal(ctx) : fcVistaFaixa(ctx));
+}
+/* As 3 formas de ver as contas fixas: Faixa (grupos lado a lado em cima, a lista do
+   escolhido embaixo), Lista (uma tabela só, pelo dia) e Calendário (o mês, dia a dia). */
+let _fcVista = LS.get('jl_fc_vista', 'faixa'), _fcGrupo = '';
+const FC_VISTAS = [['faixa', 'Por grupo'], ['lista', 'Lista'], ['cal', 'Calendário']];
+function fcVista(v) { _fcVista = v; LS.set('jl_fc_vista', v); pintarFixos(); }
+function fcGrupo(g) { _fcGrupo = g; pintarFixos(); }
+function fcVistaFaixa({ secoes, vis, linha, soma }) {
+  if (_fcGrupo && !secoes.some(s => s.g === _fcGrupo)) _fcGrupo = '';
+  const tile = (g, rot, n, tot, ico, prev) => `<button type="button" class="fc-tile${_fcGrupo === g ? ' on' : ''}" aria-pressed="${_fcGrupo === g}" onclick="fcGrupo(${escA(JSON.stringify(g))})">
+      <span class="fc-tile-h"><span class="lin-ic">${ic(ico, 18)}</span><span class="fc-tile-n">${esc(rot)}</span></span>
+      <span class="nm fc-tile-v">${brl(tot)}</span>
+      <span class="fc-tile-s">${n} ${n === 1 ? 'conta' : 'contas'}${prev}</span></button>`;
+  const prev = l => `<span class="fc-tile-ics" aria-hidden="true">${l.slice(0, 5).map(r => ic(icFixo(r), 13)).join('')}${l.length > 5 ? `<em>+${l.length - 5}</em>` : ''}</span>`;
+  const faixa = `<div class="fc-faixa" role="group" aria-label="Grupos">${tile('', 'Todas', vis.length, soma(vis), 'cartao', '')}${secoes.map(s => tile(s.g, s.g, s.l.length, s.tot, icCat(s.g === 'Sem grupo' ? '' : s.g), prev(s.l))).join('')}</div>`;
+  const mostra = _fcGrupo ? secoes.filter(s => s.g === _fcGrupo) : secoes;
+  const lista = mostra.map(s => `${_fcGrupo ? '' : `<div class="fc-sec"><span>${esc(s.g)}</span><span class="nm">${brl(s.tot)}</span></div>`}${s.l.map(linha).join('')}`).join('');
+  const g = _fcGrupo && _fcGrupo !== 'Sem grupo' ? _fcGrupo : '';
+  return faixa + `<section class="cx"><div class="cx-h"><div><h2>${esc(_fcGrupo || 'Todas as contas')}</h2><div class="cx-s">clique na conta para editar · no ícone, para trocá-lo</div></div>
+      <button type="button" class="link" onclick="fxNova('Saída', '', ${escA(JSON.stringify(g))})">+ nova conta${g ? ' em ' + esc(g) : ''}</button></div>${lista}</section>`;
+}
+function fcVistaLista({ vis, dia, noCartao }) {
+  const l = vis.slice().sort((a, b) => dia(a) - dia(b) || b.valor - a.valor);
+  return `<section class="cx" style="padding:6px 12px 12px"><div class="tb-box"><table class="tb" style="min-width:720px">
+    <thead><tr><th>Dia</th><th>Conta</th><th>Grupo</th><th>Como paga</th><th class="r">Valor</th><th><span class="so-leitor">Editar</span></th></tr></thead>
+    <tbody>${l.map(r => `<tr class="lnk" onclick="fxEditar(${r.linha})">
+      <td class="mu nm">${dois(dia(r))}</td>
+      <td><div style="display:flex;align-items:center;gap:10px"><span class="lin-ic" style="width:30px;height:30px">${ic(icFixo(r), 16)}</span><span style="font-weight:700;color:var(--txt)">${esc(r.item)}${r.data ? ' <span class="etq">uma vez</span>' : ''}</span></div></td>
+      <td class="mu">${esc(String(r.grupo || '').trim() || 'Sem grupo')}</td>
+      <td><span class="tag-ct${noCartao(r) ? ' ct' : ''}" style="margin:0">${esc(r.como || '—')}</span></td>
+      <td class="r nm" style="color:var(--txt)">${nbr(r.valor)}</td>
+      <td class="mu" style="width:24px">${ic('lapis', 15)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="tb-pe"><span>${l.length} ${l.length === 1 ? 'conta' : 'contas'} pelo dia em que saem · clique para editar</span></div></section>`;
+}
+function fcVistaCal({ vis, dia, noCartao, ym }) {
+  const y = Math.floor(ym / 100), m = ym % 100 - 1, nd = diasNoMes(y, m), ini = new Date(y, m, 1).getDay();
+  const por = {};
+  vis.forEach(r => { const d = Math.min(Math.max(1, dia(r) || 1), nd); (por[d] = por[d] || []).push(r); });
+  const hoje = new Date(), ehHoje = d => hoje.getFullYear() === y && hoje.getMonth() === m && hoje.getDate() === d;
+  let cel = '';
+  for (let i = 0; i < ini; i++) cel += '<div class="fcc-d vazio"></div>';
+  for (let d = 1; d <= nd; d++) {
+    const l = (por[d] || []).sort((a, b) => b.valor - a.valor), tot = l.reduce((s, r) => s + r.valor, 0);
+    cel += `<div class="fcc-d${l.length ? ' tem' : ''}${ehHoje(d) ? ' hoje' : ''}"><div class="fcc-n"><span>${d}</span>${tot ? `<span class="nm">${nbr(tot)}</span>` : ''}</div>
+      ${l.map(r => `<button type="button" class="fcc-i${noCartao(r) ? ' ct' : ''}" title="${escA(r.item + ' · ' + (r.como || '') + ' · ' + nbr(r.valor))}" onclick="fxEditar(${r.linha})">${ic(icFixo(r), 12)}<span>${esc(r.item)}</span></button>`).join('')}</div>`;
+  }
+  return `<section class="cx"><div class="cx-h"><div><h2>${esc(rotMes(ym))}</h2><div class="cx-s">cada conta no dia em que sai · <span class="fcc-leg ct"></span> no cartão · <span class="fcc-leg"></span> sai da conta · clique para editar</div></div></div>
+    <div class="fcc">${['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'].map(s => `<div class="fcc-s">${s}</div>`).join('')}${cel}</div></section>`;
 }
 function fcIcone(item) { _fcIcAberto = _fcIcAberto === item ? '' : item; pintarFixos(); }
 function fcIconeEscolher(item, nome) {
@@ -4396,7 +4462,7 @@ function montarFiltros() {
     el.value = opcoes.some(o => String(o[0]) === String(atual)) ? String(atual) : opcoes[0][0];
     el.dataset.feito = '1';
   };
-  sel('lsMes', [['', 'Todos os meses']].concat(_meses.map(m => [String(m.yyyymm), rotViv(m.yyyymm) + ' · paga em ' + m.label])), String(_mes));
+  sel('lsMes', [['', 'Todos os meses']].concat(_meses.map(m => [String(m.yyyymm), rotViv(m.yyyymm)])), String(_mes));
   const formas = []; _cfg.cartoes.map(c => c.nome).concat(L.map(x => x.forma)).forEach(f => { if (f && formas.indexOf(f) < 0) formas.push(f); });
   sel('lsForma', [['', 'Todos os cartões e formas']].concat(formas.map(f => [f, ehVR(f) ? 'VR (vale-refeição)' : f])), '');
   const grupos = _cfg.categorias.slice(); L.forEach(x => { if (x.grupo && grupos.indexOf(x.grupo) < 0) grupos.push(x.grupo); });
@@ -4474,8 +4540,8 @@ function pintarLancs() {
     kp('Parcelas', sp, mes ? 'a parcela do mês' : 'pelo valor total') +
     (vr.length ? kp('Vale-refeição', svr, `${vr.length} no VR · fora do total`, 'vr') : '');
   document.getElementById('lsSub').textContent = mes
-    ? `${rotViv(mes)} · fatura que vence em ${rotMes(mes).toLowerCase()}${forma ? ' · ' + forma : ''} · ${cicloTxt(mes)} · parcelas contam só a do mês · V = à vista, P = parcelado`
-    : 'todos os meses · parcelas pelo valor total · V = à vista, P = parcelado';
+    ? `${rotViv(mes)} · fatura que vence em ${rotMes(mes).toLowerCase()}${forma ? ' · ' + forma : ''} · ${cicloTxt(mes)} · parcelas contam só a do mês`
+    : 'todos os meses · parcelas pelo valor total';
   const host = document.getElementById('lsCorpo');
   if (!linhas.length) { host.innerHTML = `<section class="cx"><div class="empty">Nada com esses filtros.</div></section>`; return; }
   host.innerHTML = _lsVista === 'dia' ? lsVistaDia(linhas) : _lsVista === 'grupo' ? lsVistaGrupo(linhas) : _lsVista === 'cal' ? lsVistaCal(linhas) : lsVistaTabela(linhas);
@@ -4490,10 +4556,10 @@ const lsParcTxt = (x, k) => x.n > 1 ? (k ? `${k}/${x.n} · de ${nbr(x.valor)}` :
 const ehAroeira = g => /aroeira/i.test(String(g || ''));
 const tagAro = g => ehAroeira(g) ? '<span class="tag-aro">Aroeira</span>' : '';
 const lsTags = x => (x.vr ? '<span class="tag-vr">VR</span>' : '') + tagAro(x.grupo) + (x.enviando ? '<span class="tag-env">enviando</span>' : '');
-/** V = à vista, P 2/10 = parcelado (a parcela do mês); o VR já tem a sua marca */
+/** "à vista" ou "2/10" (a parcela do mês), depois do nome; o VR já tem a sua marca */
 const pgChip = (x, k) => x.vr ? '' : x.n > 1
-  ? `<span class="pg p" title="${escA('Parcelado · ' + lsParcTxt(x, k))}">P ${k ? k + '/' + x.n : x.n + 'x'}</span>`
-  : '<span class="pg v" title="À vista">V</span>';
+  ? `<span class="pg p" title="${escA('Parcelado · ' + lsParcTxt(x, k))}">${k ? k + '/' + x.n : x.n + 'x'}</span>`
+  : '<span class="pg v" title="À vista">à vista</span>';
 function lsSelGrupo(x) {
   const lista = _cfg.categorias.indexOf(x.grupo) < 0 ? _cfg.categorias.concat([x.grupo]) : _cfg.categorias;
   return `<select class="csel" aria-label="Grupo de ${escA(x.desc)}" onclick="event.stopPropagation()" onchange="lsRapido('${escA(x.id)}','cat',this.value)">${lista.map(g => `<option${g === x.grupo ? ' selected' : ''}>${esc(g)}</option>`).join('')}</select>`;
@@ -4512,7 +4578,7 @@ function lsVistaTabela(linhas) {
     const sub = [x.obs, x.forma !== princ && !x.vr ? x.forma : '', x.ctx && x.ctx !== 'Pessoal' ? 'para ' + x.ctx : ''].filter(Boolean).join(' · ');
     return `<tr class="lnk${x.vr ? ' vr' : ''}"${x.enviando ? ' style="opacity:.6"' : ''} onclick="lsAbrir('${escA(x.id)}')">
       <td class="mu nm">${esc(x.dataBR)}</td>
-      <td><div style="font-weight:700;color:var(--txt)">${pgChip(x, k)}${esc(x.desc)}${lsTags(x)}</div>${sub ? `<small>${esc(sub)}</small>` : ''}</td>
+      <td><div style="font-weight:700;color:var(--txt)">${esc(x.desc)}${pgChip(x, k)}${lsTags(x)}</div>${sub ? `<small>${esc(sub)}</small>` : ''}</td>
       <td>${x.enviando ? `<span class="gchip">${esc(x.grupo)}</span>` : lsSelGrupo(x)}</td>
       <td>${x.enviando ? esc(x.quem || '—') : lsSelQuem(x)}</td>
       <td class="mu">${esc(lsParcTxt(x, k))}</td>
@@ -4530,7 +4596,7 @@ function lsItemLinha(x, noMes, k) {
   const meta = [x.grupo, x.n > 1 ? lsParcTxt(x, k) : '', x.vr ? 'VR' : x.forma !== (_cfg.cartoes[0] || {}).nome ? x.forma : ''].filter(Boolean).join(' · ');
   return `<button type="button" class="lin-b" onclick="lsAbrir('${escA(x.id)}')"${x.enviando ? ' style="opacity:.6"' : ''}>
     <span class="lin-ic${x.vr ? ' vr' : ''}">${ic(icCat(x.grupo), 19)}</span>
-    <span style="flex:1;min-width:0"><span class="lin-t">${pgChip(x, k)}${esc(x.desc)}${lsTags(x)}</span><span class="lin-m">${esc(meta)}</span></span>
+    <span style="flex:1;min-width:0"><span class="lin-t">${esc(x.desc)}${pgChip(x, k)}${lsTags(x)}</span><span class="lin-m">${esc(meta)}</span></span>
     <span class="av-q${x.quem ? '' : ' vazio'}" title="${escA(x.quem || 'sem quem')}">${esc(x.quem ? x.quem[0] : '?')}</span>
     <span class="nm" style="min-width:88px;text-align:right${x.vr ? ';color:var(--mut)' : ''}">${nbr(noMes)}</span></button>`;
 }
@@ -4566,7 +4632,7 @@ function lsVistaGrupo(linhas) {
         <span style="text-align:right"><span class="nm" style="font-size:17px;display:block">${brl(c.tot)}</span>${c.vr ? `<small class="vr-tx">+ ${nbr(c.vr)} no VR</small>` : ''}</span></button>
       <div class="barra dupla"><i style="width:${(c.tot / max * 100).toFixed(1)}%"></i><b style="width:${(c.vr / max * 100).toFixed(1)}%"></b></div>
       <div>${c.its.slice(0, 5).map(l => `<button type="button" class="gcard-i" onclick="lsAbrir('${escA(l.x.id)}')">
-          <span>${pgChip(l.x, l.k)}<span class="nm mu" style="font-size:12px">${esc(l.x.dataBR.slice(0, 5))}</span> ${esc(l.x.desc)}${lsTags(l.x)}</span><span class="nm">${nbr(l.noMes)}</span></button>`).join('')}
+          <span><span class="nm mu" style="font-size:12px">${esc(l.x.dataBR.slice(0, 5))}</span> ${esc(l.x.desc)}${pgChip(l.x, l.k)}${lsTags(l.x)}</span><span class="nm">${nbr(l.noMes)}</span></button>`).join('')}
         ${c.its.length > 5 ? `<button type="button" class="link" style="padding:4px 6px" onclick="${filtro}">ver os ${c.its.length}</button>` : ''}</div></div>`;
   }).join('')}</section>`;
 }
@@ -4639,7 +4705,7 @@ function lsVistaCal(linhas) {
     const x = l.x;
     return `<button type="button" class="lin-b${ehAroeira(x.grupo) ? ' cal-aro' : ''}" onclick="lsAbrir('${escA(x.id)}')"${x.enviando ? ' style="opacity:.6"' : ''}>
       <span class="lin-ic${x.vr ? ' vr' : ''}">${ic(icCat(x.grupo), 19)}</span>
-      <span style="flex:1;min-width:0"><span class="lin-t">${pgChip(x, l.k)}${esc(x.desc)}${lsTags(x)}</span>
+      <span style="flex:1;min-width:0"><span class="lin-t">${esc(x.desc)}${pgChip(x, l.k)}${lsTags(x)}</span>
         <span class="lin-m">${esc(x.grupo)}${x.vr ? '' : `<span class="tag-ct">${esc(x.cartao || x.forma)}</span>`}</span></span>
       <span class="av-q${x.quem ? '' : ' vazio'}" title="${escA(x.quem || 'sem quem')}">${esc(x.quem ? x.quem[0] : '?')}</span>
       <span class="nm" style="min-width:80px;text-align:right">${nbr(l.noMes)}</span></button>`;
@@ -5225,4 +5291,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v51 -------- -->
+<!-- -------- index.html v52 -------- -->
