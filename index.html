@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v52 -------- -->
+<!-- -------- index.html v53 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -801,6 +801,7 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .fc-tile-ics { display:flex; gap:3px; align-items:center; color:var(--acc-tx) } .fc-tile-ics em { font-style:normal; font-weight:800; color:var(--mut) }
 .fc-sec { display:flex; justify-content:space-between; font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--mut2); padding:14px 4px 4px; border-bottom:1px solid var(--bd) }
 .tag-ct.ct { background:var(--acc-soft); color:var(--acc-tx) }
+.fc-parc { margin-top:14px } .fc-parc .fc-nome { cursor:default }
 .fcc { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; margin-top:8px }
 .fcc-s { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--mut2); padding:0 4px }
 .fcc-d { min-height:92px; border:1px solid var(--bd); border-radius:10px; padding:6px; display:flex; flex-direction:column; gap:3px; min-width:0 }
@@ -1587,7 +1588,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v52';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v53';   // sobe junto com a linha do topo do arquivo
 
 /* Clique "fora" da janela só fecha se o botão foi APERTADO fora também.
    Sem isso, selecionar texto dentro da janela e soltar o mouse fora dela
@@ -3849,6 +3850,8 @@ function icFixo(r) {
 }
 function carregarFixos(forcar) {
   if (!_dados.base || forcar) carregarBase();
+  if (!_dados.lancs || forcar)   // as compras parceladas que estão correndo vêm da LANÇAMENTOS
+    google.script.run.withSuccessHandler(l => { _dados.lancs = l; dadosGravar(); if (_tela === 'fixos') pintarFixos(); }).withFailureHandler(() => {}).listarLancamentos();
   pintarFixos();
 }
 function pintarFixos() {
@@ -3888,11 +3891,29 @@ function pintarFixos() {
       <button type="button" class="btn-ic" aria-label="Editar ${escA(r.item)}" onclick="fxEditar(${r.linha})">${ic('lapis', 16)}</button></div>`
     + (_fcIcAberto === r.item ? picker(r.item) : '');
   if (!secoes.length) {
-    host.innerHTML = cab + kpis + `<div class="cx"><div class="empty">Nenhuma conta fixa ${_fcFiltro === 'cartao' ? 'no cartão ' : _fcFiltro === 'conta' ? 'saindo da conta ' : ''}em ${esc(rotMes(ym))}.</div></div>`;
+    host.innerHTML = cab + kpis + `<div class="cx"><div class="empty">Nenhuma conta fixa ${_fcFiltro === 'cartao' ? 'no cartão ' : _fcFiltro === 'conta' ? 'saindo da conta ' : ''}em ${esc(rotMes(ym))}.</div></div>` + fcParceladas();
     return;
   }
   const ctx = { secoes, vis, dia, noCartao, linha, soma, ym };
-  host.innerHTML = cab + kpis + (_fcVista === 'lista' ? fcVistaLista(ctx) : _fcVista === 'cal' ? fcVistaCal(ctx) : fcVistaFaixa(ctx));
+  host.innerHTML = cab + kpis + (_fcVista === 'lista' ? fcVistaLista(ctx) : _fcVista === 'cal' ? fcVistaCal(ctx) : fcVistaFaixa(ctx)) + fcParceladas();
+}
+/** As compras parceladas que estão correndo no mês (Disney+ 12x na Vivo, celular…): também saem
+    todo mês, mas já estão dentro da fatura — aqui é só para ver, não somam de novo. */
+function fcParceladas() {
+  if (_fcFiltro === 'conta' || !_dados.lancs) return '';
+  const idx = idxDe(_mes), ymDoIdx = i => Math.floor((i - 1) / 12) * 100 + ((i - 1) % 12 + 1);
+  const l = _dados.lancs.filter(x => !x.vr && x.n > 1 && x.ci <= idx && idx <= x.ci + x.n - 1)
+    .map(x => ({ x, k: idx - x.ci + 1, p: x.valor / x.n }))
+    .sort((a, b) => b.p - a.p);
+  if (!l.length) return '';
+  const tot = l.reduce((s, r) => s + r.p, 0);
+  return `<section class="cx fc-parc"><div class="cx-h"><div><h2>Parceladas correndo · ${esc(rotViv(_mes))}</h2>
+      <div class="cx-s">compras divididas que também caem todo mês · já estão dentro da fatura, não somam de novo</div></div><span class="nm fc-tot">${brl(tot)}</span></div>
+    ${l.map(({ x, k, p }) => { const falta = x.n - k;
+      return `<div class="fc-li"><span class="lin-ic">${ic(icFixo({ item: x.desc, grupo: x.grupo }), 20)}</span>
+        <span class="fc-nome"><b>${esc(x.desc)}<span class="pg p">${k}/${x.n}</span></b>
+        <small>${esc([x.grupo, falta ? `termina em ${rotViv(ymDoIdx(x.ci + x.n - 1))} · faltam ${falta}` : 'última parcela', 'total ' + nbr(x.valor)].join(' · '))}<span class="tag-ct ct">${esc(x.forma || x.cartao)}</span></small></span>
+        <span class="nm">${nbr(p)}</span></div>`; }).join('')}</section>`;
 }
 /* As 3 formas de ver as contas fixas: Faixa (grupos lado a lado em cima, a lista do
    escolhido embaixo), Lista (uma tabela só, pelo dia) e Calendário (o mês, dia a dia). */
@@ -4508,7 +4529,10 @@ function lsFiltrar(L) {
   L.forEach(x => {
     let noMes = x.valor, k = 0;
     if (idx) {
-      if (x.n > 1) { if (!(x.ci <= idx && idx <= x.ci + x.n - 1)) return; noMes = x.valor / x.n; k = idx - x.ci + 1; }
+      // Pix, boleto e débito não têm fatura: entram no ciclo do cartão principal, como o VR e o Painel
+      // (o Pix de 03/11 é compra de Nov/26; no saldo do Fluxo ele continua saindo no dia em que saiu)
+      if (!x.vr && !x.cartao) { if (idxDe(ymDe(compDe(isoParaData(x.data), _cfg.cartoes[0]))) !== idx) return; }
+      else if (x.n > 1) { if (!(x.ci <= idx && idx <= x.ci + x.n - 1)) return; noMes = x.valor / x.n; k = idx - x.ci + 1; }
       else if (x.ci !== idx) return;
     }
     if (forma && String(x.forma).toUpperCase() !== forma.toUpperCase()) return;
@@ -5291,4 +5315,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v52 -------- -->
+<!-- -------- index.html v53 -------- -->
