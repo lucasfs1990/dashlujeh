@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v50 -------- -->
+<!-- -------- index.html v51 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1543,7 +1543,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <nav id="barra" class="mnc-fixa" aria-label="Navegação do app"></nav>
 
 <!-- ══ escolher o mês ═══════════════════════════════════════ -->
-<div class="folha" id="folhaMes" hidden onclick="if(event.target===this)fecharMeses()">
+<div class="folha" id="folhaMes" hidden onclick="if(cliqueFora(event,this))fecharMeses()">
   <div class="folha-c">
     <div class="sec">Mês</div>
     <div class="folha-g" id="folhaLista"></div>
@@ -1551,24 +1551,31 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 </div>
 
 <!-- ══ compras do mês (celular): toca num grupo, numa pessoa ou no cartão ══ -->
-<div class="folha" id="folhaCompras" hidden onclick="if(event.target===this)cmFechar()">
+<div class="folha" id="folhaCompras" hidden onclick="if(cliqueFora(event,this))cmFechar()">
   <div class="folha-c cm-c" role="dialog" aria-modal="true" aria-labelledby="cmTit" id="cmCaixa"></div>
 </div>
 
 <!-- ══ janela de editar um lançamento (computador) ══════════ -->
-<div class="pop" id="lsPop" hidden onclick="if(event.target===this)lsFechar()">
+<div class="pop" id="lsPop" hidden onclick="if(cliqueFora(event,this))lsFechar()">
   <div class="pop-c" role="dialog" aria-modal="true" aria-labelledby="lpTit" id="lpCaixa"></div>
 </div>
 
 <!-- ══ janela de editar uma conta fixa / salário (computador) ══ -->
-<div class="pop" id="fxPop" hidden onclick="if(event.target===this)fxFechar()">
+<div class="pop" id="fxPop" hidden onclick="if(cliqueFora(event,this))fxFechar()">
   <div class="pop-c" role="dialog" aria-modal="true" aria-labelledby="fxTit" id="fxCaixa"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v50';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v51';   // sobe junto com a linha do topo do arquivo
+
+/* Clique "fora" da janela só fecha se o botão foi APERTADO fora também.
+   Sem isso, selecionar texto dentro da janela e soltar o mouse fora dela
+   fechava a janela (o navegador manda o click para o fundo). */
+let _alvoApertado = null;
+document.addEventListener('pointerdown', e => { _alvoApertado = e.target; }, true);
+function cliqueFora(e, el) { return e.target === el && _alvoApertado === el; }
 
 /* ══ ícones (traço, 24×24) ═════════════════════════════════════ */
 const IC = {
@@ -1817,7 +1824,7 @@ window.addEventListener('DOMContentLoaded', () => {
     else if (_fxRegra) fxFechar();
     else if (document.body.classList.contains('em-lancar')) fecharLancar();
   });
-  document.body.addEventListener('click', e => { if (ehPC() && e.target === document.body && document.body.classList.contains('em-lancar')) fecharLancar(); });
+  document.body.addEventListener('click', e => { if (ehPC() && cliqueFora(e, document.body) && document.body.classList.contains('em-lancar')) fecharLancar(); });
   document.getElementById('ajConexao').hidden = false;
   if (window.JL && JL.standalone) {
     document.getElementById('ajTrocar').hidden = false;
@@ -5218,4 +5225,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v50 -------- -->
+<!-- -------- index.html v51 -------- -->
