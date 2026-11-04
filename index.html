@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v58 -------- -->
+<!-- -------- index.html v59 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -417,13 +417,33 @@ i.sq.hz.pl-c-fora { background:repeating-linear-gradient(45deg,var(--pl-fora) 0 
 .pl-li2 > div { display:grid; grid-template-columns:62px 1fr auto; gap:10px; align-items:center; padding:7px 0; border-bottom:1px solid var(--bd) }
 .pl-li2 em { font-style:normal; font-weight:700; min-width:0 } .pl-li2 em small { display:block; font-weight:500; font-size:12px; color:var(--mut) }
 .pl-tb2 { min-width:720px } .pl-tb2 td, .pl-tb2 th { padding:8px 10px } .pl-tb2 .r { text-align:right }
-.pl-tb2 tr.pv td { color:var(--mut); font-style:italic } .pl-tb2 tr.tot td { font-weight:800; border-top:1px solid var(--mut2) }
+.pl-tb2 tr.pv td { color:var(--acc-tx) } .pl-tb2 tr.tot td { font-weight:800; border-top:1px solid var(--mut2) }
 .pl-tb2 tr.mu td { color:var(--mut); font-size:12px } .pl-tb2 td.neg { color:var(--danger) }
 .pl-gu { border-color:var(--acc) }
 .pl-gu-g { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:14px 28px }
 .pl-gu h3 { font-size:14px; font-weight:800; margin-bottom:6px; color:var(--acc-tx) }
 .pl-gu ul, .pl-gu ol { padding-left:18px; display:flex; flex-direction:column; gap:6px; font-size:13px; line-height:1.5 }
 .pl-gu p { font-size:12px; color:var(--mut); margin-top:8px }
+.pl-cores { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12px; color:var(--mut); margin:-6px 0 -4px }
+.pl-cores span { display:inline-flex; align-items:center; gap:6px } .pl-cores b { color:var(--txt) }
+.pl-cores i { width:10px; height:10px; border-radius:50% } .pl-cores i.pl { background:var(--txt) } .pl-cores i.pv { background:var(--acc) } .pl-cores i.fx { background:var(--mut2) }
+.kpi .pv, .pl-tip .pv, .pl-gt .pv { color:var(--acc-tx) } .kpi .fx { color:var(--mut2) } .kpi-v .pv { color:var(--acc-tx) }
+.pl-tg { font-style:normal; font-size:10px; font-weight:800; padding:1px 6px; border-radius:6px; margin-left:4px; vertical-align:1px; white-space:nowrap }
+.pl-tg.pl { border:1px solid var(--mut2); color:var(--txt) } .pl-tg.pv { background:var(--acc-soft); color:var(--acc-tx) }
+.pl-tg.mx { background:linear-gradient(90deg,var(--s3) 50%,var(--acc-soft) 50%); color:var(--txt) }
+.kpi.pr .pl-tg, .kpi.pr .pv, .kpi.pr .fx { color:var(--acc-on); border-color:var(--acc-on); background:none }
+.pl-ktip { cursor:help; transition:border-color .15s } .pl-ktip:hover { border-color:var(--acc) }
+.pl-kq { font-size:10.5px; color:var(--mut2); margin-top:6px; opacity:0; transition:opacity .15s } .pl-ktip:hover .pl-kq { opacity:1 }
+.kpi.pr .pl-kq { color:var(--acc-on) }
+.pl-tip { max-width:440px; font-family:var(--f-tx) }
+.pc-t { font-weight:800; font-size:13px; margin-bottom:6px }
+.pc-h { font-size:11.5px; color:var(--mut); margin:4px 0 2px }
+.pc-l { display:grid; grid-template-columns:14px 1fr auto; gap:6px; align-items:baseline; padding:1px 0 }
+.pc-l b { font-family:var(--f-num); font-weight:600; white-space:nowrap } .pc-o { color:var(--mut); font-weight:800 }
+.pc-l.pv, .pc-l.pv b { color:var(--acc-tx) } .pc-l.fx, .pc-l.fx b { color:var(--mut2) }
+.pc-l.t { font-weight:800 } .pc-l.neg b { color:var(--danger) }
+.pc-hr { border-top:1px solid var(--bd); margin:5px 0 }
+.pc-n { margin-top:7px; padding-top:6px; border-top:1px dashed var(--bd); color:var(--mut); font-size:11.5px; line-height:1.5 } .pc-n b { color:var(--txt) }
 .pl-sim { display:flex; flex-direction:column; gap:14px }
 .pl-sim #plSimOut { display:flex; flex-direction:column; gap:14px }
 .pl-ctl { padding:14px 18px }
@@ -1559,7 +1579,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v58';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v59';   // sobe junto com a linha do topo do arquivo
 
 /* Clique "fora" da janela só fecha se o botão foi APERTADO fora também.
    Sem isso, selecionar texto dentro da janela e soltar o mouse fora dela
@@ -2764,7 +2784,7 @@ function plIni(ym, c) { const f = fechamentoDe(ymMais(ym, -1), c); return new Da
 function plCiclo(ym, L, c) {
   const a = plIni(ym, c), b = fechamentoDe(ym, c), de = isoDe(a), ate = isoDe(b);
   const dias = Math.round((b - a) / 864e5) + 1;
-  const r = { ym, viv: vividoDe(ym), a, b, dias, av: 0, parc: 0, parcTot: 0, fora: 0, extra: 0, grupos: {}, porDia: new Array(dias + 2).fill(0), itens: [], novas: [] };
+  const r = { ym, viv: vividoDe(ym), a, b, dias, av: 0, parc: 0, parcTot: 0, fora: 0, extra: 0, grupos: {}, porDia: new Array(dias + 2).fill(0), porDiaAv: new Array(dias + 2).fill(0), itens: [], novas: [] };
   L.forEach(i => {
     if (i.vr || i.data < de || i.data > ate) return;
     const v = i.n > 1 ? i.valor / i.n : i.valor, d = Math.max(1, Math.min(dias, Math.round((isoParaData(i.data) - a) / 864e5) + 1));
@@ -2773,17 +2793,18 @@ function plCiclo(ym, L, c) {
     else if (i.valor >= 3000) { r.extra += v; it.tipo = 'extra'; }
     else {
       if (i.n > 1) { r.parc += v; r.parcTot += i.valor; r.novas.push(i); } else r.av += v;
-      r.grupos[plGrupo(i)] = (r.grupos[plGrupo(i)] || 0) + v; r.porDia[d] += v;
+      r.grupos[plGrupo(i)] = (r.grupos[plGrupo(i)] || 0) + v; r.porDia[d] += v; if (i.n <= 1) r.porDiaAv[d] += v;
     }
     r.itens.push(it);
   });
   r.total = r.av + r.parc;
   return r;
 }
-const plAteDia = (r, d) => { let s = 0; for (let k = 1; k <= Math.min(d, r.dias); k++) s += r.porDia[k]; return s; };
+const plAteDia = (r, d, av) => { let s = 0; for (let k = 1; k <= Math.min(d, r.dias); k++) s += (av ? r.porDiaAv : r.porDia)[k]; return s; };
 const plGrupoAte = (r, g, d) => r.itens.filter(x => x.tipo === 'dia' && plGrupo(x.i) === g && x.d <= d).reduce((s, x) => s + x.v, 0);
 
 /** O modelo inteiro: ciclo aberto, ciclos fechados, médias e faixas */
+const st2 = v => ({ med: plMed(v), min: v.length ? Math.min(...v) : 0, max: v.length ? Math.max(...v) : 0 });
 function plModelo() {
   const c = _cfg.cartoes[0], L = lancsComFila();
   if (!L || !c) return null;
@@ -2802,9 +2823,13 @@ function plModelo() {
   const nMed = np.length ? Math.max(2, Math.round(np.reduce((s, i) => s + i.valor, 0) / np.reduce((s, i) => s + i.valor / i.n, 0))) : 6;
   const mesmoDia = plMed(fechados.map(r => plAteDia(r, dia)));
   const total = st(x => x.total);
-  return { c, hoje, aberto, atual, fechados, dia, grupos, nMed, mesmoDia,
+  // em cada ciclo fechado: quanto já tinha ido até o dia de hoje e quanto veio depois
+  const restos = fechados.map(r => { const ate = plAteDia(r, dia), ateAv = plAteDia(r, dia, true);
+    return { viv: r.viv, total: r.total, ate, resto: r.total - ate, rAv: r.av - ateAv, rPa: r.parc - (ate - ateAv) }; });
+  const rTot = st2(restos.map(x => x.resto)), rAv = st2(restos.map(x => x.rAv)), rPa = st2(restos.map(x => x.rPa));
+  return { c, hoje, aberto, atual, fechados, dia, grupos, nMed, mesmoDia, restos, rTot, rAv, rPa,
            av: st(x => x.av), pa: st(x => x.parc), ex: st(x => x.extra), total,
-           projCiclo: atual.total + Math.max(0, total.med - mesmoDia) };
+           projCiclo: atual.total + Math.max(0, rTot.med) };
 }
 
 /** Projeção mês a mês (calendário: a fatura ym é paga em ym). s = premissas do dia a dia e do simulador */
@@ -2824,8 +2849,8 @@ function plProj(M, s) {
     parcL = Math.min(parcL, fatura); avL = Math.min(avL, fatura - parcL);
     const fixCart = Math.max(0, fatura - parcL - avL);
     // o que ainda vai ser comprado no ciclo desta fatura (só do aberto em diante)
-    const dia = j < 0 ? 0 : j === 0 ? Math.max(0, s.dia - M.atual.av) : s.dia;
-    if (j >= 0) novas[j] = j === 0 ? Math.max(0, s.pnov - M.atual.parc) : s.pnov;
+    const dia = j < 0 ? 0 : j === 0 ? Math.max(0, M.rAv.med + s.dia - M.av.med) : s.dia;
+    if (j >= 0) novas[j] = j === 0 ? Math.max(0, M.rPa.med + s.pnov - M.pa.med) : s.pnov;
     let pnov = 0;
     for (let q = 0; q <= j; q++) if (j - q < M.nMed) pnov += novas[q] || 0;
     const pont = s.pont && s.pontMes === ym ? s.pont : 0;
@@ -2834,16 +2859,17 @@ function plProj(M, s) {
     const vd = Math.min(vencDe(ym, c).getDate(), f.dias);
     if (saldo === null) saldo = f.saldoIni;
     const ini = saldo;
-    let pior = saldo, diaPior = 1, juros = 0;
+    let pior = saldo, diaPior = 1, juros = 0, eA = 0, sA = 0, pA = 0, pE = 0, pS = 0, pP = 0;
     for (let d = 1; d <= f.dias; d++) {
-      f.movs.forEach(m => { if (m.dia === d) saldo += m.valor; });
-      if (d === 1) saldo += s.renda + s.corte;
-      if (d === vd) saldo -= dia + pnov + pont + extra;
-      if (saldo < pior) { pior = saldo; diaPior = d; }
+      f.movs.forEach(m => { if (m.dia === d) { saldo += m.valor; if (m.valor > 0) eA += m.valor; else sA -= m.valor; } });
+      if (d === 1) { saldo += s.renda + s.corte; eA += s.renda; sA -= s.corte; }
+      if (d === vd) { saldo -= dia + pnov + pont + extra; pA += dia + pnov + pont + extra; }
+      if (saldo < pior) { pior = saldo; diaPior = d; pE = eA; pS = sA; pP = pA; }
       if (saldo < 0) juros += -saldo * (f.taxa || 8) / 100 / 30;
     }
     const sai = Math.max(0, fixosConta - s.corte) + fatura + avulsos + dia + pnov + pont + extra;
-    out.push({ ym, entra: entra + s.renda, fixos: Math.max(0, fixosConta - s.corte) + fixCart, parcL, lanc: avL + avulsos, dia, pnov, pont, extra,
+    out.push({ ym, fixConta: Math.max(0, fixosConta - s.corte), fixCart, avL, avulsos, fatura, vd, pE, pS, pP,
+               entra: entra + s.renda, fixos: Math.max(0, fixosConta - s.corte) + fixCart, parcL, lanc: avL + avulsos, dia, pnov, pont, extra,
                sai, res: entra + s.renda - sai, ini, fim: saldo, pior, diaPior, juros });
   }
   return out;
@@ -2879,7 +2905,7 @@ const PL_GUIA_BASE = `<div class="pl-gu-b"><h3>Três palavras que valem para a a
   <li><b>Dia a dia</b>: o que vocês compram no ciclo, à vista mais a 1ª parcela das compras parceladas novas. Ficam de fora o VR,
     a Loja, a Célia, os reembolsos e compras de R$ 3.000 ou mais. Essas aparecem como <b>fora da média</b>.</li>
   <li><b>Costume</b>: a média dos ciclos já fechados desde 28/08/2026. Cada ciclo que fecha entra na conta, então ela fica mais confiável com o tempo.</li></ul>
-  <p>Passe o mouse em qualquer barra, linha ou grupo para ver os valores.</p></div>`;
+  <p><b>Cores</b>: branco = está na planilha; âmbar (ou listrado/pontilhado nos gráficos) = previsto pelo costume; cinza = faixa. Passe o mouse em qualquer número para ver a conta montada com os valores de vocês.</p></div>`;
 const PL_GUIA = {
   atual: `<h3>Mês atual: como está o ciclo até hoje</h3><ul>
     <li><b>Dia a dia até hoje</b>: o que vocês já gastaram no ciclo. A setinha compara com o que costumavam ter gastado <i>no mesmo dia</i> (▲ vermelho = gastando mais rápido).</li>
@@ -2935,7 +2961,31 @@ function plTipMove(e) {
 }
 document.addEventListener('pointermove', e => { if (_tela === 'plano') plTipMove(e); });
 
-const plKpi = (n, v, s, cls) => `<div class="kpi${cls ? ' ' + cls : ''}"><div class="kpi-n">${n}</div><div class="kpi-v">${v}</div><div class="kpi-s">${s}</div></div>`;
+const PL_TAG = { pl: ['pl', 'na planilha'], pv: ['pv', 'previsto'], mx: ['mx', 'planilha + previsto'] };
+const plKpi = (n, v, s, cls, tip, tag) => `<div class="kpi${cls ? ' ' + cls : ''}${tip ? ' pl-ktip' : ''}"${tip ? ` data-pltip="${plEsc(tip)}"` : ''}>
+  <div class="kpi-n">${n}${tag ? ` <i class="pl-tg ${PL_TAG[tag][0]}">${PL_TAG[tag][1]}</i>` : ''}</div><div class="kpi-v">${v}</div><div class="kpi-s">${s}</div>${tip ? '<div class="pl-kq">passe o mouse para ver a conta</div>' : ''}</div>`;
+/** A conta de um número: linhas [sinal, rótulo, valor, tipo] (tipo: pl = planilha, pv = previsto, fx = faixa, t = total, h = título) ou '-' */
+function plConta(tit, linhas, nota) {
+  return `<div class="pc-t">${tit}</div>` + linhas.filter(Boolean).map(l => l === '-' ? '<div class="pc-hr"></div>'
+    : l[3] === 'h' ? `<div class="pc-h">${l[1]}</div>`
+    : `<div class="pc-l ${l[3] || 'pl'}"><span class="pc-o">${l[0]}</span><span class="pc-r">${l[1]}</span><b>${typeof l[2] === 'number' ? plR(l[2]) : l[2]}</b></div>`).join('')
+    + (nota ? `<div class="pc-n">${nota}</div>` : '');
+}
+const plLeg = () => `<div class="pl-cores"><span><i class="pl"></i><b>Branco</b> = está na planilha (lançado ou programado na BASE)</span>
+  <span><i class="pv"></i><b>Âmbar</b> = previsto pelo costume (ainda não foi comprado)</span><span><i class="fx"></i><b>Cinza</b> = faixa: do ciclo mais barato ao mais caro</span>
+  <span class="mu">Passe o mouse em qualquer número para ver a conta.</span></div>`;
+const pv = v => `<span class="pv">${v}</span>`, fx = v => `<span class="fx">${v}</span>`;
+const ddmm = (d, ym) => `${dois(d)}/${dois(ym % 100)}`;
+function plContaPior(x, M, oque) {
+  return plConta(`${oque}: ${ddmm(x.diaPior, x.ym)}`, [
+    ['', `Saldo da conta no dia 1º de ${rotMes(x.ym)}`, x.ini, x.ini < 0 ? 'pl neg' : 'pl'],
+    ['+', `Entrou até o dia ${x.diaPior} (salários, vale…)`, x.pE, 'pl'],
+    ['−', `Saiu até o dia ${x.diaPior} (contas, faturas, Pix)`, x.pS, 'pl'],
+    x.pP > 0.5 ? ['−', 'Dia a dia previsto na fatura que vence nesse período', x.pP, 'pv'] : null,
+    '-', ['=', 'Menor saldo do mês', x.pior, 't' + (x.pior < 0 ? ' neg' : '')]],
+    x.pior < 0 ? 'Negativo = cheque especial. Depois desse dia entra dinheiro (salário/vale) e o saldo volta a subir.' : 'Mesmo no pior dia a conta não fica negativa.');
+}
+
 const plDelta = (a, b, inverso) => {
   if (!(b > 0)) return '<span class="pl-d">sem base</span>';
   const p = plPct(a, b), ruim = inverso ? p < -5 : p > 5, bom = inverso ? p > 5 : p < -5;
@@ -2947,7 +2997,6 @@ const plEsc = s => escA(s);
 function plAtual(M) {
   const A = M.atual, proj = plProj(M, plPremissas(M, 'med')), pMin = plProj(M, plPremissas(M, 'min')), pMax = plProj(M, plPremissas(M, 'max'));
   const fat = proj.find(x => x.ym === M.aberto), viv = proj[0];
-  const resto = Math.max(0, M.total.med - M.mesmoDia);
   const piorM = proj.length ? proj.slice(0, 3).reduce((a, x) => x.pior < a.pior ? x : a) : null;
   const ritmo = A.total - M.mesmoDia;
   // pauta: frases frias, da maior para a menor
@@ -2959,14 +3008,37 @@ function plAtual(M) {
   if (piorM && piorM.pior < 0) pauta.push([-piorM.pior + 5000, `Menor saldo previsto: <b class="neg">${plR(piorM.pior)}</b> em ${dois(piorM.diaPior)}/${dois(piorM.ym % 100)} (com o dia a dia médio). Cheque especial.`]);
   if (A.fora + A.extra > 0) pauta.push([A.fora + A.extra, `Fora da média neste ciclo (Loja, Célia, reembolsos, compras ≥ R$ 3.000): ${plR(A.fora + A.extra)}.`]);
   pauta.sort((a, b) => b[0] - a[0]);
+  const R = M.restos, fxMin = A.total + Math.max(0, M.rTot.min), fxMax = A.total + Math.max(0, M.rTot.max);
+  const tDia = plConta(`Dia a dia até hoje: dia ${M.dia} de ${A.dias} do ciclo`, [
+    ['+', 'Compras à vista lançadas', A.av], ['+', '1ª parcela das compras parceladas novas', A.parc], '-', ['=', 'Dia a dia até hoje', A.total, 't'],
+    '-', ['', `Para comparar: até o dia ${M.dia}, nos ciclos fechados, vocês tinham gasto`, '', 'h'],
+    ...R.map(r => ['', 'Ciclo de ' + rotMes(r.viv), r.ate, 'pl']), ['=', 'Média no mesmo dia', M.mesmoDia, 't']],
+    `Diferença: <b>${ritmo >= 0 ? '+' : '−'}${plR(Math.abs(ritmo))}</b> ${plDelta(A.total, M.mesmoDia)}. Tudo aqui já aconteceu, nada é previsão.`);
+  const tFecha = plConta(`Vai fechar o ciclo em ${plR(M.projCiclo)}`, [
+    ['+', 'Já gasto até hoje', A.total, 'pl'], ['+', `O que costuma vir do dia ${M.dia + 1} ao dia ${A.dias}`, M.rTot.med, 'pv'], '-', ['=', 'Previsão do fechamento', M.projCiclo, 't'],
+    '-', ['', `De onde vem o "costuma vir": em cada ciclo fechado, quanto foi gasto depois do dia ${M.dia}`, '', 'h'],
+    ...R.map(r => ['', `${rotMes(r.viv)}: ${plR(r.total)} no ciclo − ${plR(r.ate)} até o dia ${M.dia}`, r.resto, 'pv']), ['=', 'Média', M.rTot.med, 'pv'],
+    '-', ['', 'Faixa: troca a média pelo ciclo que menos e pelo que mais gastou depois do dia ' + M.dia, '', 'h'],
+    ['', `${plR(A.total)} + ${plR(M.rTot.min)}`, fxMin, 'fx'], ['', `${plR(A.total)} + ${plR(M.rTot.max)}`, fxMax, 'fx']],
+    `Por que dá mais que a média do ciclo inteiro (${plR(M.total.med)})? A média é como os ciclos passados terminaram. A previsão soma o que vocês <b>já</b> gastaram (${ritmo >= 0 ? plR(ritmo) + ' acima' : plR(-ritmo) + ' abaixo'} do ritmo) com o que costuma vir depois. O costume não desconta o que já passou.`);
+  const fatTot = fat ? fat.fixCart + fat.parcL + fat.avL + fat.dia + fat.pnov : 0;
+  const tFat = fat && plConta(`Fatura de ${rotMes(M.aberto)}: vence ${vencTxt(M.aberto, M.c)}`, [
+    ['+', 'Contas fixas e assinaturas no cartão (BASE)', fat.fixCart], ['+', 'Parcelas que caem nesta fatura', fat.parcL], ['+', 'Compras à vista já lançadas', fat.avL],
+    ['+', 'Dia a dia que ainda deve vir até o fechamento', fat.dia, 'pv'], ['+', 'Parcelas novas que ainda devem vir', fat.pnov, 'pv'], '-', ['=', 'Fatura prevista', fatTot, 't']],
+    'Quando vocês colarem a fatura do C6, os valores brancos viram o valor real dela.');
+  const tRes = viv && plConta(`Resultado de ${rotMes(viv.ym)} na conta (mês do calendário)`, [
+    ['+', 'Entra (salários, vale, extras da BASE)', viv.entra], ['−', 'Contas fixas pagas pela conta', viv.fixConta],
+    ['−', `Fatura paga em ${ddmm(viv.vd, viv.ym)} (ciclo de ${rotMes(vividoDe(viv.ym))})`, viv.fatura], ['−', 'Pix, boleto e débito lançados', viv.avulsos],
+    viv.dia + viv.pnov > 0.5 ? ['−', 'Dia a dia e parcelas novas previstos', viv.dia + viv.pnov, 'pv'] : null, '-', ['=', 'Resultado do mês', viv.res, 't' + (viv.res < 0 ? ' neg' : '')]],
+    `Em ${rotMes(viv.ym)} a conta paga a fatura do ciclo de ${rotMes(vividoDe(viv.ym))}, que já fechou. Por isso quase tudo aqui já está na planilha. O dia a dia de agora só pesa no mês seguinte.`);
   const kpis = `<div class="kpis">
-    ${plKpi('Dia a dia até hoje', plR(A.total), `dia ${M.dia} de ${A.dias} · ${plDelta(A.total, M.mesmoDia)} vs mesmo dia`)}
-    ${plKpi('Vai fechar o ciclo em', plR(M.projCiclo), `faixa ${plR(A.total + Math.max(0, M.total.min - M.mesmoDia))} a ${plR(A.total + Math.max(0, M.total.max - M.mesmoDia))} · média ${plR(M.total.med)}`)}
-    ${fat ? plKpi('Fatura de ' + rotMes(M.aberto), plR(fat.fixos + fat.parcL + fat.lanc + fat.dia + fat.pnov), `já lançado ${plR(fat.fixos + fat.parcL + fat.lanc)} + previsto ${plR(fat.dia + fat.pnov)}`) : ''}
-    ${viv ? plKpi('Resultado de ' + rotMes(viv.ym), plR(viv.res), `entra ${plR(viv.entra)} · sai ${plR(viv.sai)}`, viv.res < 0 ? 'fx-neg' : '') : ''}
-    ${piorM ? plKpi('Menor saldo nos 3 meses', plR(piorM.pior), `${dois(piorM.diaPior)}/${dois(piorM.ym % 100)} · faixa ${plR(Math.min(...pMax.slice(0, 3).map(x => x.pior)))} a ${plR(Math.min(...pMin.slice(0, 3).map(x => x.pior)))}`, piorM.pior < 0 ? 'fx-neg' : '') : ''}
+    ${plKpi('Dia a dia até hoje', plR(A.total), `dia ${M.dia} de ${A.dias} · ${plDelta(A.total, M.mesmoDia)} vs mesmo dia (${plR(M.mesmoDia)})`, '', tDia, 'pl')}
+    ${plKpi('Vai fechar o ciclo em', pv(plR(M.projCiclo)), `${plR(A.total)} já gasto + ${pv(plR(M.rTot.med))} a vir · faixa ${fx(plR(fxMin) + ' a ' + plR(fxMax))}`, '', tFecha, 'mx')}
+    ${fat ? plKpi('Fatura de ' + rotMes(M.aberto), plR(fatTot), `${plR(fat.fixCart + fat.parcL + fat.avL)} na planilha + ${pv(plR(fat.dia + fat.pnov))} previsto`, '', tFat, 'mx') : ''}
+    ${viv ? plKpi('Resultado de ' + rotMes(viv.ym), plR(viv.res), `entra ${plR(viv.entra)} · sai ${plR(viv.sai)}`, viv.res < 0 ? 'fx-neg' : '', tRes, viv.dia + viv.pnov > 0.5 ? 'mx' : 'pl') : ''}
+    ${piorM ? plKpi('Menor saldo nos 3 meses', plR(piorM.pior), `${ddmm(piorM.diaPior, piorM.ym)} · faixa ${fx(plR(Math.min(...pMax.slice(0, 3).map(x => x.pior))) + ' a ' + plR(Math.min(...pMin.slice(0, 3).map(x => x.pior))))}`, piorM.pior < 0 ? 'fx-neg' : '', plContaPior(piorM, M, 'Menor saldo previsto'), piorM.pP > 0.5 ? 'mx' : 'pl') : ''}
   </div>`;
-  return `${kpis}
+  return `${plLeg()}${kpis}
   <div class="pl-g2">
     <section class="cx"><div class="cx-h"><h2>Gasto acumulado no ciclo</h2><span class="cx-s">dia a dia, dia 1 = ${dois(A.a.getDate())}/${dois(A.a.getMonth() + 1)}</span></div>${plGrafAcum(M)}</section>
     <section class="cx"><div class="cx-h"><h2>Para a conversa</h2><span class="cx-s">do maior impacto para o menor</span></div>
@@ -3014,7 +3086,7 @@ function plGruposTab(M) {
         <span class="nm-g">${esc(g.g)}</span>
         <span class="pl-bul"><i class="cx2" style="width:${g.med / max * 100}%"></i><i class="b${acima ? ' up' : ''}" style="width:${g.agora / max * 100}%"></i><i class="tk" style="left:${g.mesmo / max * 100}%"></i></span>
         <span class="r num">${plR(g.agora)}</span><span class="r num mu">${plR(g.mesmo)}</span><span class="r num">${plR(g.med)}</span>
-        <span class="r num">${plR(g.proj)} ${plDelta(g.proj, g.med)}</span><span class="r num mu">${plK(g.min)}–${plK(g.max)}</span></div>`;
+        <span class="r num pv">${plR(g.proj)} ${plDelta(g.proj, g.med)}</span><span class="r num mu">${plK(g.min)}–${plK(g.max)}</span></div>`;
     }).join('')}</div>`;
 }
 
@@ -3036,12 +3108,17 @@ function plFechamento(M) {
   const lbl = outros.length ? `média de ${outros.map(r => rotMes(r.viv)).join(', ')}` : 'sem outro ciclo para comparar';
   return `<div class="pl-bar">${nav}<span class="cx-s">${dois(R.a.getDate())}/${dois(R.a.getMonth() + 1)} a ${dois(R.b.getDate())}/${dois(R.b.getMonth() + 1)} · comparado com a ${esc(lbl)}</span></div>
   <div class="kpis">
-    ${plKpi('Dia a dia do ciclo', plR(R.total), `${plDelta(R.total, base(r => r.total))} · base ${plR(base(r => r.total))}`)}
-    ${plKpi('À vista', plR(R.av), `${plDelta(R.av, base(r => r.av))} · base ${plR(base(r => r.av))}`)}
-    ${plKpi('Parcelas novas', plR(R.parc) + '/mês', `${plR(R.parcTot)} comprometidos · ${R.novas.length} compra${R.novas.length === 1 ? '' : 's'}`)}
-    ${plKpi('Fora da média', plR(R.fora + R.extra), 'Loja, Célia, reembolsos e ≥ R$ 3.000')}
-    ${fatPaga ? plKpi('Fatura ' + rotMes(R.ym), plR(fatV), (fatReal ? 'valor real do C6' : 'prevista') + ' · paga ' + vencTxt(R.ym, M.c)) : ''}
-    ${cx ? plKpi('Conta em ' + rotMes(R.viv), plR(cx.entra - cx.sai), `entrou ${plR(cx.entra)} · saiu ${plR(cx.sai)} · fim ${plR(cx.fim)}`, cx.entra - cx.sai < 0 ? 'fx-neg' : '') : ''}
+    ${plKpi('Dia a dia do ciclo', plR(R.total), `${plDelta(R.total, base(r => r.total))} · base ${plR(base(r => r.total))}`, '', plConta(`Dia a dia do ciclo de ${rotMes(R.viv)}`,
+      [['+', 'Compras à vista', R.av], ['+', '1ª parcela das parceladas novas', R.parc], '-', ['=', 'Dia a dia', R.total, 't'], '-', ['', 'Base de comparação:', '', 'h'],
+       ...outros.map(r => ['', 'Ciclo de ' + rotMes(r.viv), r.total, 'pl']), ['=', 'Média da base', base(r => r.total), 't']], 'Ciclo fechado: tudo aqui já aconteceu.'), 'pl')}
+    ${plKpi('À vista', plR(R.av), `${plDelta(R.av, base(r => r.av))} · base ${plR(base(r => r.av))}`, '', plConta('Compras à vista', [['', rotMes(R.viv), R.av, 'pl'], ...outros.map(r => ['', rotMes(r.viv) + ' (base)', r.av, 'pl'])]), 'pl')}
+    ${plKpi('Parcelas novas', plR(R.parc) + '/mês', `${plR(R.parcTot)} comprometidos · ${R.novas.length} compra${R.novas.length === 1 ? '' : 's'}`, '', plConta('Parcelas novas do ciclo',
+      [...R.novas.slice().sort((a, b) => b.valor - a.valor).slice(0, 8).map(i => ['', `${esc(i.desc)} (${i.n}x de ${plR(i.valor / i.n)})`, i.valor, 'pl']), '-', ['=', 'Total comprometido', R.parcTot, 't'], ['', 'Peso por mês (1ª parcela de cada)', R.parc, 'pl']]), 'pl')}
+    ${plKpi('Fora da média', plR(R.fora + R.extra), 'Loja, Célia, reembolsos e ≥ R$ 3.000', '', plConta('Fora da média', [['+', 'Loja, Célia e reembolsos', R.fora], ['+', 'Compras de R$ 3.000 ou mais', R.extra], '-', ['=', 'Total', R.fora + R.extra, 't']],
+      'Fica fora para não distorcer o costume do dia a dia.'), 'pl')}
+    ${fatPaga ? plKpi('Fatura ' + rotMes(R.ym), plR(fatV), (fatReal ? 'valor real do C6' : 'prevista') + ' · paga ' + vencTxt(R.ym, M.c), '', '', 'pl') : ''}
+    ${cx ? plKpi('Conta em ' + rotMes(R.viv), plR(cx.entra - cx.sai), `entrou ${plR(cx.entra)} · saiu ${plR(cx.sai)} · fim ${plR(cx.fim)}`, cx.entra - cx.sai < 0 ? 'fx-neg' : '', plConta(`Conta em ${rotMes(R.viv)} (calendário)`,
+      [['', 'Saldo no dia 1º', F.saldoIni], ['+', 'Entrou', cx.entra], ['−', 'Saiu (contas, fatura do ciclo anterior, Pix)', cx.sai], '-', ['=', 'Saldo no fim', cx.fim, 't'], ['', 'Menor saldo do mês (dia ' + cx.diaPior + ')', cx.pior, cx.pior < 0 ? 'pl neg' : 'pl']]), 'pl') : ''}
   </div>
   <div class="pl-g2">
     <section class="cx"><div class="cx-h"><h2>Dia a dia por ciclo</h2><span class="cx-s">à vista + 1ª parcela das novas</span></div>${plGrafCiclos(M, R)}</section>
@@ -3090,12 +3167,21 @@ function plProjecao(M) {
                   ['Dia a dia previsto', x => -x.dia, 'pv'], ['Parcelas novas previstas', x => -x.pnov, 'pv'], ['Resultado do mês', x => x.res, 'tot'],
                   ['Saldo no fim do mês', x => x.fim, 'tot'], ['Menor saldo (dia)', x => x.pior, 'mu']];
   const parc0 = P[0].parcL, parcF = ult.parcL;
-  return `<div class="kpis">
-    ${plKpi('Sobra média por mês', plR(medRes), `${rotMes(P[0].ym)} a ${rotMes(ult.ym)} · com o dia a dia médio`, medRes < 0 ? 'fx-neg' : '')}
-    ${plKpi('Saldo em ' + rotMes(ult.ym), plR(ult.fim), `faixa ${plR(Pmax[Pmax.length - 1].fim)} a ${plR(Pmin[Pmin.length - 1].fim)}`, ult.fim < 0 ? 'fx-neg' : '')}
-    ${plKpi('Pior momento', plR(piorM.pior), `${dois(piorM.diaPior)}/${dois(piorM.ym % 100)}/${String(Math.floor(piorM.ym / 100)).slice(2)}`, piorM.pior < 0 ? 'fx-neg' : '')}
-    ${plKpi('Meses que passam do zero', neg.length + ' de ' + P.length, neg.length ? 'juros estimados ' + plR(P.reduce((s, x) => s + x.juros, 0)) : 'sem cheque especial')}
-    ${plKpi('Parcelas já feitas', plK(parc0) + ' → ' + plK(parcF), `de ${rotMes(P[0].ym)} a ${rotMes(ult.ym)} se ninguém parcelar mais`)}
+  const tMed = plConta('Sobra média por mês', [...P.map(x => ['', rotMes(x.ym), x.res, (x.dia + x.pnov > 0.5 ? 'pv' : 'pl') + (x.res < 0 ? ' neg' : '')]), '-', ['=', `Soma ÷ ${P.length} meses`, medRes, 't']],
+    'Resultado de cada mês = entra − sai. Âmbar = mês que já tem dia a dia previsto dentro.');
+  const tFim = plConta(`Saldo no fim de ${rotMes(ult.ym)}`, [['', `Saldo da conta no dia 1º de ${rotMes(P[0].ym)}`, P[0].ini, 'pl'], ...P.map(x => ['+', 'Resultado de ' + rotMes(x.ym), x.res, x.dia + x.pnov > 0.5 ? 'pv' : 'pl']),
+    '-', ['=', 'Saldo no fim', ult.fim, 't' + (ult.fim < 0 ? ' neg' : '')], '-', ['', 'Mesma conta com o ciclo mais caro', Pmax[Pmax.length - 1].fim, 'fx'], ['', 'Mesma conta com o ciclo mais barato', Pmin[Pmin.length - 1].fim, 'fx']],
+    'Aqui o saldo passa de um mês para o outro inteiro, como no Fluxo.');
+  const tNeg = plConta('Meses em que a conta passa do zero', P.map(x => ['', `${rotMes(x.ym)}: pior dia ${x.diaPior}`, x.pior, x.pior < 0 ? 'pl neg' : 'pl']),
+    neg.length ? `Juros estimados do cheque especial (taxa das Configurações): ${plR(P.reduce((s, x) => s + x.juros, 0))}.` : 'Nenhum mês negativo.');
+  const tParc = plConta('Parcelas já feitas, por mês', P.map(x => ['', rotMes(x.ym), x.parcL, 'pl']),
+    `Só as compras já lançadas. Novas parcelas entram como previsão (âmbar): ${plR(M.pa.med)}/mês por ciclo, durando ~${M.nMed} meses.`);
+  return `${plLeg()}<div class="kpis">
+    ${plKpi('Sobra média por mês', plR(medRes), `${rotMes(P[0].ym)} a ${rotMes(ult.ym)} · com o dia a dia médio`, medRes < 0 ? 'fx-neg' : '', tMed, 'mx')}
+    ${plKpi('Saldo em ' + rotMes(ult.ym), plR(ult.fim), `faixa ${fx(plR(Pmax[Pmax.length - 1].fim) + ' a ' + plR(Pmin[Pmin.length - 1].fim))}`, ult.fim < 0 ? 'fx-neg' : '', tFim, 'mx')}
+    ${plKpi('Pior momento', plR(piorM.pior), `${ddmm(piorM.diaPior, piorM.ym)}/${String(Math.floor(piorM.ym / 100)).slice(2)}`, piorM.pior < 0 ? 'fx-neg' : '', plContaPior(piorM, M, 'Pior momento'), piorM.pP > 0.5 ? 'mx' : 'pl')}
+    ${plKpi('Meses que passam do zero', neg.length + ' de ' + P.length, neg.length ? 'juros estimados ' + plR(P.reduce((s, x) => s + x.juros, 0)) : 'sem cheque especial', '', tNeg, 'mx')}
+    ${plKpi('Parcelas já feitas', plK(parc0) + ' → ' + plK(parcF), `de ${rotMes(P[0].ym)} a ${rotMes(ult.ym)} se ninguém parcelar mais`, '', tParc, 'pl')}
   </div>
   <div class="pl-g2">
     <section class="cx"><div class="cx-h"><h2>Entra x sai, mês a mês</h2><span class="cx-s">listrado = previsto pelo costume (ainda não comprado)</span></div>${plGrafMeses(P)}</section>
@@ -3197,12 +3283,16 @@ function plSimOut() {
   const negP = P.filter(x => x.pior < 0).length, negB = B.filter(x => x.pior < 0).length;
   const mP = plMed(P.map(x => x.res)), mB = plMed(B.map(x => x.res)), jP = P.reduce((s, x) => s + x.juros, 0), jB = B.reduce((s, x) => s + x.juros, 0);
   const dif = (a, b, inv) => { const d = a - b; if (Math.abs(d) < 0.5) return '<span class="pl-d">igual ao costume</span>'; const bom = inv ? d < 0 : d > 0; return `<span class="pl-d ${bom ? 'dn' : 'up'}">${d > 0 ? '+' : '−'}${plR(Math.abs(d))} vs costume</span>`; };
-  host.innerHTML = `<div class="kpis">
-    ${plKpi('Saldo em ' + rotMes(P[u].ym), plR(P[u].fim), dif(P[u].fim, B[u].fim), P[u].fim < 0 ? 'fx-neg' : 'pr')}
-    ${plKpi('Sobra média por mês', plR(mP), dif(mP, mB), mP < 0 ? 'fx-neg' : '')}
-    ${plKpi('Pior momento', plR(piorP.pior), `${dois(piorP.diaPior)}/${dois(piorP.ym % 100)} · ${dif(piorP.pior, piorB.pior)}`, piorP.pior < 0 ? 'fx-neg' : '')}
-    ${plKpi('Meses no cheque especial', negP + ' de ' + P.length, negP === negB ? 'igual ao costume' : `costume: ${negB}`)}
-    ${plKpi('Juros do cheque especial', plR(jP), dif(jP, jB, true))}
+  const C0 = plPremissas(M, 'med'), mud = [['dia', 'Dia a dia por ciclo'], ['pnov', 'Parcelas novas por ciclo'], ['extra', 'Extraordinário por mês'], ['corte', 'Corte nas contas fixas'], ['renda', 'Renda extra por mês'], ['pont', 'Gasto pontual em ' + rotMes(_plSim.pontMes)]]
+    .filter(m => Math.abs((_plSim[m[0]] || 0) - (C0[m[0]] || 0)) > 0.5).map(m => ['', `${m[1]}: ${plR(C0[m[0]])} → ${plR(_plSim[m[0]])}`, '', 'pv']);
+  const cmp = (tit, a, b, nota) => plConta(tit, [['', 'Sem mexer (costume)', b, 'pl'], ['', 'Com o que você mexeu', a, 'pv'], '-', ['=', 'Diferença', (a - b >= 0 ? '+' : '−') + plR(Math.abs(a - b)), 't'],
+    ...(mud.length ? ['-', ['', 'O que mudou:', '', 'h'], ...mud] : [['', 'Nenhum controle mexido ainda.', '', 'h']])], nota);
+  host.innerHTML = `${plLeg()}<div class="kpis">
+    ${plKpi('Saldo em ' + rotMes(P[u].ym), plR(P[u].fim), dif(P[u].fim, B[u].fim), P[u].fim < 0 ? 'fx-neg' : 'pr', cmp('Saldo em ' + rotMes(P[u].ym), P[u].fim, B[u].fim, 'Saldo de hoje + o resultado de cada mês até lá.'), 'mx')}
+    ${plKpi('Sobra média por mês', plR(mP), dif(mP, mB), mP < 0 ? 'fx-neg' : '', cmp('Sobra média por mês', mP, mB, 'Média de (entra − sai) dos ' + P.length + ' meses.'), 'mx')}
+    ${plKpi('Pior momento', plR(piorP.pior), `${dois(piorP.diaPior)}/${dois(piorP.ym % 100)} · ${dif(piorP.pior, piorB.pior)}`, piorP.pior < 0 ? 'fx-neg' : '', plContaPior(piorP, M, 'Pior momento simulado'), 'mx')}
+    ${plKpi('Meses no cheque especial', negP + ' de ' + P.length, negP === negB ? 'igual ao costume' : `costume: ${negB}`, '', plConta('Meses no cheque especial', P.map((x, i) => ['', `${rotMes(x.ym)} (costume ${plR(B[i].pior)})`, x.pior, x.pior < 0 ? 'pv neg' : 'pv'])), 'mx')}
+    ${plKpi('Juros do cheque especial', plR(jP), dif(jP, jB, true), '', cmp('Juros do cheque especial', jP, jB, 'Saldo negativo de cada dia × a taxa das Configurações ÷ 30.'), 'mx')}
   </div>
   <div class="pl-g2">
     <section class="cx"><div class="cx-h"><h2>Saldo no fim de cada mês</h2><span class="cx-s">simulado x sem mexer</span></div>${plGrafSaldo(P, null, null, B, true)}</section>
@@ -5589,4 +5679,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v58 -------- -->
+<!-- -------- index.html v59 -------- -->
