@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v57 -------- -->
+<!-- -------- index.html v58 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -419,6 +419,11 @@ i.sq.hz.pl-c-fora { background:repeating-linear-gradient(45deg,var(--pl-fora) 0 
 .pl-tb2 { min-width:720px } .pl-tb2 td, .pl-tb2 th { padding:8px 10px } .pl-tb2 .r { text-align:right }
 .pl-tb2 tr.pv td { color:var(--mut); font-style:italic } .pl-tb2 tr.tot td { font-weight:800; border-top:1px solid var(--mut2) }
 .pl-tb2 tr.mu td { color:var(--mut); font-size:12px } .pl-tb2 td.neg { color:var(--danger) }
+.pl-gu { border-color:var(--acc) }
+.pl-gu-g { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:14px 28px }
+.pl-gu h3 { font-size:14px; font-weight:800; margin-bottom:6px; color:var(--acc-tx) }
+.pl-gu ul, .pl-gu ol { padding-left:18px; display:flex; flex-direction:column; gap:6px; font-size:13px; line-height:1.5 }
+.pl-gu p { font-size:12px; color:var(--mut); margin-top:8px }
 .pl-sim { display:flex; flex-direction:column; gap:14px }
 .pl-sim #plSimOut { display:flex; flex-direction:column; gap:14px }
 .pl-ctl { padding:14px 18px }
@@ -1554,7 +1559,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v57';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v58';   // sobe junto com a linha do topo do arquivo
 
 /* Clique "fora" da janela só fecha se o botão foi APERTADO fora também.
    Sem isso, selecionar texto dentro da janela e soltar o mouse fora dela
@@ -2857,14 +2862,65 @@ function pintarPlano() {
   _plM = M;
   const abas = [['atual', 'Mês atual'], ['fech', 'Fechamento'], ['proj', 'Projeção'], ['sim', 'Simulador']];
   const cab = `<header class="pch"><div><h1>Plano</h1><div class="pch-s">${M ? `ciclo de ${esc(rotMes(M.atual.viv))}: ${dois(M.atual.a.getDate())}/${dois(M.atual.a.getMonth() + 1)} a ${dois(M.atual.b.getDate())}/${dois(M.atual.b.getMonth() + 1)} · fatura paga em ${vencTxt(M.aberto, M.c)} · média de ${M.fechados.length} ciclo${M.fechados.length === 1 ? '' : 's'} fechado${M.fechados.length === 1 ? '' : 's'}` : 'carregando…'}</div></div>
-    <div class="pch-d"><div class="mseg">${abas.map(a => `<button type="button" class="${_plAba === a[0] ? 'on' : ''}" onclick="plAba('${a[0]}')">${a[1]}</button>`).join('')}</div></div></header>`;
+    <div class="pch-d"><button type="button" class="bt pq${_plGuia ? ' acc' : ''}" aria-pressed="${_plGuia}" onclick="plGuiaTroca()">${ic('info', 16)} Como usar</button><div class="mseg">${abas.map(a => `<button type="button" class="${_plAba === a[0] ? 'on' : ''}" onclick="plAba('${a[0]}')">${a[1]}</button>`).join('')}</div></div></header>`;
   if (!M || !(_dados.fluxo && Object.keys(_dados.fluxo).length)) { host.innerHTML = cab + '<div class="esq" style="height:190px"></div>'; return; }
   if (!_plSim) _plSim = plPremissas(M, 'med');
   const corpo = { atual: plAtual, fech: plFechamento, proj: plProjecao, sim: plSimulador }[_plAba](M);
-  host.innerHTML = cab + corpo + '<div class="pl-tip" id="plTip" hidden></div>';
+  host.innerHTML = cab + plGuiaHtml() + corpo + '<div class="pl-tip" id="plTip" hidden></div>';
   if (_plAba === 'sim') plSimOut();
 }
 function plAba(a) { _plAba = a; pintarPlano(); }
+/* ── Guia "Como usar" do Plano: abre no topo, explica a vista aberta e o roteiro da reunião ── */
+let _plGuia = false;
+try { _plGuia = LS.get('jl_plguia', '1') === '1'; } catch (e) {}
+function plGuiaTroca() { _plGuia = !_plGuia; try { LS.set('jl_plguia', _plGuia ? '1' : '0'); } catch (e) {} pintarPlano(); }
+const PL_GUIA_BASE = `<div class="pl-gu-b"><h3>Três palavras que valem para a aba inteira</h3><ul>
+  <li><b>Ciclo</b>: o período de uma fatura do C6, do dia 28 a 27. O ciclo de <i>novembro</i> (28/10 a 27/11) é pago em 05/12.</li>
+  <li><b>Dia a dia</b>: o que vocês compram no ciclo, à vista mais a 1ª parcela das compras parceladas novas. Ficam de fora o VR,
+    a Loja, a Célia, os reembolsos e compras de R$ 3.000 ou mais. Essas aparecem como <b>fora da média</b>.</li>
+  <li><b>Costume</b>: a média dos ciclos já fechados desde 28/08/2026. Cada ciclo que fecha entra na conta, então ela fica mais confiável com o tempo.</li></ul>
+  <p>Passe o mouse em qualquer barra, linha ou grupo para ver os valores.</p></div>`;
+const PL_GUIA = {
+  atual: `<h3>Mês atual: como está o ciclo até hoje</h3><ul>
+    <li><b>Dia a dia até hoje</b>: o que vocês já gastaram no ciclo. A setinha compara com o que costumavam ter gastado <i>no mesmo dia</i> (▲ vermelho = gastando mais rápido).</li>
+    <li><b>Vai fechar o ciclo em</b>: o que já foi gasto mais o que costuma vir dos dias que faltam. A faixa vai do ciclo mais barato ao mais caro.</li>
+    <li><b>Fatura</b>: o que já está lançado nela mais o que ainda deve entrar pelo costume.</li>
+    <li><b>Resultado do mês</b>: o que entra menos o que sai da conta neste mês do calendário.</li>
+    <li><b>Menor saldo nos 3 meses</b>: o pior dia da conta pela frente. Vermelho = cheque especial.</li>
+    <li><b>Gráfico</b>: a linha âmbar é o ciclo de agora e o pontilhado é para onde ele vai no ritmo médio. A tracejada é a média e as cinzas são cada ciclo passado. Âmbar acima da tracejada = gastando mais que o normal.</li>
+    <li><b>Para a conversa</b>: a pauta pronta, do assunto que mais pesa em reais para o que menos pesa. Comece por ela.</li>
+    <li><b>Por grupo</b>: a barra é o gasto até hoje (laranja = acima do normal), o traço branco é a média no mesmo dia e o contorno é a média do ciclo inteiro. Barra passando do traço = adiantado; passando do contorno = já gastou o ciclo todo.</li></ul>`,
+  fech: `<h3>Fechamento: como foi um ciclo que já fechou</h3><ul>
+    <li>Use ‹ › para escolher o ciclo. Ele é comparado com a média dos <i>outros</i> ciclos fechados (a "base").</li>
+    <li><b>Cartões de cima</b>: dia a dia, à vista, parcelas novas (quanto por mês e o total que ficou para a frente), fora da média, a fatura e como a conta terminou o mês.</li>
+    <li><b>Dia a dia por ciclo</b>: uma barra por ciclo, com a linha da média. O ciclo escolhido fica aceso e o aberto aparece listrado.</li>
+    <li><b>Onde mudou</b>: o grupo menos a base. Barra laranja para a direita = gastou mais; verde para a esquerda = gastou menos. Os de cima explicam a diferença do ciclo.</li>
+    <li><b>Parcelas novas criadas</b>: o que este ciclo deixou para pagar nos próximos meses, com o mês da última parcela.</li></ul>`,
+  proj: `<h3>Projeção: os próximos 6 meses da conta</h3><ul>
+    <li>Aqui o mês é o do <b>calendário da conta</b>: em dezembro sai a fatura do ciclo de novembro.</li>
+    <li><b>Entra x sai</b>: a linha verde é o que entra; a pilha é o que sai. Liso = já existe (contas fixas, parcelas feitas, compras lançadas). <b>Listrado</b> = previsto pelo costume, o dia a dia e as parcelas novas que vocês ainda vão fazer. O número em cima é o resultado do mês.</li>
+    <li><b>Saldo no fim de cada mês</b>: a linha é o saldo previsto e a faixa vai do jeito mais barato ao mais caro. O ponto embaixo de cada mês é o pior dia, e vermelho é cheque especial.</li>
+    <li><b>Parcelas já feitas</b>: quanto elas pesam hoje e no último mês. É a folga que aparece <i>se ninguém parcelar mais</i>.</li>
+    <li><b>Tabela mês a mês</b>: os mesmos números do gráfico, linha por linha. As linhas em itálico são previsões.</li></ul>`,
+  sim: `<h3>Simulador: e se…?</h3><ul>
+    <li>Mexa nos controles de baixo; os números e gráficos de cima mudam na hora. Tudo parte do <b>costume</b>.</li>
+    <li><b>Otimista / Costume / Pessimista</b>: põe o dia a dia e as parcelas no ciclo mais barato, na média ou no mais caro (o pessimista soma ainda o extraordinário médio).</li>
+    <li><b>Dia a dia por ciclo</b>: o teto de compras à vista que vocês combinarem. <b>Parcelas novas</b>: quanto por mês vocês aceitam parcelar (cada uma dura uns meses e se acumula).</li>
+    <li><b>Corte nas contas fixas</b> e <b>Renda extra</b>: valem todo mês. <b>Gasto pontual</b>: um gasto grande num mês só, como uma viagem.</li>
+    <li>Nos cartões de cima, verde = melhor que o costume e vermelho = pior. A linha tracejada do gráfico é o "sem mexer".</li>
+    <li>Os controles não gravam nada na planilha: é só para testar a decisão antes de tomar.</li></ul>`
+};
+const PL_ROTEIRO = `<div class="pl-gu-b"><h3>Roteiro da reunião (15 a 20 min)</h3><ol>
+  <li><b>Mês atual</b>: leiam os 5 cartões e o bloco <i>Para a conversa</i>. Vejam se o ritmo está acima do mesmo dia e quais grupos estão adiantados.</li>
+  <li><b>Fechamento</b>: só na primeira reunião depois do dia 27. Vejam o ciclo que fechou: <i>Onde mudou</i> e as parcelas novas que ficaram.</li>
+  <li><b>Projeção</b>: o pior momento e quantos meses passam do zero. É o tamanho do problema (ou da folga).</li>
+  <li><b>Simulador</b>: testem a decisão (ex.: dia a dia até R$ 4.000, sem parcelar roupa) e vejam o saldo de daqui a 6 meses.</li>
+  <li><b>Combinem 1 ou 2 coisas</b> até a próxima reunião, com o número: "Fast-food até R$ 600 no ciclo".</li></ol>
+  <p>Toque em <b>Como usar</b> de novo para esconder este guia.</p></div>`;
+function plGuiaHtml() {
+  return _plGuia ? `<section class="cx pl-gu"><div class="pl-gu-g"><div class="pl-gu-b">${PL_GUIA[_plAba]}</div>${PL_ROTEIRO}${PL_GUIA_BASE}</div></section>` : '';
+}
+
 /** Dica ao passar o mouse: qualquer elemento com data-pltip */
 function plTipMove(e) {
   const t = document.getElementById('plTip'); if (!t) return;
@@ -5533,4 +5589,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v57 -------- -->
+<!-- -------- index.html v58 -------- -->
