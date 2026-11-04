@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v54 -------- -->
+<!-- -------- index.html v55 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -807,6 +807,8 @@ body.pc #t-lancar .barra-salvar { position:sticky; max-width:none; margin:16px 0
 .lp-sw::after { content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--mut); transition:transform .15s }
 .lp-assin[aria-checked="true"] .lp-sw { background:var(--acc) } .lp-assin[aria-checked="true"] .lp-sw::after { transform:translateX(16px); background:var(--acc-on) }
 .lp-assin b { display:block; font-size:14px; color:var(--txt) } .lp-assin small { display:block; font-size:12px; color:var(--mut) }
+.lp-assin-g { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; align-items:center; margin:8px 20px 0; padding:0 12px }
+.lp-assin-g label { margin:0 } .lp-assin-g small { grid-column:2; font-size:12px; color:var(--mut) }
 .fc-parc { margin-top:14px } .fc-parc .fc-nome { cursor:default }
 .fcc { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; margin-top:8px }
 .fcc-s { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--mut2); padding:0 4px }
@@ -1594,7 +1596,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v54';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v55';   // sobe junto com a linha do topo do arquivo
 
 /* Clique "fora" da janela só fecha se o botão foi APERTADO fora também.
    Sem isso, selecionar texto dentro da janela e soltar o mouse fora dela
@@ -3904,30 +3906,51 @@ function pintarFixos() {
   host.innerHTML = cab + kpis + (_fcVista === 'lista' ? fcVistaLista(ctx) : _fcVista === 'cal' ? fcVistaCal(ctx) : fcVistaFaixa(ctx)) + fcParceladas();
 }
 /* ── Assinatura que veio parcelada (Disney+ 12x na Vivo): a marca fica nas
-   Configurações (prefs "assin_<#>" = "1", # = coluna A da LANÇAMENTOS). Ela entra
-   nas Contas fixas e, depois da última parcela, o servidor continua prevendo a
-   parcela na fatura (code.gs v21). ── */
-const ehAssin = x => !!x && !x.vr && ((_dados.config || {}).prefs || {})['assin_' + x.num] === '1';
+   Configurações (prefs "assin_<#>" = "1", # = coluna A da LANÇAMENTOS; "assing_<#>" =
+   o grupo dela nas Contas fixas). Ela entra nas Contas fixas e, depois da última
+   parcela, o servidor continua prevendo a parcela na fatura (code.gs v21).
+   A Categoria da compra não muda: "Para onde foi" e a análise seguem iguais. ── */
+const prefsApp = () => ((_dados.config || {}).prefs || {});
+const ehAssin = x => !!x && !x.vr && prefsApp()['assin_' + x.num] === '1';
+/** Os grupos das Contas fixas (aba BASE), com "Assinaturas" sempre na lista */
+function gruposFixos() {
+  const g = [];
+  ((_dados.base || {}).regras || []).forEach(r => { const s = String(r.grupo || '').trim(); if (r.tipo === 'Saída' && s && g.indexOf(s) < 0) g.push(s); });
+  if (!g.some(s => /^assinatura/i.test(semAc(s)))) g.push('Assinaturas');
+  return g.sort((a, b) => a.localeCompare(b, 'pt'));
+}
+/** O grupo da assinatura nas Contas fixas: o escolhido; senão "Assinaturas" (o nome que a BASE usa) */
+const grupoAssin = x => prefsApp()['assing_' + x.num] || gruposFixos().find(s => /^assinatura/i.test(semAc(s))) || 'Assinaturas';
 /** As assinaturas que estão valendo no mês, no formato das contas fixas da BASE */
 function fcAssinaturas() {
   if (!_dados.lancs) return [];
   const idx = idxDe(_mes);
   return _dados.lancs.filter(x => ehAssin(x) && x.n > 1 && idx >= x.ci).map(x => ({
-    item: x.desc, grupo: x.grupo, como: x.forma, valor: Math.round(x.valor / x.n * 100) / 100, dia: +String(x.data).slice(8),
+    item: x.desc, grupo: grupoAssin(x), como: x.forma, valor: Math.round(x.valor / x.n * 100) / 100, dia: +String(x.data).slice(8),
     data: '', tipo: 'Saída', linha: 0, lanc: x.id, k: idx - x.ci + 1, n: x.n }));
 }
 const fcEtq = r => r.data ? ' <span class="etq">uma vez</span>'
   : r.lanc ? `<span class="pg p" title="Assinatura: renova sozinha depois da última parcela">${r.k <= r.n ? r.k + '/' + r.n + ' · renova' : 'assinatura'}</span>` : '';
 const fcClique = r => r.lanc ? `lsAbrir(${escA(JSON.stringify(r.lanc))})` : `fxEditar(${r.linha})`;
-function lpAssin(on) {
-  const x = _lsPop && _lsPop.x; if (!x) return;
-  const chave = 'assin_' + x.num, p = {}; p[chave] = on ? '1' : '';
+/** Grava as prefs da assinatura (na hora no aparelho; na planilha por trás) */
+function assinGravar(p, msg) {
   _dados.config = _dados.config || {}; _dados.config.prefs = _dados.config.prefs || {};
-  _dados.config.prefs[chave] = p[chave];
+  Object.assign(_dados.config.prefs, p);
   _dados.inicio = {}; _dados.painel = {}; dadosGravar();
   if (_tela === 'fixos') pintarFixos();
-  google.script.run.withSuccessHandler(c => { _dados.config = c; dadosGravar(); showToast(on ? '✓ Marcada como assinatura' : 'Deixou de ser assinatura', 'ok'); sincronizar(false); })
+  google.script.run.withSuccessHandler(c => { _dados.config = c; dadosGravar(); showToast(msg, 'ok'); sincronizar(false); })
     .withFailureHandler(err => showToast((err && err.message) || 'Não consegui guardar', 'err')).salvarConfig('prefs', p);
+}
+function lpAssin(on) {
+  const x = _lsPop && _lsPop.x; if (!x) return;
+  const p = {}; p['assin_' + x.num] = on ? '1' : '';
+  if (on && !prefsApp()['assing_' + x.num]) p['assing_' + x.num] = grupoAssin(x);
+  assinGravar(p, on ? '✓ Marcada como assinatura' : 'Deixou de ser assinatura');
+}
+function lpAssinGrupo(g) {
+  const x = _lsPop && _lsPop.x; if (!x || !g) return;
+  const p = {}; p['assing_' + x.num] = g;
+  assinGravar(p, '✓ Nas Contas fixas em ' + g);
 }
 /** As compras parceladas que estão correndo no mês (Disney+ 12x na Vivo, celular…): também saem
     todo mês, mas já estão dentro da fatura — aqui é só para ver, não somam de novo. */
@@ -4884,7 +4907,11 @@ function pintarPop() {
         ${f.n > 1 ? `<input id="lpN" type="number" inputmode="numeric" min="2" max="48" value="${f.n}" aria-label="Número de parcelas" style="width:72px;text-align:center"/>` : ''}`}</div></div>
     </div>
     ${!vr && x.n > 1 && x.num ? `<button type="button" class="lp-assin" role="switch" aria-checked="${ehAssin(x)}" onclick="lpLer();lpAssin(!ehAssin(_lsPop.x));pintarPop()"><i class="lp-sw" aria-hidden="true"></i>
-      <span><b>É assinatura: renova sozinha</b><small>aparece nas Contas fixas e, depois da ${x.n}ª parcela, o app continua contando ${nbr(x.valor / x.n)} por mês na fatura</small></span></button>` : ''}
+      <span><b>É assinatura: renova sozinha</b><small>aparece nas Contas fixas e, depois da ${x.n}ª parcela, o app continua contando ${nbr(x.valor / x.n)} por mês na fatura</small></span></button>
+      ${ehAssin(x) ? (() => { const g = grupoAssin(x), lista = gruposFixos().concat(gruposFixos().indexOf(g) < 0 ? [g] : []);
+        return `<div class="lp-assin-g"><label for="lpAssinG">Grupo nas Contas fixas</label>
+          <select id="lpAssinG" onchange="lpLer();lpAssinGrupo(this.value)">${lista.map(s => `<option${s === g ? ' selected' : ''}>${esc(s)}</option>`).join('')}</select>
+          <small>só nas Contas fixas · a compra continua em ${esc(x.grupo)} no "Para onde foi"</small></div>`; })() : ''}` : ''}
     <div class="lp-2" style="grid-template-columns:1fr auto;align-items:end">
       <div><label for="lpObs">Observação</label><input id="lpObs" value="${escA(f.obs)}" placeholder="opcional" autocomplete="off"/>
         ${f.obs ? '<div class="cfg-h">é por ela que o Importar C6 reconhece a compra</div>' : ''}</div>
@@ -5350,4 +5377,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v54 -------- -->
+<!-- -------- index.html v55 -------- -->
