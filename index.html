@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- -------- index.html v56 -------- -->
+<!-- -------- index.html v57 -------- -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -1554,7 +1554,7 @@ button.pessoa { font-family:var(--f-tx); color:var(--txt) }
 <div class="toast" id="toast"></div>
 
 <script>
-const VERSAO_INDEX = 'v56';   // sobe junto com a linha do topo do arquivo
+const VERSAO_INDEX = 'v57';   // sobe junto com a linha do topo do arquivo
 
 /* Clique "fora" da janela só fecha se o botão foi APERTADO fora também.
    Sem isso, selecionar texto dentro da janela e soltar o mouse fora dela
@@ -2865,12 +2865,12 @@ function pintarPlano() {
   if (_plAba === 'sim') plSimOut();
 }
 function plAba(a) { _plAba = a; pintarPlano(); }
-/** Dica ao passar o mouse: qualquer elemento com data-tip */
+/** Dica ao passar o mouse: qualquer elemento com data-pltip */
 function plTipMove(e) {
   const t = document.getElementById('plTip'); if (!t) return;
-  const el = e.target.closest('[data-tip]');
+  const el = e.target.closest('[data-pltip]');
   if (!el) { t.hidden = true; return; }
-  t.innerHTML = el.getAttribute('data-tip'); t.hidden = false;
+  t.innerHTML = el.getAttribute('data-pltip'); t.hidden = false;
   const w = t.offsetWidth, h = t.offsetHeight;
   let x = e.clientX + 14, y = e.clientY + 14;
   if (x + w > innerWidth - 8) x = e.clientX - w - 14;
@@ -2933,7 +2933,7 @@ function plGrafAcum(M) {
   for (let d = 1; d <= D; d++) {
     const linhas = [`<b>Dia ${d}</b>`, d <= M.dia ? `${rotMes(A.viv)} (agora): ${plR(cur[d])}` : d <= A.dias ? `${rotMes(A.viv)} no ritmo médio: ${plR(proj[d])}` : '',
                     `média: ${plR(med[d])}`].concat(M.fechados.map((r, i) => d <= r.dias ? `${rotMes(r.viv)}: ${plR(S[i][d])}` : '')).filter(Boolean);
-    cols += `<rect x="${X(d - 0.5)}" y="${PT}" width="${(W - PL - PR) / D}" height="${H - PT - PB}" fill="transparent" data-tip="${plEsc(linhas.join('<br>'))}"/>`;
+    cols += `<rect x="${X(d - 0.5)}" y="${PT}" width="${(W - PL - PR) / D}" height="${H - PT - PB}" fill="transparent" data-pltip="${plEsc(linhas.join('<br>'))}"/>`;
   }
   return `<svg class="pl-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gasto acumulado do dia a dia no ciclo atual comparado com os ciclos anteriores">
     ${ticks.map(v => `<line x1="${PL}" x2="${W - PR}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--bd)"/><text class="pl-tx" x="${PL - 8}" y="${Y(v) + 4}" text-anchor="end">${plK(v)}</text>`).join('')}
@@ -2954,7 +2954,7 @@ function plGruposTab(M) {
   return `<div class="pl-gt"><div class="pl-gt-h"><span>Grupo</span><span></span><span class="r">Até hoje</span><span class="r">Mesmo dia</span><span class="r">Ciclo (média)</span><span class="r">Projeção</span><span class="r">Faixa</span></div>
     ${G.map(g => {
       const acima = g.agora > g.mesmo * 1.1 && g.agora - g.mesmo > 50;
-      return `<div class="pl-gt-l" data-tip="${plEsc(`<b>${esc(g.g)}</b><br>até hoje ${plR(g.agora)} · mesmo dia ${plR(g.mesmo)}<br>ciclo médio ${plR(g.med)} (${plR(g.min)} a ${plR(g.max)})<br>projeção do ciclo ${plR(g.proj)}`)}">
+      return `<div class="pl-gt-l" data-pltip="${plEsc(`<b>${esc(g.g)}</b><br>até hoje ${plR(g.agora)} · mesmo dia ${plR(g.mesmo)}<br>ciclo médio ${plR(g.med)} (${plR(g.min)} a ${plR(g.max)})<br>projeção do ciclo ${plR(g.proj)}`)}">
         <span class="nm-g">${esc(g.g)}</span>
         <span class="pl-bul"><i class="cx2" style="width:${g.med / max * 100}%"></i><i class="b${acima ? ' up' : ''}" style="width:${g.agora / max * 100}%"></i><i class="tk" style="left:${g.mesmo / max * 100}%"></i></span>
         <span class="r num">${plR(g.agora)}</span><span class="r num mu">${plR(g.mesmo)}</span><span class="r num">${plR(g.med)}</span>
@@ -2990,7 +2990,7 @@ function plFechamento(M) {
   <div class="pl-g2">
     <section class="cx"><div class="cx-h"><h2>Dia a dia por ciclo</h2><span class="cx-s">à vista + 1ª parcela das novas</span></div>${plGrafCiclos(M, R)}</section>
     <section class="cx"><div class="cx-h"><h2>Onde mudou</h2><span class="cx-s">${esc(rotMes(R.viv))} menos a base, por grupo</span></div>
-      <div class="pl-dv">${G.map(x => `<div class="pl-dv-l" data-tip="${plEsc(`<b>${esc(x.g)}</b><br>${rotMes(R.viv)}: ${plR(x.v)}<br>base: ${plR(x.b)}`)}"><span class="nm-g">${esc(x.g)}</span>
+      <div class="pl-dv">${G.map(x => `<div class="pl-dv-l" data-pltip="${plEsc(`<b>${esc(x.g)}</b><br>${rotMes(R.viv)}: ${plR(x.v)}<br>base: ${plR(x.b)}`)}"><span class="nm-g">${esc(x.g)}</span>
         <span class="pl-dv-t"><i class="${x.d > 0 ? 'up' : 'dn'}" style="${x.d > 0 ? 'left:50%' : 'right:50%'};width:${Math.abs(x.d) / dmax * 50}%"></i></span>
         <span class="r num">${x.d > 0 ? '+' : ''}${plR(x.d)}</span><span class="r num mu">${plR(x.v)}</span></div>`).join('')}</div></section>
   </div>
@@ -3012,7 +3012,7 @@ function plGrafCiclos(M, R) {
       const x = PL + i * bw + bw * 0.22, w = bw * 0.56, aberto = r === M.atual, sel = r === R;
       const yA = Y(r.av), yP = Y(r.av + r.parc), yF = yP;
       const tip = `<b>Ciclo de ${rotMes(r.viv)}</b>${aberto ? ' (aberto, até hoje)' : ''}<br>à vista ${plR(r.av)}<br>parcelas novas ${plR(r.parc)}/mês<br>fora da média (não está na barra) ${plR(r.fora + r.extra)}`;
-      return `<g data-tip="${plEsc(tip)}" opacity="${sel || aberto ? 1 : .55}">
+      return `<g data-pltip="${plEsc(tip)}" opacity="${sel || aberto ? 1 : .55}">
         <rect x="${x}" y="${yP}" width="${w}" height="${Math.max(0, yA - yP - 2)}" rx="3" class="pl-c-parc${aberto ? ' hz' : ''}"/>
         <rect x="${x}" y="${yA}" width="${w}" height="${Math.max(0, y0 - yA)}" rx="3" class="pl-c-av${aberto ? ' hz' : ''}"/>
         <rect x="${PL + i * bw}" y="${PT}" width="${bw}" height="${H - PT - PB}" fill="transparent"/>
@@ -3064,7 +3064,7 @@ function plGrafMeses(P, compact) {
       let acc = 0, segs = '';
       usadas.forEach(c => { const v = x[c[0]]; if (!(v > 0.5)) return; const yT = Y(acc + v), yB = Y(acc); segs += `<rect x="${bx}" y="${yT}" width="${w}" height="${Math.max(0, yB - yT - 2)}" rx="3" class="${c[2]}${c[3]}"/>`; acc += v; });
       const tip = `<b>${rotMes(x.ym)}</b><br>entra ${plR(x.entra)}<br>` + usadas.map(c => `${c[1]}: ${plR(x[c[0]])}`).join('<br>') + `<br><b>resultado ${plR(x.res)}</b>`;
-      return `<g data-tip="${plEsc(tip)}">${segs}
+      return `<g data-pltip="${plEsc(tip)}">${segs}
         <line x1="${bx - 6}" x2="${bx + w + 6}" y1="${Y(x.entra)}" y2="${Y(x.entra)}" stroke="var(--ok)" stroke-width="3" stroke-linecap="round"/>
         <rect x="${PL + i * bw}" y="${PT}" width="${bw}" height="${H - PT - PB}" fill="transparent"/>
         <text class="pl-tx" x="${bx + w / 2}" y="${H - 8}" text-anchor="middle">${rotMes(x.ym)}</text>
@@ -3089,7 +3089,7 @@ function plGrafSaldo(P, Pmin, Pmax, Pbase, compact) {
     <path d="${path(P, x => x.fim)}" fill="none" stroke="var(--acc)" stroke-width="2.5"/>
     ${P.map((x, i) => {
       const tip = `<b>${rotMes(x.ym)}</b><br>começa ${plR(x.ini)}<br>termina ${plR(x.fim)}${Pbase ? ` (sem mexer: ${plR(Pbase[i].fim)})` : ''}<br>menor saldo ${plR(x.pior)} no dia ${x.diaPior}` + (Pmin ? `<br>faixa no fim: ${plR(Pmax[i].fim)} a ${plR(Pmin[i].fim)}` : '');
-      return `<g data-tip="${plEsc(tip)}"><rect x="${X(i) - (W - PL - PR) / n / 2}" y="${PT}" width="${(W - PL - PR) / n}" height="${H - PT - PB}" fill="transparent"/>
+      return `<g data-pltip="${plEsc(tip)}"><rect x="${X(i) - (W - PL - PR) / n / 2}" y="${PT}" width="${(W - PL - PR) / n}" height="${H - PT - PB}" fill="transparent"/>
         <line x1="${X(i)}" x2="${X(i)}" y1="${Y(x.fim)}" y2="${Y(x.pior)}" stroke="${x.pior < 0 ? 'var(--danger)' : 'var(--mut2)'}" stroke-width="1.5" stroke-dasharray="2 3"/>
         <circle cx="${X(i)}" cy="${Y(x.pior)}" r="4" fill="${x.pior < 0 ? 'var(--danger)' : 'var(--mut2)'}" stroke="var(--s1)" stroke-width="2"/>
         <circle cx="${X(i)}" cy="${Y(x.fim)}" r="5" fill="var(--acc)" stroke="var(--s1)" stroke-width="2"/>
@@ -5533,4 +5533,4 @@ function pedirLogin() {
 </script>
 </body>
 </html>
-<!-- -------- index.html v56 -------- -->
+<!-- -------- index.html v57 -------- -->
